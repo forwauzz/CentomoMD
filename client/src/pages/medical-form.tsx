@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DictationModal } from "@/components/dictation-modal";
+import { FloatingRecordButton } from "@/components/floating-record-button";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { exportToPDF } from "@/lib/pdf-export";
@@ -440,6 +441,11 @@ export default function MedicalForm() {
       const currentValue = form.getValues(fieldName as keyof FormData) || '';
       form.setValue(fieldName as keyof FormData, currentValue + ' ' + transcript);
     });
+  };
+
+  const handleDirectDictation = (text: string, fieldName: string) => {
+    const currentValue = form.getValues(fieldName as keyof FormData) || '';
+    form.setValue(fieldName as keyof FormData, currentValue + ' ' + text);
   };
 
   const handleStopDictation = () => {
@@ -1671,6 +1677,12 @@ export default function MedicalForm() {
       </div>
 
       {/* Voice Recognition Modal */}
+      {/* Floating Record Button */}
+      <FloatingRecordButton 
+        language={language}
+        onDirectDictation={handleDirectDictation}
+      />
+
       <DictationModal
         open={!!currentDictationField}
         onClose={() => setCurrentDictationField(null)}

@@ -4,12 +4,14 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import MedicalForm from "@/pages/medical-form";
+import DictationPage from "@/pages/dictation-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={MedicalForm} />
+      <Route path="/dictation" component={() => <DictationPage language="fr" />} />
       <Route component={NotFound} />
     </Switch>
   );
