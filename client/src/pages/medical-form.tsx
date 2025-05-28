@@ -12,7 +12,7 @@ import { DictationModal } from "@/components/dictation-modal";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { exportToPDF } from "@/lib/pdf-export";
-import { Mic, Save, Printer, Trash2, Eye, FileText } from "lucide-react";
+import { Mic, Save, Printer, Trash2, Eye, FileText, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -91,10 +91,235 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+// Language translations
+const translations = {
+  fr: {
+    title: "Cent.MD",
+    subtitle: "Rapport d'Évaluation Médicale",
+    save: "Sauvegarder",
+    print: "Imprimer",
+    clear: "Effacer",
+    language: "Langue",
+    notSaved: "Non sauvegardé",
+    saved: "Sauvegardé",
+    formCleared: "Formulaire effacé",
+    allDataDeleted: "Toutes les données ont été supprimées.",
+    confirmClear: "Êtes-vous sûr de vouloir effacer toutes les données du formulaire?",
+    lastSaved: "Dernière sauvegarde :",
+    
+    // Section A
+    sectionA: "A. RENSEIGNEMENTS SUR LE TRAVAILLEUR",
+    workerName: "Nom :",
+    workerFirstName: "Prénom :",
+    healthInsuranceNo: "No d'assurance maladie :",
+    birthDate: "Date de naissance :",
+    address: "Adresse :",
+    phone: "Téléphone :",
+    workerFileNo: "No de dossier du travailleur :",
+    originEventDate: "Date de l'évènement d'origine :",
+    recurrenceDate: "Date de la récidive, rechute ou aggravation :",
+    
+    // Section B
+    sectionB: "B. RENSEIGNEMENTS SUR LE MÉDECIN",
+    doctorName: "Nom :",
+    doctorFirstName: "Prénom :",
+    licenseNo: "No permis :",
+    doctorAddress: "Adresse :",
+    doctorPhone: "Téléphone :",
+    email: "Courriel :",
+    
+    // Section C
+    sectionC: "C. RAPPORT",
+    evaluationMandate: "1. Mandat de l'évaluation",
+    acceptedDiagnosis: "2. Diagnostics acceptés par la CNESST",
+    interviewModality: "3. Modalité de l'entrevue",
+    identification: "4. Identification",
+    
+    // Section 5
+    section5: "5. Antécédents",
+    medicalHistory: "Médicaux :",
+    surgicalHistory: "Chirurgicaux :",
+    lesionHistory: "Au site et au pourtour de la lésion :",
+    cnsstHistory: "CNESST :",
+    saaqHistory: "SAAQ :",
+    otherHistory: "Autres :",
+    allergies: "Allergie :",
+    tobacco: "Tabac :",
+    cannabis: "Cannabis :",
+    alcohol: "Alcool :",
+    
+    // Section 6
+    section6: "6. Médication actuelle et mesures thérapeutiques en cours",
+    currentMedication: "Médication actuelle :",
+    
+    // Section 7
+    section7: "7. Historique de faits et évolution",
+    historyEvolution: "Historique de faits et évolution :",
+    
+    // Section 8
+    section8: "8. Questionnaire subjectif et état actuel",
+    evolutionAppreciation: "Appréciation subjective de l'évolution :",
+    complaintsProblems: "Plaintes et problèmes :",
+    avqImpact: "Impact sur AVQ/AVD :",
+    
+    // Section 9
+    section9: "9. Examen Physique",
+    weight: "Poids :",
+    height: "Taille :",
+    dominance: "Dominance :",
+    generalObservation: "Observation générale et attitude :",
+    lumbarSpine: "Rachis Lombaire :",
+    palpation: "Palpation :",
+    inspection: "Inspection :",
+    flexion: "Flexion :",
+    extension: "Extension :",
+    lateralFlexionL: "Flexion Latérale G. :",
+    lateralFlexionR: "Flexion Latérale D. :",
+    rotationL: "Rotation G. :",
+    rotationR: "Rotation D. :",
+    radicularManeuvers: "Manœuvres radiculaires :",
+    slrRight: "S.L.R. Droit :",
+    slrLeft: "S.L.R. Gauche :",
+    tripodeRight: "Tripode Droit :",
+    tripodeLeft: "Tripode Gauche :",
+    lasegueRight: "Lasègue Droit :",
+    lasegueLeft: "Lasègue Gauche :",
+    reverseLasegueRight: "Lasègue inversé Droit :",
+    reverseLasegueLeft: "Lasègue inversé Gauche :",
+    hips: "Hanches :",
+    hipsPalpation: "Palpation :",
+    hipsInspection: "Inspection :",
+    articulateRange: "Amplitude articulaire :",
+    activeRight: "Actif Droit :",
+    passiveRight: "Passif Droit :",
+    activeLeft: "Actif Gauche :",
+    passiveLeft: "Passif Gauche :",
+    hipsFlexion: "Flexion :",
+    hipsExtension: "Extension :",
+    internalRotation: "Rotation interne :",
+    externalRotation: "Rotation externe :",
+    abduction: "Abduction :",
+    adduction: "Adduction :",
+    additionalExams: "Examens additionnels :"
+  },
+  en: {
+    title: "Cent.MD",
+    subtitle: "Medical Evaluation Report",
+    save: "Save",
+    print: "Print",
+    clear: "Clear",
+    language: "Language",
+    notSaved: "Not saved",
+    saved: "Saved",
+    formCleared: "Form cleared",
+    allDataDeleted: "All data has been deleted.",
+    confirmClear: "Are you sure you want to clear all form data?",
+    lastSaved: "Last saved:",
+    
+    // Section A
+    sectionA: "A. WORKER INFORMATION",
+    workerName: "Last Name:",
+    workerFirstName: "First Name:",
+    healthInsuranceNo: "Health Insurance No:",
+    birthDate: "Date of Birth:",
+    address: "Address:",
+    phone: "Phone:",
+    workerFileNo: "Worker File No:",
+    originEventDate: "Original Event Date:",
+    recurrenceDate: "Recurrence, Relapse or Aggravation Date:",
+    
+    // Section B
+    sectionB: "B. PHYSICIAN INFORMATION",
+    doctorName: "Last Name:",
+    doctorFirstName: "First Name:",
+    licenseNo: "License No:",
+    doctorAddress: "Address:",
+    doctorPhone: "Phone:",
+    email: "Email:",
+    
+    // Section C
+    sectionC: "C. REPORT",
+    evaluationMandate: "1. Evaluation Mandate",
+    acceptedDiagnosis: "2. Diagnoses Accepted by CNESST",
+    interviewModality: "3. Interview Modality",
+    identification: "4. Identification",
+    
+    // Section 5
+    section5: "5. Medical History",
+    medicalHistory: "Medical:",
+    surgicalHistory: "Surgical:",
+    lesionHistory: "At and around lesion site:",
+    cnsstHistory: "CNESST:",
+    saaqHistory: "SAAQ:",
+    otherHistory: "Other:",
+    allergies: "Allergies:",
+    tobacco: "Tobacco:",
+    cannabis: "Cannabis:",
+    alcohol: "Alcohol:",
+    
+    // Section 6
+    section6: "6. Current Medication and Ongoing Therapeutic Measures",
+    currentMedication: "Current Medication:",
+    
+    // Section 7
+    section7: "7. History of Facts and Evolution",
+    historyEvolution: "History of Facts and Evolution:",
+    
+    // Section 8
+    section8: "8. Subjective Questionnaire and Current State",
+    evolutionAppreciation: "Subjective Appreciation of Evolution:",
+    complaintsProblems: "Complaints and Problems:",
+    avqImpact: "Impact on ADL/IADL:",
+    
+    // Section 9
+    section9: "9. Physical Examination",
+    weight: "Weight:",
+    height: "Height:",
+    dominance: "Dominance:",
+    generalObservation: "General Observation and Attitude:",
+    lumbarSpine: "Lumbar Spine:",
+    palpation: "Palpation:",
+    inspection: "Inspection:",
+    flexion: "Flexion:",
+    extension: "Extension:",
+    lateralFlexionL: "Lateral Flexion L:",
+    lateralFlexionR: "Lateral Flexion R:",
+    rotationL: "Rotation L:",
+    rotationR: "Rotation R:",
+    radicularManeuvers: "Radicular Maneuvers:",
+    slrRight: "S.L.R. Right:",
+    slrLeft: "S.L.R. Left:",
+    tripodeRight: "Tripod Right:",
+    tripodeLeft: "Tripod Left:",
+    lasegueRight: "Lasègue Right:",
+    lasegueLeft: "Lasègue Left:",
+    reverseLasegueRight: "Reverse Lasègue Right:",
+    reverseLasegueLeft: "Reverse Lasègue Left:",
+    hips: "Hips:",
+    hipsPalpation: "Palpation:",
+    hipsInspection: "Inspection:",
+    articulateRange: "Range of Motion:",
+    activeRight: "Active Right:",
+    passiveRight: "Passive Right:",
+    activeLeft: "Active Left:",
+    passiveLeft: "Passive Left:",
+    hipsFlexion: "Flexion:",
+    hipsExtension: "Extension:",
+    internalRotation: "Internal Rotation:",
+    externalRotation: "External Rotation:",
+    abduction: "Abduction:",
+    adduction: "Adduction:",
+    additionalExams: "Additional Examinations:"
+  }
+};
+
 export default function MedicalForm() {
   const [currentDictationField, setCurrentDictationField] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
+  const [language, setLanguage] = useState<'fr' | 'en'>('fr');
   const { toast } = useToast();
+  
+  const t = translations[language];
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -177,7 +402,7 @@ export default function MedicalForm() {
     stopListening,
     resetTranscript,
   } = useSpeechRecognition({
-    language: 'fr-FR',
+    language: language === 'fr' ? 'fr-FR' : 'en-US',
     continuous: true,
     interimResults: true,
   });
@@ -223,13 +448,13 @@ export default function MedicalForm() {
   };
 
   const handleClearForm = () => {
-    if (confirm('Êtes-vous sûr de vouloir effacer toutes les données du formulaire?')) {
+    if (confirm(t.confirmClear)) {
       form.reset();
       clearData();
-      setLastSaved('Non sauvegardé');
+      setLastSaved(t.notSaved);
       toast({
-        title: "Formulaire effacé",
-        description: "Toutes les données ont été supprimées.",
+        title: t.formCleared,
+        description: t.allDataDeleted,
       });
     }
   };
@@ -238,8 +463,8 @@ export default function MedicalForm() {
     const data = form.getValues();
     saveData(data);
     toast({
-      title: "Sauvegardé",
-      description: "Le formulaire a été sauvegardé avec succès.",
+      title: t.saved,
+      description: language === 'fr' ? "Le formulaire a été sauvegardé avec succès." : "The form has been saved successfully.",
     });
   };
 
@@ -258,19 +483,32 @@ export default function MedicalForm() {
       <div className="bg-white shadow-sm border-b no-print">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-blue-600">Cent.MD</h1>
-            <div className="flex gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-blue-600">{t.title}</h1>
+              <p className="text-sm text-gray-600">{t.subtitle}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={language} onValueChange={(value: 'fr' | 'en') => setLanguage(value)}>
+                <SelectTrigger className="w-32">
+                  <Globe className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fr">Français</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
               <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
                 <Save className="w-4 h-4 mr-2" />
-                Sauvegarder
+                {t.save}
               </Button>
               <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
                 <Printer className="w-4 h-4 mr-2" />
-                Imprimer
+                {t.print}
               </Button>
               <Button onClick={handleClearForm} variant="destructive">
                 <Trash2 className="w-4 h-4 mr-2" />
-                Effacer
+                {t.clear}
               </Button>
             </div>
           </div>
@@ -285,44 +523,44 @@ export default function MedicalForm() {
             {/* Section A: Renseignements sur le travailleur (Static) */}
             <Card className="form-section">
               <CardHeader className="bg-gray-50 border-b">
-                <CardTitle className="text-lg">A. RENSEIGNEMENTS SUR LE TRAVAILLEUR</CardTitle>
+                <CardTitle className="text-lg">{t.sectionA}</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="field-group">
-                    <label className="field-label">Nom :</label>
+                    <label className="field-label">{t.workerName}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">Prénom :</label>
+                    <label className="field-label">{t.workerFirstName}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">No d'assurance maladie :</label>
+                    <label className="field-label">{t.healthInsuranceNo}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">Date de naissance :</label>
+                    <label className="field-label">{t.birthDate}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">Adresse :</label>
+                    <label className="field-label">{t.address}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">Téléphone :</label>
+                    <label className="field-label">{t.phone}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">No de dossier du travailleur :</label>
+                    <label className="field-label">{t.workerFileNo}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">Date de l'évènement d'origine :</label>
+                    <label className="field-label">{t.originEventDate}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                   </div>
                   <div className="field-group col-span-2">
-                    <label className="field-label">Date de la récidive, rechute ou aggravation :</label>
+                    <label className="field-label">{t.recurrenceDate}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">Nil</div>
                   </div>
                 </div>
