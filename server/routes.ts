@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
 import { insertMedicalFormSchema } from "@shared/schema";
+import { formatSection7Text, enhanceSection7Dictation } from "./ai-formatter";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -95,6 +96,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete medical form" });
+    }
+  });
+
+  // AI formatting for Section 7
+  app.post("/api/format-section7", async (req, res) => {
+    try {
+      const { text, language = 'fr' } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+
+      const formattedText = await formatSection7Text(text, language);
+      res.json({ formatted: formattedText });
+    } catch (error) {
+      console.error('Format Section 7 error:', error);
+      res.status(500).json({ message: "Failed to format text" });
+    }
+  });
+
+  // AI enhancement for Section 7 dictation
+  app.post("/api/enhance-section7-dictation", async (req, res) => {
+    try {
+      const { transcript, language = 'fr' } = req.body;
+      
+      if (!transcript) {
+        return res.status(400).json({ message: "Transcript is required" });
+      }
+
+      const enhanced = await enhanceSection7Dictation(transcript, language);
+      res.json(enhanced);
+    } catch (error) {
+      console.error('Enhance Section 7 dictation error:', error);
+      res.status(500).json({ message: "Failed to enhance dictation" });
     }
   });
 

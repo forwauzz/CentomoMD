@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DictationModal } from "@/components/dictation-modal";
 import { FloatingRecordButton } from "@/components/floating-record-button";
+import { AIFormatSection7 } from "@/components/ai-format-section7";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { exportToPDF } from "@/lib/pdf-export";
