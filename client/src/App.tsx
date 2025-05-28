@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -8,10 +9,12 @@ import DictationPage from "@/pages/dictation-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  const [language, setLanguage] = useState<'fr' | 'en'>('fr');
+  
   return (
     <Switch>
-      <Route path="/" component={MedicalForm} />
-      <Route path="/dictation" component={() => <DictationPage language="fr" />} />
+      <Route path="/" component={() => <MedicalForm language={language} onLanguageChange={setLanguage} />} />
+      <Route path="/dictation" component={() => <DictationPage language={language} />} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -22,8 +22,14 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
 
   const startListening = useCallback((onResult?: (transcript: string) => void) => {
     if (!isSupported) {
-      setError('La reconnaissance vocale n\'est pas supportée par votre navigateur.');
+      setError('Speech recognition is not supported by your browser.');
       return;
+    }
+
+    // Stop any existing recognition first
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
     }
 
     setError(null);
@@ -56,7 +62,10 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
-      setError(`Erreur de reconnaissance vocale: ${event.error}`);
+      const errorMessage = options.language?.startsWith('fr') 
+        ? `Erreur de reconnaissance vocale: ${event.error}`
+        : `Speech recognition error: ${event.error}`;
+      setError(errorMessage);
       setIsListening(false);
     };
 

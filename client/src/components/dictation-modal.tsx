@@ -9,6 +9,7 @@ interface DictationModalProps {
   onStartDictation: () => void;
   onStopDictation: () => void;
   error?: string | null;
+  language?: 'fr' | 'en';
 }
 
 export function DictationModal({
@@ -17,13 +18,35 @@ export function DictationModal({
   isListening,
   onStartDictation,
   onStopDictation,
-  error
+  error,
+  language = 'fr'
 }: DictationModalProps) {
+  const translations = {
+    fr: {
+      title: "Dictée vocale",
+      listening: "En écoute... Parlez maintenant",
+      clickToStart: "Cliquez pour commencer la dictée",
+      stop: "Arrêter",
+      start: "Commencer",
+      close: "Fermer"
+    },
+    en: {
+      title: "Voice Dictation",
+      listening: "Listening... Speak now",
+      clickToStart: "Click to start dictation",
+      stop: "Stop",
+      start: "Start",
+      close: "Close"
+    }
+  };
+
+  const t = translations[language];
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Dictée vocale</DialogTitle>
+          <DialogTitle>{t.title}</DialogTitle>
         </DialogHeader>
         
         <div className="flex flex-col items-center space-y-4 py-4">
@@ -38,7 +61,7 @@ export function DictationModal({
           </div>
           
           <p className="text-center text-gray-600">
-            {isListening ? "En écoute... Parlez maintenant" : "Cliquez pour commencer la dictée"}
+            {isListening ? t.listening : t.clickToStart}
           </p>
           
           {error && (
@@ -53,7 +76,7 @@ export function DictationModal({
                 className="flex items-center gap-2"
               >
                 <MicOff className="w-4 h-4" />
-                Arrêter
+                {t.stop}
               </Button>
             ) : (
               <Button 
@@ -61,7 +84,7 @@ export function DictationModal({
                 className="flex items-center gap-2"
               >
                 <Mic className="w-4 h-4" />
-                Commencer
+                {t.start}
               </Button>
             )}
             
@@ -71,7 +94,7 @@ export function DictationModal({
               className="flex items-center gap-2"
             >
               <X className="w-4 h-4" />
-              Fermer
+              {t.close}
             </Button>
           </div>
         </div>

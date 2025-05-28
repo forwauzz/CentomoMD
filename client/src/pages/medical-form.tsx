@@ -314,10 +314,14 @@ const translations = {
   }
 };
 
-export default function MedicalForm() {
+interface MedicalFormProps {
+  language: 'fr' | 'en';
+  onLanguageChange: (language: 'fr' | 'en') => void;
+}
+
+export default function MedicalForm({ language, onLanguageChange }: MedicalFormProps) {
   const [currentDictationField, setCurrentDictationField] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
-  const [language, setLanguage] = useState<'fr' | 'en'>('fr');
   const { toast } = useToast();
   
   const t = translations[language];
@@ -408,6 +412,13 @@ export default function MedicalForm() {
     interimResults: true,
   });
 
+  // Update speech recognition language when language changes
+  useEffect(() => {
+    if (isListening) {
+      stopListening();
+    }
+  }, [language, stopListening, isListening]);
+
   // Load saved data on mount
   useEffect(() => {
     const savedData = loadData();
@@ -494,7 +505,7 @@ export default function MedicalForm() {
               <p className="text-sm text-gray-600">{t.subtitle}</p>
             </div>
             <div className="flex items-center gap-3">
-              <Select value={language} onValueChange={(value: 'fr' | 'en') => setLanguage(value)}>
+              <Select value={language} onValueChange={(value: 'fr' | 'en') => onLanguageChange(value)}>
                 <SelectTrigger className="w-32">
                   <Globe className="w-4 h-4 mr-2" />
                   <SelectValue />
@@ -1690,6 +1701,7 @@ export default function MedicalForm() {
         onStartDictation={() => {}} // Already handled in handleDictation
         onStopDictation={handleStopDictation}
         error={error}
+        language={language}
       />
     </div>
   );
