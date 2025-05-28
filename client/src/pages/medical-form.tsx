@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +15,7 @@ import { AIFormatSection7 } from "@/components/ai-format-section7";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { exportToPDF } from "@/lib/pdf-export";
-import { Mic, Save, Printer, Trash2, Eye, FileText, Globe } from "lucide-react";
+import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, ChevronDown, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -323,9 +324,27 @@ interface MedicalFormProps {
 export default function MedicalForm({ language, onLanguageChange }: MedicalFormProps) {
   const [currentDictationField, setCurrentDictationField] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
+  const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>({
+    section1: false,
+    section2: false,
+    section3: false,
+    section4: false,
+    section5: false,
+    section6: false,
+    section7: false,
+    section8: false,
+    section9: false,
+  });
   const { toast } = useToast();
   
   const t = translations[language];
+
+  const toggleSection = (sectionKey: string) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }));
+  };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -539,11 +558,22 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
           <form className="space-y-6">
             
             {/* Section A: Renseignements sur le travailleur (Static) */}
-            <Card className="form-section">
-              <CardHeader className="bg-gray-50 border-b">
-                <CardTitle className="text-lg">{t.sectionA}</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
+            <Collapsible open={!collapsedSections.section1} onOpenChange={() => toggleSection('section1')}>
+              <Card className="form-section">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="bg-gray-50 border-b cursor-pointer hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{t.sectionA}</CardTitle>
+                      {collapsedSections.section1 ? (
+                        <ChevronRight className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                      )}
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="field-group">
                     <label className="field-label">{t.workerName}</label>
@@ -582,8 +612,10 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">Nil</div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
 
             {/* Section B: Renseignements sur le médecin (Static) */}
             <Card className="form-section">
