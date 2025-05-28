@@ -918,10 +918,10 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                   </div>
                 </div>
 
-                {/* 7. Historique de faits et évolution (FILLABLE) */}
+                {/* 7. Historique de faits et évolution (FILLABLE with AI) */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-md font-semibold">7. Historique de faits et évolution</h3>
+                    <h3 className="text-md font-semibold">{t.section7}</h3>
                     <Button
                       type="button"
                       size="sm"
@@ -938,10 +938,10 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea 
-                              {...field} 
-                              className="w-full min-h-[200px]" 
-                              placeholder="Décrivez l'historique complet des faits et l'évolution de la condition"
+                            <AIFormatSection7 
+                              value={field.value || ''}
+                              onValueChange={field.onChange}
+                              language={language}
                             />
                           </FormControl>
                         </FormItem>
