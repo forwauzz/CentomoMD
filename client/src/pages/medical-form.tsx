@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CollapsibleSection } from "@/components/collapsible-section";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -558,71 +558,49 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
           <form className="space-y-6">
             
             {/* Section A: Renseignements sur le travailleur (Static) */}
-            <Collapsible open={!collapsedSections.section1} onOpenChange={() => toggleSection('section1')}>
-              <Card className="form-section">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="bg-gray-50 border-b cursor-pointer hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{t.sectionA}</CardTitle>
-                      {collapsedSections.section1 ? (
-                        <ChevronRight className="h-5 w-5 text-gray-500" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-gray-500" />
-                      )}
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="field-group">
-                    <label className="field-label">{t.workerName}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">{t.workerFirstName}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">{t.healthInsuranceNo}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">{t.birthDate}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">{t.address}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">{t.phone}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">{t.workerFileNo}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
-                  </div>
-                  <div className="field-group">
-                    <label className="field-label">{t.originEventDate}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
-                  </div>
-                  <div className="field-group col-span-2">
-                    <label className="field-label">{t.recurrenceDate}</label>
-                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">Nil</div>
-                  </div>
+            <CollapsibleSection title={t.sectionA}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="field-group">
+                  <label className="field-label">{t.workerName}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
                 </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
-            </Collapsible>
+                <div className="field-group">
+                  <label className="field-label">{t.workerFirstName}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.healthInsuranceNo}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.birthDate}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.address}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.phone}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.workerFileNo}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.originEventDate}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group col-span-2">
+                  <label className="field-label">{t.recurrenceDate}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">Nil</div>
+                </div>
+              </div>
+            </CollapsibleSection>
 
             {/* Section B: Renseignements sur le médecin (Static) */}
-            <Card className="form-section">
-              <CardHeader className="bg-gray-50 border-b">
-                <CardTitle className="text-lg">B. RENSEIGNEMENTS SUR LE MÉDECIN</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
+            <CollapsibleSection title="B. RENSEIGNEMENTS SUR LE MÉDECIN">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="field-group">
                     <label className="field-label">Nom :</label>
@@ -649,15 +627,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">adjointe.orthopedie@gmail.com</div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+            </CollapsibleSection>
 
             {/* Section C: Rapport */}
-            <Card className="form-section">
-              <CardHeader className="bg-gray-50 border-b">
-                <CardTitle className="text-lg">C. RAPPORT</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-8">
+            <CollapsibleSection title="C. RAPPORT">
+              <div className="space-y-8">
 
                 {/* 1. Mandat de l'évaluation (Static) */}
                 <div>
