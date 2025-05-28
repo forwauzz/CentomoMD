@@ -24,6 +24,10 @@ La travailleuse rencontre le docteur Daniel Leblanc, le 3 novembre 2020. Il main
 La travailleuse rencontre le docteur Adama-Rabi Youla, le 9 février 2021. Elle maintient le diagnostic de déchirure du mollet droit. Elle maintient les traitements en physiothérapie et ergothérapie. Elle juge la condition clinique stable. Elle prescrit une assignation temporaire à partir du 10 mars 2021.`;
 
 export async function formatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OpenAI API key is not configured');
+  }
+
   try {
     const systemPrompt = language === 'fr' 
       ? `Tu es un assistant médical expert qui formate les textes de rapports médicaux selon les standards professionnels québécois. 

@@ -108,11 +108,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Text is required" });
       }
 
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING"
+        });
+      }
+
       const formattedText = await formatSection7Text(text, language);
       res.json({ formatted: formattedText });
     } catch (error) {
       console.error('Format Section 7 error:', error);
-      res.status(500).json({ message: "Failed to format text" });
+      
+      // Check if it's an OpenAI API error
+      if (error.message && error.message.includes('API')) {
+        return res.status(500).json({ 
+          message: "OpenAI API error - please check your API key",
+          error: "API_ERROR"
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to format text", 
+        error: error.message || "Unknown error"
+      });
     }
   });
 

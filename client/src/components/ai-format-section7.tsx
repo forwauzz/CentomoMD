@@ -68,6 +68,18 @@ export function AIFormatSection7({ value, onValueChange, language }: AIFormatSec
       }
 
       const data = await response.json();
+      
+      if (data.error === 'API_KEY_MISSING') {
+        toast({
+          title: t.error,
+          description: language === 'fr'
+            ? "Clé API OpenAI non configurée. Contactez l'administrateur."
+            : "OpenAI API key not configured. Contact administrator.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       onValueChange(data.formatted);
       
       toast({
@@ -81,8 +93,8 @@ export function AIFormatSection7({ value, onValueChange, language }: AIFormatSec
       toast({
         title: t.error,
         description: language === 'fr'
-          ? "Impossible de formater le texte. Vérifiez votre connexion."
-          : "Unable to format text. Please check your connection.",
+          ? "Erreur de formatage. La clé API OpenAI pourrait être invalide."
+          : "Formatting error. OpenAI API key might be invalid.",
         variant: "destructive",
       });
     } finally {
