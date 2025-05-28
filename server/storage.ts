@@ -1,4 +1,6 @@
 import { medicalForms, type MedicalForm, type InsertMedicalForm } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getMedicalForm(id: number): Promise<MedicalForm | undefined>;
@@ -8,55 +10,39 @@ export interface IStorage {
   getAllMedicalForms(): Promise<MedicalForm[]>;
 }
 
-export class MemStorage implements IStorage {
-  private medicalForms: Map<number, MedicalForm>;
-  private currentId: number;
-
-  constructor() {
-    this.medicalForms = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getMedicalForm(id: number): Promise<MedicalForm | undefined> {
-    return this.medicalForms.get(id);
+    const [form] = await db.select().from(medicalForms).where(eq(medicalForms.id, id));
+    return form || undefined;
   }
 
   async createMedicalForm(insertForm: InsertMedicalForm): Promise<MedicalForm> {
-    const id = this.currentId++;
-    const now = new Date();
-    const form: MedicalForm = { 
-      ...insertForm, 
-      id, 
-      createdAt: now,
-      updatedAt: now
-    };
-    this.medicalForms.set(id, form);
+    const [form] = await db
+      .insert(medicalForms)
+      .values(insertForm)
+      .returning();
     return form;
   }
 
   async updateMedicalForm(id: number, updateData: Partial<InsertMedicalForm>): Promise<MedicalForm | undefined> {
-    const existingForm = this.medicalForms.get(id);
-    if (!existingForm) {
-      return undefined;
-    }
-
-    const updatedForm: MedicalForm = {
-      ...existingForm,
-      ...updateData,
-      updatedAt: new Date()
-    };
-    
-    this.medicalForms.set(id, updatedForm);
-    return updatedForm;
+    const [updatedForm] = await db
+      .update(medicalForms)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(medicalForms.id, id))
+      .returning();
+    return updatedForm || undefined;
   }
 
   async deleteMedicalForm(id: number): Promise<boolean> {
-    return this.medicalForms.delete(id);
+    const result = await db
+      .delete(medicalForms)
+      .where(eq(medicalForms.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
   }
 
   async getAllMedicalForms(): Promise<MedicalForm[]> {
-    return Array.from(this.medicalForms.values());
+    return await db.select().from(medicalForms);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
