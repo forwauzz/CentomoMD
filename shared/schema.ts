@@ -87,6 +87,44 @@ export const medicalForms = pgTable("medical_forms", {
   genouxExtensionGaucheActif: text("genoux_extension_gauche_actif"),
   genouxExtensionGauchePassif: text("genoux_extension_gauche_passif"),
   
+  // Manœuvres ligamentaires genoux
+  genouxLci0Droit: text("genoux_lci_0_droit"),
+  genouxLci0Gauche: text("genoux_lci_0_gauche"),
+  genouxLci20Droit: text("genoux_lci_20_droit"),
+  genouxLci20Gauche: text("genoux_lci_20_gauche"),
+  genouxLce0Droit: text("genoux_lce_0_droit"),
+  genouxLce0Gauche: text("genoux_lce_0_gauche"),
+  genouxLce20Droit: text("genoux_lce_20_droit"),
+  genouxLce20Gauche: text("genoux_lce_20_gauche"),
+  genouxLachmanDroit: text("genoux_lachman_droit"),
+  genouxLachmanGauche: text("genoux_lachman_gauche"),
+  genouxPivotDroit: text("genoux_pivot_droit"),
+  genouxPivotGauche: text("genoux_pivot_gauche"),
+  genouxTiroirAnterieurDroit: text("genoux_tiroir_anterieur_droit"),
+  genouxTiroirAnterieurGauche: text("genoux_tiroir_anterieur_gauche"),
+  genouxTiroirPosterieurDroit: text("genoux_tiroir_posterieur_droit"),
+  genouxTiroirPosterieurGauche: text("genoux_tiroir_posterieur_gauche"),
+  genouxSagPosterieurDroit: text("genoux_sag_posterieur_droit"),
+  genouxSagPosterieurGauche: text("genoux_sag_posterieur_gauche"),
+  genouxDial30Droit: text("genoux_dial_30_droit"),
+  genouxDial30Gauche: text("genoux_dial_30_gauche"),
+  genouxDial90Droit: text("genoux_dial_90_droit"),
+  genouxDial90Gauche: text("genoux_dial_90_gauche"),
+  
+  // Manœuvres méniscales genoux
+  genouxApleyDroit: text("genoux_apley_droit"),
+  genouxApleyGauche: text("genoux_apley_gauche"),
+  genouxMcMurrayDroit: text("genoux_mcmurray_droit"),
+  genouxMcMurrayGauche: text("genoux_mcmurray_gauche"),
+  genouxThessalyDroit: text("genoux_thessaly_droit"),
+  genouxThessalyGauche: text("genoux_thessaly_gauche"),
+  
+  // Circonférence genoux
+  genouxCirconferenceCuisseDroit: text("genoux_circonference_cuisse_droit"),
+  genouxCirconferenceCuisseGauche: text("genoux_circonference_cuisse_gauche"),
+  genouxCirconferenceMolletDroit: text("genoux_circonference_mollet_droit"),
+  genouxCirconferenceMolletGauche: text("genoux_circonference_mollet_gauche"),
+  
   examensAdditionnels: text("examens_additionnels"),
   
   createdAt: timestamp("created_at").defaultNow(),

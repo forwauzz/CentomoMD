@@ -102,6 +102,44 @@ const formSchema = z.object({
   genouxExtensionGaucheActif: z.string().optional(),
   genouxExtensionGauchePassif: z.string().optional(),
   
+  // Manœuvres ligamentaires genoux
+  genouxLci0Droit: z.string().optional(),
+  genouxLci0Gauche: z.string().optional(),
+  genouxLci20Droit: z.string().optional(),
+  genouxLci20Gauche: z.string().optional(),
+  genouxLce0Droit: z.string().optional(),
+  genouxLce0Gauche: z.string().optional(),
+  genouxLce20Droit: z.string().optional(),
+  genouxLce20Gauche: z.string().optional(),
+  genouxLachmanDroit: z.string().optional(),
+  genouxLachmanGauche: z.string().optional(),
+  genouxPivotDroit: z.string().optional(),
+  genouxPivotGauche: z.string().optional(),
+  genouxTiroirAnterieurDroit: z.string().optional(),
+  genouxTiroirAnterieurGauche: z.string().optional(),
+  genouxTiroirPosterieurDroit: z.string().optional(),
+  genouxTiroirPosterieurGauche: z.string().optional(),
+  genouxSagPosterieurDroit: z.string().optional(),
+  genouxSagPosterieurGauche: z.string().optional(),
+  genouxDial30Droit: z.string().optional(),
+  genouxDial30Gauche: z.string().optional(),
+  genouxDial90Droit: z.string().optional(),
+  genouxDial90Gauche: z.string().optional(),
+  
+  // Manœuvres méniscales genoux
+  genouxApleyDroit: z.string().optional(),
+  genouxApleyGauche: z.string().optional(),
+  genouxMcMurrayDroit: z.string().optional(),
+  genouxMcMurrayGauche: z.string().optional(),
+  genouxThessalyDroit: z.string().optional(),
+  genouxThessalyGauche: z.string().optional(),
+  
+  // Circonférence genoux
+  genouxCirconferenceCuisseDroit: z.string().optional(),
+  genouxCirconferenceCuisseGauche: z.string().optional(),
+  genouxCirconferenceMolletDroit: z.string().optional(),
+  genouxCirconferenceMolletGauche: z.string().optional(),
+  
   examensAdditionnels: z.string().optional(),
 });
 
@@ -1901,6 +1939,395 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                     />
                                   </td>
                                   <td className="border p-2">0°</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Manœuvres ligamentaires table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Manœuvres ligamentaires :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">LCI 0°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLci0Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLci0Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">LCI 20°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLci20Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLci20Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">LCE 0°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLce0Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLce0Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">LCE 20°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLce20Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLce20Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Lachman</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLachmanDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLachmanGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Pivot</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxPivotDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxPivotGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Tiroir antérieur</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTiroirAnterieurDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTiroirAnterieurGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Tiroir postérieur</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTiroirPosterieurDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTiroirPosterieurGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Sag postérieur</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxSagPosterieurDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxSagPosterieurGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Dial à 30°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxDial30Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxDial30Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Dial à 90°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxDial90Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxDial90Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Manœuvres méniscales table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Manœuvres méniscales :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Apley</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxApleyDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxApleyGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">McMurray</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxMcMurrayDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxMcMurrayGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Thessaly</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxThessalyDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxThessalyGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Circonférence table */}
+                        <div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Circonférence cuisse (cm)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxCirconferenceCuisseDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxCirconferenceCuisseGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Circonférence mollet (cm)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxCirconferenceMolletDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxCirconferenceMolletGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
                                 </tr>
                               </tbody>
                             </table>
