@@ -160,6 +160,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Saved forms routes (authentication required)
+  
+  // Get all saved forms for the authenticated user
+  app.get("/api/saved-forms", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const savedForms = await storage.getSavedFormsByUserId(userId);
+      res.json(savedForms);
+    } catch (error) {
+      console.error('Get saved forms error:', error);
+      res.status(500).json({ message: "Failed to fetch saved forms" });
+    }
+  });
+
+  // Get a specific saved form
+  app.get("/api/saved-forms/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
+
+      const savedForm = await storage.getSavedForm(id);
+      if (!savedForm) {
+        return res.status(404).json({ message: "Saved form not found" });
+      }
+
+      // Check if the form belongs to the authenticated user
+      if (savedForm.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      res.json(savedForm);
+    } catch (error) {
+      console.error('Get saved form error:', error);
+      res.status(500).json({ message: "Failed to fetch saved form" });
+    }
+  });
+
+  // Save a medical form temporarily
+  app.post("/api/saved-forms", requireAuth, async (req, res) => {
+    try {
+      const { title, formData, retentionDays = 7 } = req.body;
+      
+      if (!title || !formData) {
+        return res.status(400).json({ message: "Title and form data are required" });
+      }
+
+      // Validate retention days (1-30 days)
+      const validRetentionDays = Math.min(Math.max(parseInt(retentionDays) || 7, 1), 30);
+      
+      const userId = req.session.userId;
+      const savedForm = await storage.saveMedicalForm(userId, title, formData, validRetentionDays);
+      
+      res.status(201).json(savedForm);
+    } catch (error) {
+      console.error('Save form error:', error);
+      res.status(500).json({ message: "Failed to save form" });
+    }
+  });
+
+  // Update a saved form
+  app.put("/api/saved-forms/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
+
+      const { title, formData, retentionDays = 7 } = req.body;
+      
+      if (!title || !formData) {
+        return res.status(400).json({ message: "Title and form data are required" });
+      }
+
+      // Check if the form exists and belongs to the user
+      const existingForm = await storage.getSavedForm(id);
+      if (!existingForm) {
+        return res.status(404).json({ message: "Saved form not found" });
+      }
+
+      if (existingForm.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Validate retention days (1-30 days)
+      const validRetentionDays = Math.min(Math.max(parseInt(retentionDays) || 7, 1), 30);
+      
+      const updatedForm = await storage.updateSavedForm(id, title, formData, validRetentionDays);
+      
+      if (!updatedForm) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      res.json(updatedForm);
+    } catch (error) {
+      console.error('Update saved form error:', error);
+      res.status(500).json({ message: "Failed to update saved form" });
+    }
+  });
+
+  // Delete a saved form
+  app.delete("/api/saved-forms/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
+
+      // Check if the form exists and belongs to the user
+      const existingForm = await storage.getSavedForm(id);
+      if (!existingForm) {
+        return res.status(404).json({ message: "Saved form not found" });
+      }
+
+      if (existingForm.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const deleted = await storage.deleteSavedForm(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Form not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error('Delete saved form error:', error);
+      res.status(500).json({ message: "Failed to delete saved form" });
+    }
+  });
+
+  // Clean up expired forms (admin only)
+  app.post("/api/cleanup-expired-forms", requireAdmin, async (req, res) => {
+    try {
+      const deletedCount = await storage.deleteExpiredForms();
+      res.json({ deletedCount });
+    } catch (error) {
+      console.error('Cleanup expired forms error:', error);
+      res.status(500).json({ message: "Failed to cleanup expired forms" });
+    }
+  });
+
   // AI formatting for Section 7
   app.post("/api/format-section7", async (req, res) => {
     try {

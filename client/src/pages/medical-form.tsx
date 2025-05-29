@@ -13,6 +13,8 @@ import { DictationModal } from "@/components/dictation-modal";
 import { FloatingRecordButton } from "@/components/floating-record-button";
 import { AIFormatSection7 } from "@/components/ai-format-section7";
 import { AIFormatSection8 } from "@/components/ai-format-section8";
+import { SaveFormDialog } from "@/components/save-form-dialog";
+import { SavedFormsManager } from "@/components/saved-forms-manager";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useAuth } from "@/hooks/useAuth";
