@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import session from 'express-session';
 import { randomBytes } from 'crypto';
+import connectPgSimple from 'connect-pg-simple';
 
 // Password utilities
 export async function hashPassword(password: string): Promise<string> {
@@ -21,17 +22,31 @@ export function generateUserId(): string {
 export function getSessionConfig() {
   const sessionSecret = process.env.SESSION_SECRET || randomBytes(64).toString('hex');
   
-  return session({
+  // Use database session store for production
+  const PgSession = connectPgSimple(session);
+  
+  const sessionConfig: any = {
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Allow cookies over HTTP for deployment
+      secure: false, // Allow cookies over HTTP
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
     },
-  });
+  };
+
+  // Use PostgreSQL session store if database is available
+  if (process.env.DATABASE_URL) {
+    sessionConfig.store = new PgSession({
+      conString: process.env.DATABASE_URL,
+      tableName: 'sessions',
+      createTableIfMissing: true,
+    });
+  }
+  
+  return session(sessionConfig);
 }
 
 // Authentication middleware
