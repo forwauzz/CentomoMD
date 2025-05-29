@@ -223,7 +223,7 @@ type FormData = z.infer<typeof formSchema>;
 // Language translations
 const translations = {
   fr: {
-    title: "Cent.MD",
+    title: "CentomoMD",
     subtitle: "Rapport d'Évaluation Médicale",
     save: "Sauvegarder",
     print: "Imprimer",
@@ -332,7 +332,7 @@ const translations = {
     additionalExams: "Examens additionnels :"
   },
   en: {
-    title: "Cent.MD",
+    title: "CentomoMD",
     subtitle: "Medical Evaluation Report",
     save: "Save",
     print: "Print",

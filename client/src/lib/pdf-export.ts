@@ -94,7 +94,7 @@ function generatePrintableHTML(formData: any): string {
     </head>
     <body>
         <div class="header">
-            <h1>Cent.MD</h1>
+            <h1>CentomoMD</h1>
             <h2>Rapport d'Évaluation Médicale</h2>
         </div>
         
