@@ -1092,9 +1092,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       name="observationGenerale"
                       render={({ field }) => (
                         <FormItem>
-                          <div className="flex items-center justify-between mb-2">
-                            <FormLabel className="block">Observation générale et attitude :</FormLabel>
-                            <div className="flex gap-2 no-print">
+                          <div className="mb-2">
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="block">Observation générale et attitude :</FormLabel>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 mb-3 no-print">
                               <Button
                                 type="button"
                                 size="sm"
@@ -1107,7 +1109,7 @@ Le travailleur est en mesure de marcher sur la pointe des pieds, sur les talons 
 La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu de façon à bien exposer les zones anatomiques à évaluer.`;
                                   field.onChange(normalRightText);
                                 }}
-                                className="text-xs px-2 py-1 h-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                                className="text-xs px-3 py-2 h-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200 whitespace-nowrap"
                               >
                                 Normal Right Lower Limb Male
                               </Button>
@@ -1123,7 +1125,7 @@ Le travailleur est en mesure de marcher sur la pointe des pieds, sur les talons 
 La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu de façon à bien exposer les zones anatomiques à évaluer.`;
                                   field.onChange(normalLeftText);
                                 }}
-                                className="text-xs px-2 py-1 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                                className="text-xs px-3 py-2 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 whitespace-nowrap"
                               >
                                 Normal Left Lower Limb Male
                               </Button>
@@ -1139,7 +1141,7 @@ La travailleuse est en mesure de marcher sur la pointe des pieds, sur les talons
 La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue de façon à bien exposer les zones anatomiques à évaluer.`;
                                   field.onChange(normalRightFemaleText);
                                 }}
-                                className="text-xs px-2 py-1 h-auto bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200"
+                                className="text-xs px-3 py-2 h-auto bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200 whitespace-nowrap"
                               >
                                 Normal Right Lower Limb Female
                               </Button>
@@ -1155,7 +1157,7 @@ La travailleuse est en mesure de marcher sur la pointe des pieds, sur les talons
 La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue de façon à bien exposer les zones anatomiques à évaluer.`;
                                   field.onChange(normalLeftFemaleText);
                                 }}
-                                className="text-xs px-2 py-1 h-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+                                className="text-xs px-3 py-2 h-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 whitespace-nowrap"
                               >
                                 Normal Left Lower Limb Female
                               </Button>
