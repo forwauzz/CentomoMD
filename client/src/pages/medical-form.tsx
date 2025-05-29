@@ -15,8 +15,9 @@ import { AIFormatSection7 } from "@/components/ai-format-section7";
 import { AIFormatSection8 } from "@/components/ai-format-section8";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useAuth } from "@/hooks/useAuth";
 import { exportToPDF } from "@/lib/pdf-export";
-import { Mic, Save, Printer, Trash2, Eye, FileText, Globe } from "lucide-react";
+import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -463,6 +464,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
     section9: false,
   });
   const { toast } = useToast();
+  const { user, logout } = useAuth();
   
   const t = translations[language];
 
@@ -767,6 +769,23 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
     exportToPDF(data);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès.",
+      });
+      window.location.href = "/";
+    } catch (error) {
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Une erreur est survenue lors de la déconnexion.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -800,6 +819,23 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 <Trash2 className="w-4 h-4 mr-2" />
                 {t.clear}
               </Button>
+              
+              {/* User Info and Logout */}
+              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-gray-300">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <User className="w-4 h-4" />
+                  <span>{user?.firstName} {user?.lastName}</span>
+                </div>
+                <Button 
+                  onClick={handleLogout} 
+                  variant="outline" 
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Déconnexion
+                </Button>
+              </div>
             </div>
           </div>
         </div>
