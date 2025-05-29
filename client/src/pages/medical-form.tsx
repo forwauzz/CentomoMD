@@ -1218,9 +1218,8 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 7. Historique de faits et évolution (FILLABLE with AI) */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-md font-semibold">{t.section7}</h3>
+                <CollapsibleSection title={t.section7} defaultOpen={true}>
+                  <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
                       size="sm"
@@ -1247,12 +1246,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       )}
                     />
                   </div>
-                </div>
+                </CollapsibleSection>
 
                 {/* 8. Questionnaire subjectif et état actuel (FILLABLE) */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-md font-semibold">8. Questionnaire subjectif et état actuel</h3>
+                <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={true}>
+                  <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
                       size="sm"
@@ -1356,12 +1354,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       )}
                     />
                   </div>
-                </div>
+                </CollapsibleSection>
 
                 {/* 9. Examen Physique (FILLABLE) */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-md font-semibold">9. Examen Physique</h3>
+                <CollapsibleSection title="9. Examen Physique" defaultOpen={true}>
+                  <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
                       size="sm"
