@@ -14,15 +14,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const [language, setLanguage] = useState<'fr' | 'en'>('fr');
   const [showLogin, setShowLogin] = useState(false);
-  const { isAuthenticated, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Chargement...</div>
-      </div>
-    );
-  }
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   if (showLogin) {
     return <LoginPage />;

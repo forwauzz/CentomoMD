@@ -20,9 +20,21 @@ interface LoginCredentials {
 export function useAuth() {
   const queryClient = useQueryClient();
 
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await fetch("/api/auth/me");
+      if (response.status === 401) {
+        return null; // Not authenticated, but not an error
+      }
+      if (!response.ok) {
+        throw new Error("Failed to fetch user");
+      }
+      return response.json();
+    },
   });
 
   const loginMutation = useMutation({
@@ -59,9 +71,9 @@ export function useAuth() {
   });
 
   return {
-    user: user?.user,
+    user: user?.user || null,
     isLoading,
-    isAuthenticated: !!user?.user,
+    isAuthenticated: !!(user?.user),
     login: loginMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
     isLoggingIn: loginMutation.isPending,
