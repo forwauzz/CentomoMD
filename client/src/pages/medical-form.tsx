@@ -1043,7 +1043,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 5. Antécédents */}
-                <CollapsibleSection title="5. Antécédents" defaultOpen={true}>
+                <CollapsibleSection title="5. Antécédents" defaultOpen={false}>
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -1251,7 +1251,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 6. Médication actuelle */}
-                <CollapsibleSection title="6. Médication actuelle et mesures thérapeutiques en cours" defaultOpen={true}>
+                <CollapsibleSection title="6. Médication actuelle et mesures thérapeutiques en cours" defaultOpen={false}>
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -1282,7 +1282,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 7. Historique de faits et évolution (FILLABLE with AI) */}
-                <CollapsibleSection title={t.section7} defaultOpen={true}>
+                <CollapsibleSection title={t.section7} defaultOpen={false}>
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -1313,7 +1313,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 8. Questionnaire subjectif et état actuel (FILLABLE) */}
-                <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={true}>
+                <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={false}>
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -1421,7 +1421,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 9. Examen Physique (FILLABLE) */}
-                <CollapsibleSection title="9. Examen Physique" defaultOpen={true}>
+                <CollapsibleSection title="9. Examen Physique" defaultOpen={false}>
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -3549,7 +3549,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                 </CollapsibleSection>
 
                 {/* 10. Examens paracliniques (STATIC) */}
-                <CollapsibleSection title={t.section10} defaultOpen={true}>
+                <CollapsibleSection title={t.section10} defaultOpen={false}>
                   <div className="pl-4 space-y-4">
                     <div className="bg-gray-50 p-4 rounded border">
                       <p className="text-sm text-gray-700">
@@ -3560,7 +3560,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                 </CollapsibleSection>
 
                 {/* 11. Conclusion (FILLABLE) */}
-                <CollapsibleSection title={t.section11} defaultOpen={true}>
+                <CollapsibleSection title={t.section11} defaultOpen={false}>
                   <div className="pl-4 space-y-6">
                     {/* AI Generation and Copy Components */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

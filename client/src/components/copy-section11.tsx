@@ -16,31 +16,31 @@ export function CopySection11({ formData, language }: CopySection11Props) {
     const sections = [];
 
     if (formData.conclusionResume) {
-      sections.push(`**Résumé :**\n${formData.conclusionResume}`);
+      sections.push(`RÉSUMÉ :\n${formData.conclusionResume}`);
     }
 
     if (formData.conclusionDiagnostic) {
-      sections.push(`**Diagnostic :**\n${formData.conclusionDiagnostic}`);
+      sections.push(`DIAGNOSTIC :\n${formData.conclusionDiagnostic}`);
     }
 
     if (formData.conclusionDateConsolidation) {
-      sections.push(`**Date de consolidation :**\n${formData.conclusionDateConsolidation}`);
+      sections.push(`DATE DE CONSOLIDATION :\n${formData.conclusionDateConsolidation}`);
     }
 
     if (formData.conclusionSoinsTraitements) {
-      sections.push(`**Nature, nécessité, suffisance, durée des soins ou traitements administrés ou prescrits :**\n${formData.conclusionSoinsTraitements}`);
+      sections.push(`NATURE, NÉCESSITÉ, SUFFISANCE, DURÉE DES SOINS OU TRAITEMENTS ADMINISTRÉS OU PRESCRITS :\n${formData.conclusionSoinsTraitements}`);
     }
 
     if (formData.conclusionAtteintePermanente) {
-      sections.push(`**Existence de l'atteinte permanente à l'intégrité physique ou psychique :**\n${formData.conclusionAtteintePermanente}`);
+      sections.push(`EXISTENCE DE L'ATTEINTE PERMANENTE À L'INTÉGRITÉ PHYSIQUE OU PSYCHIQUE :\n${formData.conclusionAtteintePermanente}`);
     }
 
     if (formData.conclusionLimitationsFonctionnelles) {
-      sections.push(`**Existence de limitations fonctionnelles résultant de la lésion professionnelle :**\n${formData.conclusionLimitationsFonctionnelles}`);
+      sections.push(`EXISTENCE DE LIMITATIONS FONCTIONNELLES RÉSULTANT DE LA LÉSION PROFESSIONNELLE :\n${formData.conclusionLimitationsFonctionnelles}`);
     }
 
     if (formData.conclusionEvaluationLimitations) {
-      sections.push(`**Évaluation des limitations fonctionnelles :**\n${formData.conclusionEvaluationLimitations}`);
+      sections.push(`ÉVALUATION DES LIMITATIONS FONCTIONNELLES :\n${formData.conclusionEvaluationLimitations}`);
     }
 
     return sections.join('\n\n');
@@ -50,31 +50,31 @@ export function CopySection11({ formData, language }: CopySection11Props) {
     const sections = [];
 
     if (formData.conclusionResume) {
-      sections.push(`**Summary:**\n${formData.conclusionResume}`);
+      sections.push(`SUMMARY:\n${formData.conclusionResume}`);
     }
 
     if (formData.conclusionDiagnostic) {
-      sections.push(`**Diagnosis:**\n${formData.conclusionDiagnostic}`);
+      sections.push(`DIAGNOSIS:\n${formData.conclusionDiagnostic}`);
     }
 
     if (formData.conclusionDateConsolidation) {
-      sections.push(`**Consolidation Date:**\n${formData.conclusionDateConsolidation}`);
+      sections.push(`CONSOLIDATION DATE:\n${formData.conclusionDateConsolidation}`);
     }
 
     if (formData.conclusionSoinsTraitements) {
-      sections.push(`**Nature, necessity, sufficiency, duration of care or treatments administered or prescribed:**\n${formData.conclusionSoinsTraitements}`);
+      sections.push(`NATURE, NECESSITY, SUFFICIENCY, DURATION OF CARE OR TREATMENTS ADMINISTERED OR PRESCRIBED:\n${formData.conclusionSoinsTraitements}`);
     }
 
     if (formData.conclusionAtteintePermanente) {
-      sections.push(`**Existence of permanent impairment to physical or psychological integrity:**\n${formData.conclusionAtteintePermanente}`);
+      sections.push(`EXISTENCE OF PERMANENT IMPAIRMENT TO PHYSICAL OR PSYCHOLOGICAL INTEGRITY:\n${formData.conclusionAtteintePermanente}`);
     }
 
     if (formData.conclusionLimitationsFonctionnelles) {
-      sections.push(`**Existence of functional limitations resulting from the occupational injury:**\n${formData.conclusionLimitationsFonctionnelles}`);
+      sections.push(`EXISTENCE OF FUNCTIONAL LIMITATIONS RESULTING FROM THE OCCUPATIONAL INJURY:\n${formData.conclusionLimitationsFonctionnelles}`);
     }
 
     if (formData.conclusionEvaluationLimitations) {
-      sections.push(`**Evaluation of functional limitations:**\n${formData.conclusionEvaluationLimitations}`);
+      sections.push(`EVALUATION OF FUNCTIONAL LIMITATIONS:\n${formData.conclusionEvaluationLimitations}`);
     }
 
     return sections.join('\n\n');
