@@ -800,7 +800,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
             {/* Welcome Message */}
             <div className="flex-1 text-center">
               <div className="text-lg font-medium text-gray-700">
-                Bon retour, Dr. {user?.firstName || 'Centomo'}
+                Bon retour, Dr. Centomo
               </div>
               <div className="text-sm text-gray-500">
                 Rapport d'Évaluation Médicale
