@@ -461,6 +461,56 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       hanchesAdductionDroitPassif: "-",
       hanchesAdductionGaucheActif: "20",
       hanchesAdductionGauchePassif: "-",
+      
+      // Genoux default values
+      genouxPalpation: "",
+      genouxInspection: "",
+      genouxFlexionDroitActif: "",
+      genouxFlexionDroitPassif: "",
+      genouxFlexionGaucheActif: "",
+      genouxFlexionGauchePassif: "",
+      genouxExtensionDroitActif: "",
+      genouxExtensionDroitPassif: "",
+      genouxExtensionGaucheActif: "",
+      genouxExtensionGauchePassif: "",
+      
+      // Manœuvres ligamentaires defaults
+      genouxLci0Droit: "Sec",
+      genouxLci0Gauche: "Sec",
+      genouxLci20Droit: "Sec",
+      genouxLci20Gauche: "Sec",
+      genouxLce0Droit: "Sec",
+      genouxLce0Gauche: "Sec",
+      genouxLce20Droit: "Sec",
+      genouxLce20Gauche: "Sec",
+      genouxLachmanDroit: "Sec",
+      genouxLachmanGauche: "Sec",
+      genouxPivotDroit: "Neg",
+      genouxPivotGauche: "Neg",
+      genouxTiroirAnterieurDroit: "Sec",
+      genouxTiroirAnterieurGauche: "Sec",
+      genouxTiroirPosterieurDroit: "Sec",
+      genouxTiroirPosterieurGauche: "Sec",
+      genouxSagPosterieurDroit: "Neg",
+      genouxSagPosterieurGauche: "Neg",
+      genouxDial30Droit: "Neg",
+      genouxDial30Gauche: "Neg",
+      genouxDial90Droit: "Neg",
+      genouxDial90Gauche: "Neg",
+      
+      // Manœuvres méniscales defaults
+      genouxApleyDroit: "Neg",
+      genouxApleyGauche: "Neg",
+      genouxMcMurrayDroit: "Neg",
+      genouxMcMurrayGauche: "Neg",
+      genouxThessalyDroit: "Neg",
+      genouxThessalyGauche: "Neg",
+      
+      // Circonférence defaults (empty for measurements)
+      genouxCirconferenceCuisseDroit: "",
+      genouxCirconferenceCuisseGauche: "",
+      genouxCirconferenceMolletDroit: "",
+      genouxCirconferenceMolletGauche: "",
     },
   });
 
