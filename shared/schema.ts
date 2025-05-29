@@ -74,6 +74,19 @@ export const medicalForms = pgTable("medical_forms", {
   hanchesAdductionDroitPassif: text("hanches_adduction_droit_passif"),
   hanchesAdductionGaucheActif: text("hanches_adduction_gauche_actif"),
   hanchesAdductionGauchePassif: text("hanches_adduction_gauche_passif"),
+  
+  // Genoux
+  genouxPalpation: text("genoux_palpation"),
+  genouxInspection: text("genoux_inspection"),
+  genouxFlexionDroitActif: text("genoux_flexion_droit_actif"),
+  genouxFlexionDroitPassif: text("genoux_flexion_droit_passif"),
+  genouxFlexionGaucheActif: text("genoux_flexion_gauche_actif"),
+  genouxFlexionGauchePassif: text("genoux_flexion_gauche_passif"),
+  genouxExtensionDroitActif: text("genoux_extension_droit_actif"),
+  genouxExtensionDroitPassif: text("genoux_extension_droit_passif"),
+  genouxExtensionGaucheActif: text("genoux_extension_gauche_actif"),
+  genouxExtensionGauchePassif: text("genoux_extension_gauche_passif"),
+  
   examensAdditionnels: text("examens_additionnels"),
   
   createdAt: timestamp("created_at").defaultNow(),

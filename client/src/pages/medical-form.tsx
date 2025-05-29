@@ -89,6 +89,19 @@ const formSchema = z.object({
   hanchesAdductionDroitPassif: z.string().optional(),
   hanchesAdductionGaucheActif: z.string().optional(),
   hanchesAdductionGauchePassif: z.string().optional(),
+  
+  // Genoux
+  genouxPalpation: z.string().optional(),
+  genouxInspection: z.string().optional(),
+  genouxFlexionDroitActif: z.string().optional(),
+  genouxFlexionDroitPassif: z.string().optional(),
+  genouxFlexionGaucheActif: z.string().optional(),
+  genouxFlexionGauchePassif: z.string().optional(),
+  genouxExtensionDroitActif: z.string().optional(),
+  genouxExtensionDroitPassif: z.string().optional(),
+  genouxExtensionGaucheActif: z.string().optional(),
+  genouxExtensionGauchePassif: z.string().optional(),
+  
   examensAdditionnels: z.string().optional(),
 });
 
@@ -1424,7 +1437,21 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
 
                     {/* Hanches section */}
                     <Card className="border p-4">
-                      <h4 className="font-semibold mb-3">Hanches :</h4>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">Hanches :</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            form.setValue('hanchesPalpation', 'Aucune douleur au niveau des grands trochanters.');
+                            form.setValue('hanchesInspection', 'Aucune atrophie musculaire au niveau des fessiers ou des cuisses. Aucune cicatrice observée.');
+                          }}
+                          className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                        >
+                          NORMAL
+                        </Button>
+                      </div>
                       <div className="space-y-3">
                         <FormField
                           control={form.control}
@@ -1717,6 +1744,163 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                     />
                                   </td>
                                   <td className="border p-2">20°</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Genoux section */}
+                    <Card className="border p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">Genoux :</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            form.setValue('genouxPalpation', 'Aucune douleur à l\'interligne articulaire, au niveau des rotules et au niveau des insertions ligamentaires et tendineuses.');
+                            form.setValue('genouxInspection', 'Aucune atrophie musculaire. Aucune déformation ou de cicatrice');
+                          }}
+                          className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                        >
+                          NORMAL
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        <FormField
+                          control={form.control}
+                          name="genouxPalpation"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Palpation :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="interligne articulaire, rotules, insertions sans douleur" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="genouxInspection"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Inspection :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="pas d'atrophie musculaire, déformation ou cicatrice" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Amplitude articulaire genoux table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Amplitude articulaire :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Mouvement</th>
+                                  <th className="border p-2 text-center" colSpan={2}>Droit</th>
+                                  <th className="border p-2 text-center" colSpan={2}>Gauche</th>
+                                  <th className="border p-2 text-left">Normale</th>
+                                </tr>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2"></th>
+                                  <th className="border p-2 text-center">Actif</th>
+                                  <th className="border p-2 text-center">Passif</th>
+                                  <th className="border p-2 text-center">Actif</th>
+                                  <th className="border p-2 text-center">Passif</th>
+                                  <th className="border p-2"></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Flexion</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxFlexionDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxFlexionDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxFlexionGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxFlexionGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">135°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Extension</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxExtensionDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxExtensionDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxExtensionGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxExtensionGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">0°</td>
                                 </tr>
                               </tbody>
                             </table>
