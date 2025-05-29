@@ -411,5 +411,42 @@ function generateFormSections(formData: any): string {
     <div class="text-content">
       Vous référez au point 7, Historique des faits et évolution.
     </div>
+
+    <div style="font-weight: bold; margin: 15px 0 10px 0;">11. Conclusion</div>
+    
+    <div style="font-weight: bold; margin: 10px 0 5px 0;">Résumé :</div>
+    <div class="text-content">
+      ${formData.conclusionResume || ''}
+    </div>
+    
+    <div style="font-weight: bold; margin: 10px 0 5px 0;">Diagnostic :</div>
+    <div class="text-content">
+      ${formData.conclusionDiagnostic || ''}
+    </div>
+    
+    <div style="font-weight: bold; margin: 10px 0 5px 0;">Date de consolidation :</div>
+    <div class="text-content">
+      ${formData.conclusionDateConsolidation || ''}
+    </div>
+    
+    <div style="font-weight: bold; margin: 10px 0 5px 0;">Nature, nécessité́, suffisance, durée des soins ou traitements administrés ou prescrits :</div>
+    <div class="text-content">
+      ${formData.conclusionSoinsTraitements || ''}
+    </div>
+    
+    <div style="font-weight: bold; margin: 10px 0 5px 0;">Existence de l'atteinte permanente à l'intégrité́ physique ou psychique :</div>
+    <div class="text-content">
+      ${formData.conclusionAtteintePermanente || ''}
+    </div>
+    
+    <div style="font-weight: bold; margin: 10px 0 5px 0;">Existence de limitations fonctionnelles résultant de la lésion professionnelle :</div>
+    <div class="text-content">
+      ${formData.conclusionLimitationsFonctionnelles || ''}
+    </div>
+    
+    <div style="font-weight: bold; margin: 10px 0 5px 0;">Évaluation des limitations fonctionnelles résultant de la lésion professionnelle :</div>
+    <div class="text-content">
+      ${formData.conclusionEvaluationLimitations || ''}
+    </div>
   `;
 }

@@ -221,6 +221,15 @@ const formSchema = z.object({
   piedsPoulsPedieuxGauche: z.string().optional(),
   
   examensAdditionnels: z.string().optional(),
+  
+  // Section 11: Conclusion
+  conclusionResume: z.string().optional(),
+  conclusionDiagnostic: z.string().optional(),
+  conclusionDateConsolidation: z.string().optional(),
+  conclusionSoinsTraitements: z.string().optional(),
+  conclusionAtteintePermanente: z.string().optional(),
+  conclusionLimitationsFonctionnelles: z.string().optional(),
+  conclusionEvaluationLimitations: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -338,7 +347,17 @@ const translations = {
     
     // Section 10
     section10: "10. Examens paracliniques",
-    paraclinicalExamsText: "Vous référez au point 7, Historique des faits et évolution."
+    paraclinicalExamsText: "Vous référez au point 7, Historique des faits et évolution.",
+    
+    // Section 11
+    section11: "11. Conclusion",
+    conclusionSummary: "Résumé :",
+    conclusionDiagnosis: "Diagnostic :",
+    conclusionConsolidationDate: "Date de consolidation :",
+    conclusionCareNecessity: "Nature, nécessité́, suffisance, durée des soins ou traitements administrés ou prescrits :",
+    conclusionPermanentImpairment: "Existence de l'atteinte permanente à l'intégrité́ physique ou psychique :",
+    conclusionFunctionalLimitations: "Existence de limitations fonctionnelles résultant de la lésion professionnelle :",
+    conclusionLimitationsEvaluation: "Évaluation des limitations fonctionnelles résultant de la lésion professionnelle :"
   },
   en: {
     title: "CentomoMD",
@@ -451,7 +470,17 @@ const translations = {
     
     // Section 10
     section10: "10. Paraclinical Examinations",
-    paraclinicalExamsText: "You refer to point 7, History of facts and evolution."
+    paraclinicalExamsText: "You refer to point 7, History of facts and evolution.",
+    
+    // Section 11
+    section11: "11. Conclusion",
+    conclusionSummary: "Summary:",
+    conclusionDiagnosis: "Diagnosis:",
+    conclusionConsolidationDate: "Consolidation Date:",
+    conclusionCareNecessity: "Nature, necessity, sufficiency, duration of care or treatments administered or prescribed:",
+    conclusionPermanentImpairment: "Existence of permanent impairment to physical or psychological integrity:",
+    conclusionFunctionalLimitations: "Existence of functional limitations resulting from occupational injury:",
+    conclusionLimitationsEvaluation: "Evaluation of functional limitations resulting from occupational injury:"
   }
 };
 
@@ -3525,6 +3554,151 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                         {t.paraclinicalExamsText}
                       </p>
                     </div>
+                  </div>
+                </CollapsibleSection>
+
+                {/* 11. Conclusion (FILLABLE) */}
+                <CollapsibleSection title={t.section11} defaultOpen={true}>
+                  <div className="pl-4 space-y-6">
+                    {/* Résumé */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionResume"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">{t.conclusionSummary}</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[100px]" 
+                                placeholder="Résumé du cas et des principales constatations"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Diagnostic */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionDiagnostic"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">{t.conclusionDiagnosis}</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[80px]" 
+                                placeholder="Diagnostic médical principal et secondaires"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Date de consolidation */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionDateConsolidation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">{t.conclusionConsolidationDate}</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="field-input" 
+                                placeholder="Date de consolidation médicale"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Nature, nécessité, suffisance, durée des soins */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionSoinsTraitements"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">{t.conclusionCareNecessity}</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[120px]" 
+                                placeholder="Décrivez la nature, nécessité, suffisance et durée des soins"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Existence de l'atteinte permanente */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionAtteintePermanente"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">{t.conclusionPermanentImpairment}</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[100px]" 
+                                placeholder="Évaluez l'existence d'une atteinte permanente"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Existence de limitations fonctionnelles */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionLimitationsFonctionnelles"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">{t.conclusionFunctionalLimitations}</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[100px]" 
+                                placeholder="Décrivez l'existence de limitations fonctionnelles"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Évaluation des limitations fonctionnelles */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionEvaluationLimitations"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">{t.conclusionLimitationsEvaluation}</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[120px]" 
+                                placeholder="Évaluez en détail les limitations fonctionnelles"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </CollapsibleSection>
               </div>
