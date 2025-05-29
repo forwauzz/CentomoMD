@@ -14,6 +14,7 @@ import { DictationModal } from "@/components/dictation-modal";
 import { FloatingRecordButton } from "@/components/floating-record-button";
 import { AIFormatSection7 } from "@/components/ai-format-section7";
 import { AIFormatSection8 } from "@/components/ai-format-section8";
+import { AIGenerateSection11 } from "@/components/ai-generate-section11";
 import { SaveFormDialog } from "@/components/save-form-dialog";
 import { SavedFormsManager } from "@/components/saved-forms-manager";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
@@ -3560,6 +3561,21 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                 {/* 11. Conclusion (FILLABLE) */}
                 <CollapsibleSection title={t.section11} defaultOpen={true}>
                   <div className="pl-4 space-y-6">
+                    {/* AI Generation Component */}
+                    <AIGenerateSection11
+                      formData={form.getValues()}
+                      language={language}
+                      onGenerated={(conclusion) => {
+                        form.setValue('conclusionResume', conclusion.resume);
+                        form.setValue('conclusionDiagnostic', conclusion.diagnostic);
+                        form.setValue('conclusionDateConsolidation', conclusion.dateConsolidation);
+                        form.setValue('conclusionSoinsTraitements', conclusion.soinsTraitements);
+                        form.setValue('conclusionAtteintePermanente', conclusion.atteintePermanente);
+                        form.setValue('conclusionLimitationsFonctionnelles', conclusion.limitationsFonctionnelles);
+                        form.setValue('conclusionEvaluationLimitations', conclusion.evaluationLimitations);
+                      }}
+                    />
+
                     {/* Résumé */}
                     <FormField
                       control={form.control}
