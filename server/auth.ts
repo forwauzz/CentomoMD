@@ -27,7 +27,8 @@ export function getSessionConfig() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Allow cookies over HTTP for deployment
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
     },
   });
