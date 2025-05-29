@@ -38,6 +38,10 @@ export function AIFormatSection8({ value, onValueChange, language }: AIFormatSec
         body: JSON.stringify({ text: value, language }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       
       if (data.formatted) {
@@ -50,7 +54,8 @@ export function AIFormatSection8({ value, onValueChange, language }: AIFormatSec
             : "Text has been structured according to medical standards.",
         });
       } else {
-        throw new Error('No formatted text received');
+        console.error('API Response:', data);
+        throw new Error(data.message || 'No formatted text received');
       }
     } catch (error) {
       console.error('Error formatting text:', error);
