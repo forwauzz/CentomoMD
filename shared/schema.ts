@@ -126,6 +126,11 @@ export const medicalForms = pgTable("medical_forms", {
   genouxCirconferenceMolletGauche: text("genoux_circonference_mollet_gauche"),
   
   atrophieMusculaire: text("atrophie_musculaire"),
+  
+  // Pieds / Chevilles
+  piedsCheillesPalpation: text("pieds_chevilles_palpation"),
+  piedsChevillesInspection: text("pieds_chevilles_inspection"),
+  
   examensAdditionnels: text("examens_additionnels"),
   
   createdAt: timestamp("created_at").defaultNow(),

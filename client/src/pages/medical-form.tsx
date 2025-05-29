@@ -141,6 +141,11 @@ const formSchema = z.object({
   genouxCirconferenceMolletGauche: z.string().optional(),
   
   atrophieMusculaire: z.string().optional(),
+  
+  // Pieds / Chevilles
+  piedsCheillesPalpation: z.string().optional(),
+  piedsChevillesInspection: z.string().optional(),
+  
   examensAdditionnels: z.string().optional(),
 });
 
@@ -515,6 +520,10 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       
       // Atrophie musculaire default
       atrophieMusculaire: "TBD by Dr Centomo",
+      
+      // Pieds / Chevilles defaults
+      piedsCheillesPalpation: "",
+      piedsChevillesInspection: "",
     },
   });
 
@@ -2407,6 +2416,56 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                         </FormItem>
                       )}
                     />
+
+                    {/* Pieds / Chevilles section */}
+                    <Card className="border p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">Pieds / Chevilles :</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            form.setValue('piedsCheillesPalpation', 'Aucune douleur aux malléoles, aucune douleur à l\'interligne articulaire des chevilles, aucune douleur au mi-pied.');
+                            form.setValue('piedsChevillesInspection', 'Aucune déformation. Arches plantaires présente et normale. Aucune cicatrice');
+                          }}
+                          className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                        >
+                          NORMAL
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        <FormField
+                          control={form.control}
+                          name="piedsCheillesPalpation"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Palpation :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="malléoles, interligne articulaire, mi-pied sans douleur" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="piedsChevillesInspection"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Inspection :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="pas de déformation, arches plantaires normales, aucune cicatrice" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </Card>
 
                     {/* Additional examination sections */}
                     <FormField
