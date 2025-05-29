@@ -1222,6 +1222,48 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       <Mic className="w-4 h-4" />
                     </Button>
                   </div>
+                  
+                  {/* AI Formatting for entire Section 8 */}
+                  <div className="mb-4">
+                    <AIFormatSection8
+                      value={`${form.getValues('appreciationEvolution') || ''}${form.getValues('plaintesproblemes') || ''}${form.getValues('impactAvq') || ''}`}
+                      onValueChange={(formattedText) => {
+                        // Parse the formatted text and distribute to appropriate fields
+                        const lines = formattedText.split('\n').filter(line => line.trim());
+                        let currentSection = '';
+                        let appreciationText = '';
+                        let plaintesText = '';
+                        let impactText = '';
+                        
+                        for (const line of lines) {
+                          if (line.includes('Appréciation subjective de l\'évolution')) {
+                            currentSection = 'appreciation';
+                            continue;
+                          } else if (line.includes('Plaintes et problèmes')) {
+                            currentSection = 'plaintes';
+                            continue;
+                          } else if (line.includes('Impact sur AVQ/AVD')) {
+                            currentSection = 'impact';
+                            continue;
+                          }
+                          
+                          if (currentSection === 'appreciation' && line.trim()) {
+                            appreciationText += (appreciationText ? '\n' : '') + line;
+                          } else if (currentSection === 'plaintes' && line.trim()) {
+                            plaintesText += (plaintesText ? '\n' : '') + line;
+                          } else if (currentSection === 'impact' && line.trim()) {
+                            impactText += (impactText ? '\n' : '') + line;
+                          }
+                        }
+                        
+                        if (appreciationText) form.setValue('appreciationEvolution', appreciationText);
+                        if (plaintesText) form.setValue('plaintesproblemes', plaintesText);
+                        if (impactText) form.setValue('impactAvq', impactText);
+                      }}
+                      language={language}
+                    />
+                  </div>
+                  
                   <div className="pl-4 space-y-4">
                     <FormField
                       control={form.control}
