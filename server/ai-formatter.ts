@@ -52,7 +52,26 @@ Il n'y a pas d'épanchement intra-articulaire à la cheville. Œdème des tissus
 
 Le travailleur revoit le docteur Ménard, le 7 mars 2023. Il diagnostique une entorse de la cheville droite et une atteinte tendineuse au niveau des muscles péroniers. Il juge la condition clinique stable.
 
-Le travailleur revoit le docteur Ménard, le 27 février 2024. Il maintient le diagnostic d'entorse de cheville droite et atteinte tendineuse des muscles péroniers de la cheville droite. Il note une aggravation avec une fracture de la jambe gauche à la suite d'un déséquilibre.`;
+Le travailleur revoit le docteur Ménard, le 27 février 2024. Il maintient le diagnostic d'entorse de cheville droite et atteinte tendineuse des muscles péroniers de la cheville droite. Il note une aggravation avec une fracture de la jambe gauche à la suite d'un déséquilibre.
+
+EXEMPLE ADDITIONNEL 3 - CAS GENOU COMPLEXE:
+
+Le travailleur est ouvrier d'entrepôt et travaille au débarcadère. Ses tâches consistent à faire la réception des produits, décharger les camions, manœuvrer le chariot élévateur et le chariot électrique, placer les produits dans le réfrigérateur ou congélateur.
+
+La fiche de réclamation du travailleur décrit l'événement suivant survenu le 9 novembre 2022 :
+
+« Je venais juste de finir une tâche qui consistait à débarquer un container. En rentrant les palettes de lait, je ramène le chariot à palettes, je fais un pas et le second je trébuche et c'est mon genou qui fait très mal, après c'est l'hôpital. »
+
+Le travailleur consulte le docteur Ashwin Sairam, le 16 novembre 2022. Il diagnostique une entorse du genou droit et prescrit une résonance magnétique afin d'exclure une déchirure méniscale et une déchirure du ligament collatéral interne du genou droit.
+
+Le travailleur obtient une résonance magnétique du genou droit, le 22 avril 2023. Elle est interprétée par le docteur Yves Benabu, radiologiste. Ce dernier constate :
+
+« Compartiment interne :
+Aspect macéré, dégénéré du ménisque interne où on note une déchirure et un aspect macéré complexe de la corne postérieure avec une déchirure en anse de seau avec un fragment du ménisque venant s'interposer au sein de l'échancrure intercondylienne, mesurant jusqu'à 25 x 4 mm. »
+
+Le travailleur revoit le docteur Sairam, le 18 mai 2023. Il maintient le diagnostic d'entorse du genou droit et ajoute les diagnostics de déchirure du ménisque interne et du ligament croisé antérieur suivant les résultats de la résonance magnétique.
+
+Le travailleur revoit le docteur Sairam, le 19 juin 2024. Il juge la condition clinique améliorée. Il augmente les jours de travail à tâches régulières à 5 jours par semaine. Il note : « besoin d'expertise 204 ».`;
 
 export async function formatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
