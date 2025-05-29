@@ -334,7 +334,11 @@ const translations = {
     externalRotation: "Rotation externe :",
     abduction: "Abduction :",
     adduction: "Adduction :",
-    additionalExams: "Examens additionnels :"
+    additionalExams: "Examens additionnels :",
+    
+    // Section 10
+    section10: "10. Examens paracliniques",
+    paraclinicalExamsText: "Vous référez au point 7, Historique des faits et évolution."
   },
   en: {
     title: "CentomoMD",
@@ -443,7 +447,11 @@ const translations = {
     externalRotation: "External Rotation:",
     abduction: "Abduction:",
     adduction: "Adduction:",
-    additionalExams: "Additional Examinations:"
+    additionalExams: "Additional Examinations:",
+    
+    // Section 10
+    section10: "10. Paraclinical Examinations",
+    paraclinicalExamsText: "You refer to point 7, History of facts and evolution."
   }
 };
 
@@ -3506,6 +3514,17 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                         </FormItem>
                       )}
                     />
+                  </div>
+                </CollapsibleSection>
+
+                {/* 10. Examens paracliniques (STATIC) */}
+                <CollapsibleSection title={t.section10} defaultOpen={true}>
+                  <div className="pl-4 space-y-4">
+                    <div className="bg-gray-50 p-4 rounded border">
+                      <p className="text-sm text-gray-700">
+                        {t.paraclinicalExamsText}
+                      </p>
+                    </div>
                   </div>
                 </CollapsibleSection>
               </div>
