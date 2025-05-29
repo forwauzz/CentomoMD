@@ -1092,7 +1092,43 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       name="observationGenerale"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="mb-2 block">Observation générale et attitude :</FormLabel>
+                          <div className="flex items-center justify-between mb-2">
+                            <FormLabel className="block">Observation générale et attitude :</FormLabel>
+                            <div className="flex gap-2 no-print">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const normalRightText = `Le travailleur s'est présenté à l'heure pour l'évaluation. À l'accueil, il se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur droit. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et le travailleur n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, le travailleur présente des gestes fluides sans surprotection.
+
+Le travailleur est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
+
+La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu de façon à bien exposer les zones anatomiques à évaluer.`;
+                                  field.onChange(normalRightText);
+                                }}
+                                className="text-xs px-2 py-1 h-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                              >
+                                Normal Right Lower Limb Male
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const normalLeftText = `Le travailleur s'est présenté à l'heure pour l'évaluation. À l'accueil, il se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur gauche. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et le travailleur n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, le travailleur présente des gestes fluides sans surprotection.
+
+Le travailleur est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
+
+La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu de façon à bien exposer les zones anatomiques à évaluer.`;
+                                  field.onChange(normalLeftText);
+                                }}
+                                className="text-xs px-2 py-1 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                              >
+                                Normal Left Lower Limb Male
+                              </Button>
+                            </div>
+                          </div>
                           <FormControl>
                             <Textarea 
                               {...field} 
