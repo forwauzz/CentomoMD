@@ -206,3 +206,151 @@ Respond in JSON with:
     };
   }
 }
+
+const SECTION_8_SAMPLE = `8. Questionnaire subjectif et état actuel
+
+Appréciation subjective de l'évolution : La travailleuse rapporte une nette amélioration depuis son accident. Elle rapporte que dans les derniers mois, elle a observé peu d'amélioration au niveau de sa condition et juge d'elle-même qu'elle a atteint un plateau thérapeutique en physiothérapie et ergothérapie. Elle a des doutes quant à sa capacité de reprendre son travail comme chauffeur de taxi adapté étant donné la marchepied «step» qu'elle doit toujours utiliser pour monter et descendre de son véhicule. Elle doute aussi d'être en mesure de pousser ou tirer les patients en chaise roulante. Elle juge son amélioration à environ 75 à 80% de son état de base.
+
+Plaintes et problèmes : Elle se plaint principalement de sensations de brûlure intermittente au niveau de son mollet droite et au niveau antérieur de sa jambe droite. Elle ne peut rapporter d'éléments déclencheurs de ses douleurs et elles surviennent subitement. Elle rapporte des douleurs au niveau de la cheville droite surtout en fin d'amplitude articulaire. Elle rapporte avoir moins de douleurs et avoir une meilleure tolérance à l'effort lorsqu'il fait des échauffements avant de faire ses activités comme prescrit et démontré en physiothérapie.
+
+Elle rapporte une diminution de la force ainsi que de l'endurance musculaire au membre inférieur droite. Elle commence à exprimer de la fatigue lorsqu'elle a une position debout prolongée ou lorsqu'elle marche sur une durée d'environ 1h00 à 1h30.
+
+Elle ne rapporte pas de douleur nocturne mais éprouve des raideurs matinales au niveau de sa cheville droite. Elle rapporte avoir des douleurs à sa cheville droite lors des changements barométriques. Elle ne rapporte aucun symptôme spécifique au niveau de son genou droit.
+
+Impact sur AVQ/AVD : cf feuille en annexe.`;
+
+export async function formatSection8Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OpenAI API key is not configured');
+  }
+
+  try {
+    const systemPrompt = language === 'fr' 
+      ? `Tu es un assistant médical expert qui formate les textes de rapports médicaux selon les standards professionnels québécois.
+
+INSTRUCTIONS:
+- Formate le texte brut fourni selon le style de la Section 8 "Questionnaire subjectif et état actuel"
+- Structure le texte en trois sous-sections distinctes :
+  1. "Appréciation subjective de l'évolution :" (perception du patient, plateau thérapeutique, pourcentage d'amélioration, capacités fonctionnelles)
+  2. "Plaintes et problèmes :" (symptômes spécifiques, douleurs, localisations, facteurs déclencheurs, limitations)
+  3. "Impact sur AVQ/AVD :" (impact sur les activités de la vie quotidienne et domestique)
+- Utilise le vocabulaire médical approprié
+- Maintiens la troisième personne (le/la travailleur/travailleuse)
+- Organise les informations de manière logique
+- Respecte les conventions d'écriture médicale québécoise
+
+EXEMPLE DE FORMAT:
+${SECTION_8_SAMPLE}
+
+Réponds uniquement avec le texte formaté, sans explications.`
+      : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards.
+
+INSTRUCTIONS:
+- Format the provided raw text according to Section 8 "Subjective questionnaire and current state" style
+- Structure text in three distinct subsections:
+  1. "Subjective appreciation of evolution:" (patient perception, therapeutic plateau, improvement percentage, functional capabilities)
+  2. "Complaints and problems:" (specific symptoms, pain, locations, triggers, limitations)
+  3. "Impact on ADL:" (impact on activities of daily living)
+- Use appropriate medical vocabulary
+- Maintain third person (the worker)
+- Organize information logically
+- Respect Quebec medical writing conventions
+
+FORMAT EXAMPLE:
+${SECTION_8_SAMPLE}
+
+Respond only with the formatted text, no explanations.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt
+        },
+        {
+          role: "user",
+          content: `Formate ce texte médical brut:\n\n${rawText}`
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 2000,
+    });
+
+    return response.choices[0].message.content || rawText;
+  } catch (error) {
+    console.error('Error formatting Section 8 text:', error);
+    // Return original text if formatting fails
+    return rawText;
+  }
+}
+
+export async function enhanceSection8Dictation(transcript: string, language: 'fr' | 'en' = 'fr'): Promise<{
+  formatted: string;
+  suggestions?: string[];
+}> {
+  try {
+    const systemPrompt = language === 'fr'
+      ? `Tu es un assistant médical qui aide à améliorer la dictée pour les rapports médicaux.
+
+INSTRUCTIONS:
+- Améliore et formate le texte dicté pour la Section 8 "Questionnaire subjectif et état actuel"
+- Corrige les erreurs de dictée vocale
+- Structure en trois sous-sections : Appréciation subjective, Plaintes et problèmes, Impact sur AVQ/AVD
+- Ajoute la ponctuation appropriée
+- Utilise le vocabulaire médical correct
+- Garde le contenu factuel intact
+- Formate selon les standards médicaux québécois
+
+Réponds en JSON avec:
+{
+  "formatted": "texte formaté",
+  "suggestions": ["suggestion 1", "suggestion 2"]
+}`
+      : `You are a medical assistant that helps improve dictation for medical reports.
+
+INSTRUCTIONS:
+- Improve and format dictated text for Section 8 "Subjective questionnaire and current state"
+- Correct voice dictation errors
+- Structure in three subsections: Subjective appreciation, Complaints and problems, Impact on ADL
+- Add appropriate punctuation
+- Use correct medical vocabulary
+- Keep factual content intact
+- Format according to Quebec medical standards
+
+Respond in JSON with:
+{
+  "formatted": "formatted text",
+  "suggestions": ["suggestion 1", "suggestion 2"]
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt
+        },
+        {
+          role: "user",
+          content: transcript
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.2,
+      max_tokens: 2000,
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    return {
+      formatted: result.formatted || transcript,
+      suggestions: result.suggestions || []
+    };
+  } catch (error) {
+    console.error('Error enhancing Section 8 dictation:', error);
+    return {
+      formatted: transcript,
+      suggestions: []
+    };
+  }
+}

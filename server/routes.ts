@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
 import { insertMedicalFormSchema } from "@shared/schema";
-import { formatSection7Text, enhanceSection7Dictation } from "./ai-formatter";
+import { formatSection7Text, enhanceSection7Dictation, formatSection8Text, enhanceSection8Dictation } from "./ai-formatter";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -148,6 +148,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(enhanced);
     } catch (error) {
       console.error('Enhance Section 7 dictation error:', error);
+      res.status(500).json({ message: "Failed to enhance dictation" });
+    }
+  });
+
+  // AI formatting for Section 8
+  app.post("/api/format-section8", async (req, res) => {
+    try {
+      const { text, language = 'fr' } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING"
+        });
+      }
+
+      const formattedText = await formatSection8Text(text, language);
+      res.json({ formatted: formattedText });
+    } catch (error) {
+      console.error('Format Section 8 error:', error);
+      
+      // Check if it's an OpenAI API error
+      if (error.message && error.message.includes('API')) {
+        return res.status(500).json({ 
+          message: "OpenAI API error - please check your API key",
+          error: "API_ERROR"
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to format text", 
+        error: error.message || "Unknown error"
+      });
+    }
+  });
+
+  // AI enhancement for Section 8 dictation
+  app.post("/api/enhance-section8-dictation", async (req, res) => {
+    try {
+      const { transcript, language = 'fr' } = req.body;
+      
+      if (!transcript) {
+        return res.status(400).json({ message: "Transcript is required" });
+      }
+
+      const enhanced = await enhanceSection8Dictation(transcript, language);
+      res.json(enhanced);
+    } catch (error) {
+      console.error('Enhance Section 8 dictation error:', error);
       res.status(500).json({ message: "Failed to enhance dictation" });
     }
   });
