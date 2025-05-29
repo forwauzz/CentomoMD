@@ -159,6 +159,9 @@ export const medicalForms = pgTable("medical_forms", {
   piedsTestApprehensionDroit: text("pieds_test_apprehension_droit"),
   piedsTestApprehensionGauche: text("pieds_test_apprehension_gauche"),
   
+  // Neuro-vasculaire pieds/chevilles
+  piedsNeuroVasculaire: text("pieds_neuro_vasculaire"),
+  
   examensAdditionnels: text("examens_additionnels"),
   
   createdAt: timestamp("created_at").defaultNow(),

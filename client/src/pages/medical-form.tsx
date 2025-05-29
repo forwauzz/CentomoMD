@@ -174,6 +174,9 @@ const formSchema = z.object({
   piedsTestApprehensionDroit: z.string().optional(),
   piedsTestApprehensionGauche: z.string().optional(),
   
+  // Neuro-vasculaire pieds/chevilles
+  piedsNeuroVasculaire: z.string().optional(),
+  
   examensAdditionnels: z.string().optional(),
 });
 
@@ -580,6 +583,9 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       piedsThompsonGauche: "Neg",
       piedsTestApprehensionDroit: "Neg",
       piedsTestApprehensionGauche: "Neg",
+      
+      // Neuro-vasculaire pieds/chevilles default
+      piedsNeuroVasculaire: "",
     },
   });
 
@@ -2878,6 +2884,39 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                               </tbody>
                             </table>
                           </div>
+                        </div>
+
+                        {/* Neuro-vasculaire section */}
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <FormLabel className="mb-0">Neuro-vasculaire :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                form.setValue('piedsNeuroVasculaire', 'TBD by Dr Centomo');
+                              }}
+                              className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                            >
+                              NORMAL
+                            </Button>
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name="piedsNeuroVasculaire"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Textarea 
+                                    {...field} 
+                                    className="w-full min-h-[80px]" 
+                                    placeholder="Évaluation neuro-vasculaire..."
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                         </div>
                       </div>
                     </Card>
