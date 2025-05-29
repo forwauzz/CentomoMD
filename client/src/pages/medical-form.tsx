@@ -1127,6 +1127,38 @@ La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu
                               >
                                 Normal Left Lower Limb Male
                               </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const normalRightFemaleText = `La travailleuse s'est présentée à l'heure pour l'évaluation. À l'accueil, elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur droit. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et la travailleuse n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, la travailleuse présente des gestes fluides sans surprotection.
+
+La travailleuse est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
+
+La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue de façon à bien exposer les zones anatomiques à évaluer.`;
+                                  field.onChange(normalRightFemaleText);
+                                }}
+                                className="text-xs px-2 py-1 h-auto bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200"
+                              >
+                                Normal Right Lower Limb Female
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const normalLeftFemaleText = `La travailleuse s'est présentée à l'heure pour l'évaluation. À l'accueil, elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur gauche. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et la travailleuse n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, la travailleuse présente des gestes fluides sans surprotection.
+
+La travailleuse est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
+
+La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue de façon à bien exposer les zones anatomiques à évaluer.`;
+                                  field.onChange(normalLeftFemaleText);
+                                }}
+                                className="text-xs px-2 py-1 h-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+                              >
+                                Normal Left Lower Limb Female
+                              </Button>
                             </div>
                           </div>
                           <FormControl>
