@@ -3483,10 +3483,10 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                     />
                   </div>
                 </CollapsibleSection>
-                </CollapsibleSection>
 
             {/* Footer Actions */}
-            <div className="flex justify-between items-center pt-6 no-print">
+            <div className="pt-6">
+            <div className="flex justify-between items-center no-print">
               <div className="text-sm text-gray-500">
                 Dernière sauvegarde: <span>{lastSaved}</span>
               </div>
