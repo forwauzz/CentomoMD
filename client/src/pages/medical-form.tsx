@@ -15,7 +15,7 @@ import { AIFormatSection7 } from "@/components/ai-format-section7";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { exportToPDF } from "@/lib/pdf-export";
-import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, ChevronDown, ChevronRight } from "lucide-react";
+import { Mic, Save, Printer, Trash2, Eye, FileText, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -1660,9 +1660,8 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                     />
                   </div>
                 </div>
-
-              </CardContent>
-            </Card>
+              </div>
+            </CollapsibleSection>
 
             {/* Footer Actions */}
             <div className="flex justify-between items-center pt-6 no-print">
