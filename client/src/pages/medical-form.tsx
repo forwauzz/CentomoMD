@@ -920,12 +920,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
 
             {/* Section C: Rapport */}
             <CollapsibleSection title="C. RAPPORT">
-              <div className="space-y-8">
+              <div className="space-y-4">
 
-                {/* 1. Mandat de l'évaluation (Static) */}
-                <div>
-                  <h3 className="text-md font-semibold mb-4">1. Mandat de l'évaluation</h3>
-                  <div className="pl-4 space-y-3 text-sm">
+                {/* 1. Mandat de l'évaluation */}
+                <CollapsibleSection title="1. Mandat de l'évaluation" defaultOpen={false}>
+                  <div className="space-y-3 text-sm">
                     <p>Le but de l'évaluation est de répondre aux points suivants de l'article de la LATMP :</p>
                     <div className="space-y-2 pl-4">
                       <p>1) Diagnostic.</p>
@@ -937,32 +936,29 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       <p className="pl-4">b) Évaluation des limitations fonctionnelles résultant de la lésion professionnelle.</p>
                     </div>
                   </div>
-                </div>
+                </CollapsibleSection>
 
-                {/* 2. Diagnostics acceptés par la CNESST (Static) */}
-                <div>
-                  <h3 className="text-md font-semibold mb-4">2. Diagnostics acceptés par la CNESST</h3>
-                  <div className="pl-4">
+                {/* 2. Diagnostics acceptés par la CNESST */}
+                <CollapsibleSection title="2. Diagnostics acceptés par la CNESST" defaultOpen={false}>
+                  <div>
                     <p>Déchirure mollet droit.</p>
                   </div>
-                </div>
+                </CollapsibleSection>
 
-                {/* 3. Modalité de l'entrevue (Static) */}
-                <div>
-                  <h3 className="text-md font-semibold mb-4">3. Modalité de l'entrevue</h3>
-                  <div className="pl-4 space-y-4 text-sm">
+                {/* 3. Modalité de l'entrevue */}
+                <CollapsibleSection title="3. Modalité de l'entrevue" defaultOpen={false}>
+                  <div className="space-y-4 text-sm">
                     <p>L'évaluation suivante s'est tenue dans les locaux de la clinique du Complexe Médical Nord-de-Île (CMNDI). Nous avons clairement expliqué à notre mandat d'évaluateur indépendant désigné par la CNESST dans le cadre de l'application de l'article 204 de la LATMP. Nous lui avons précisé que nous n'agirons pas en tant que médecins traitants. Notre rapport d'évaluation sera d'abord envoyé́ à la CNESST.</p>
                     <p>Nous avons procédé́ au questionnaire subjectif ainsi qu'à un examen physique détaillé́ en relation avec les lésions à évaluer, nous nous sommes assurés à la fin de l'entrevue d'avoir couvert l'ensemble de la problématique.</p>
                     <p>Nous avons revu le dossier CNESST de même que le dossier médical. Nous avons pu consulter l'ensemble des rapports et des bilans radiologiques réalisés dans le cadre de l'évaluation de la lésion.</p>
                     <p>L'entrevue s'est effectuée cordialement, la patiente participait pleinement à son entrevue. L'entrevue s'est déroulée entre.</p>
                     <p>À la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.</p>
                   </div>
-                </div>
+                </CollapsibleSection>
 
-                {/* 4. Identification (Static) */}
-                <div>
-                  <h3 className="text-md font-semibold mb-4">4. Identification</h3>
-                  <div className="pl-4 space-y-2 text-sm">
+                {/* 4. Identification */}
+                <CollapsibleSection title="4. Identification" defaultOpen={false}>
+                  <div className="space-y-2 text-sm">
                     <p><strong>Âge :</strong> Il s'agit d'une femme de 49 ans.</p>
                     <p><strong>Dominance :</strong> Elle est droitière</p>
                     <p><strong>Emploi :</strong> Elle travaillait comme chauffeuse de taxi / transport adapté à l'emploi de Taxi Ormstown inc. depuis janvier 2016.</p>
@@ -970,12 +966,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                     <p>Elle est en arrêt de travail depuis l'accident</p>
                     <p>Comme activité de loisir elle pratique le baseball.</p>
                   </div>
-                </div>
+                </CollapsibleSection>
 
-                {/* 5. Antécédents (FILLABLE) */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-md font-semibold">5. Antécédents</h3>
+                {/* 5. Antécédents */}
+                <CollapsibleSection title="5. Antécédents" defaultOpen={true}>
+                  <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
                       size="sm"
@@ -1179,12 +1174,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       />
                     </div>
                   </div>
-                </div>
+                </CollapsibleSection>
 
-                {/* 6. Médication actuelle (FILLABLE) */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-md font-semibold">6. Médication actuelle et mesures thérapeutiques en cours</h3>
+                {/* 6. Médication actuelle */}
+                <CollapsibleSection title="6. Médication actuelle et mesures thérapeutiques en cours" defaultOpen={true}>
+                  <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
                       size="sm"
@@ -1211,7 +1205,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                       )}
                     />
                   </div>
-                </div>
+                </CollapsibleSection>
 
                 {/* 7. Historique de faits et évolution (FILLABLE with AI) */}
                 <div>
