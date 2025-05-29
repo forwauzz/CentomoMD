@@ -131,6 +131,34 @@ export const medicalForms = pgTable("medical_forms", {
   piedsCheillesPalpation: text("pieds_chevilles_palpation"),
   piedsChevillesInspection: text("pieds_chevilles_inspection"),
   
+  // Amplitude articulaire pieds/chevilles
+  piedsDorsiflexionCheville: text("pieds_dorsiflexion_cheville"),
+  piedsPlantifexionCheville: text("pieds_plantiflexion_cheville"),
+  piedsMvtsSousAstragaliensDroit: text("pieds_mvts_sous_astragaliens_droit"),
+  piedsMvtsSousAstragaliensGauche: text("pieds_mvts_sous_astragaliens_gauche"),
+  piedsMvtsMidTarsienDroit: text("pieds_mvts_mid_tarsien_droit"),
+  piedsMvtsMidTarsienGauche: text("pieds_mvts_mid_tarsien_gauche"),
+  
+  // Manœuvres ligamentaires pieds/chevilles
+  piedsTiroir0Droit: text("pieds_tiroir_0_droit"),
+  piedsTiroir0Gauche: text("pieds_tiroir_0_gauche"),
+  piedsTiroir20Droit: text("pieds_tiroir_20_droit"),
+  piedsTiroir20Gauche: text("pieds_tiroir_20_gauche"),
+  piedsVarusStressDroit: text("pieds_varus_stress_droit"),
+  piedsVarusStressGauche: text("pieds_varus_stress_gauche"),
+  piedsLaxiteCalcaneoFibulaireDroit: text("pieds_laxite_calcaneo_fibulaire_droit"),
+  piedsLaxiteCalcaneoFibulaireGauche: text("pieds_laxite_calcaneo_fibulaire_gauche"),
+  piedsSqueezeTestDroit: text("pieds_squeeze_test_droit"),
+  piedsSqueezeTestGauche: text("pieds_squeeze_test_gauche"),
+  
+  // Manœuvres spécifiques tendons pieds/chevilles
+  piedsSingleHeelRaiseDroit: text("pieds_single_heel_raise_droit"),
+  piedsSingleHeelRaiseGauche: text("pieds_single_heel_raise_gauche"),
+  piedsThompsonDroit: text("pieds_thompson_droit"),
+  piedsThompsonGauche: text("pieds_thompson_gauche"),
+  piedsTestApprehensionDroit: text("pieds_test_apprehension_droit"),
+  piedsTestApprehensionGauche: text("pieds_test_apprehension_gauche"),
+  
   examensAdditionnels: text("examens_additionnels"),
   
   createdAt: timestamp("created_at").defaultNow(),
