@@ -801,27 +801,29 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b no-print">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-blue-600">{t.title}</h1>
-              <p className="text-sm text-gray-600">{t.subtitle}</p>
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          {/* Top Row */}
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-8">
+              <div>
+                <h1 className="text-xl font-bold text-blue-600 leading-tight">{t.title}</h1>
+                <p className="text-xs text-gray-600">{t.subtitle}</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-base font-medium text-gray-700 leading-tight">
+                  Bon retour, Dr. Centomo
+                </div>
+                <div className="text-xs text-gray-500">
+                  Rapport d'Évaluation Médicale
+                </div>
+              </div>
             </div>
             
-            {/* Welcome Message */}
-            <div className="flex-1 text-center">
-              <div className="text-lg font-medium text-gray-700">
-                Bon retour, Dr. Centomo
-              </div>
-              <div className="text-sm text-gray-500">
-                Rapport d'Évaluation Médicale
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
               <Select value={language} onValueChange={(value: 'fr' | 'en') => onLanguageChange(value)}>
-                <SelectTrigger className="w-24">
-                  <Globe className="w-4 h-4" />
+                <SelectTrigger className="w-20">
+                  <Globe className="w-3 h-3" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -830,43 +832,45 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </SelectContent>
               </Select>
               
-              <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700 whitespace-nowrap">
+              <Button 
+                onClick={handleLogout} 
+                variant="outline" 
+                size="sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="w-3 h-3" />
+                <span className="ml-1 text-xs">Déconnexion</span>
+              </Button>
+            </div>
+          </div>
+          
+          {/* Bottom Row - Action Buttons */}
+          <div className="flex justify-center">
+            <div className="flex items-center gap-2">
+              <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700">
                 <Save className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">{t.save}</span>
+                <span className="ml-1">Sauvegarder</span>
               </Button>
               
-              <Button onClick={() => setShowSaveDialog(true)} size="sm" className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap">
+              <Button onClick={() => setShowSaveDialog(true)} size="sm" className="bg-orange-600 hover:bg-orange-700">
                 <Archive className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">Sauvegarder</span>
+                <span className="ml-1">Sauvegarder</span>
               </Button>
               
-              <Button onClick={() => setShowSavedForms(true)} size="sm" variant="outline" className="whitespace-nowrap">
+              <Button onClick={() => setShowSavedForms(true)} size="sm" variant="outline">
                 <FolderOpen className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">Charger</span>
+                <span className="ml-1">Charger</span>
               </Button>
               
-              <Button onClick={handlePrint} size="sm" className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">
+              <Button onClick={handleExportPDF} size="sm" className="bg-blue-600 hover:bg-blue-700">
                 <Printer className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">{t.print}</span>
+                <span className="ml-1">Imprimer</span>
               </Button>
               
-              <Button onClick={handleClearForm} size="sm" variant="destructive" className="whitespace-nowrap">
+              <Button onClick={handleClearForm} size="sm" variant="destructive">
                 <Trash2 className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">{t.clear}</span>
+                <span className="ml-1">Effacer</span>
               </Button>
-              
-              {/* User Info and Logout */}
-              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-300">
-                <Button 
-                  onClick={handleLogout} 
-                  variant="outline" 
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 whitespace-nowrap"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline ml-2">Déconnexion</span>
-                </Button>
-              </div>
             </div>
           </div>
         </div>
