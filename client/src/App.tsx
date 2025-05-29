@@ -14,16 +14,28 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const [language, setLanguage] = useState<'fr' | 'en'>('fr');
   const [showLogin, setShowLogin] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, isLoading, user } = useAuth();
   
-  if (showLogin) {
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Chargement...</div>
+      </div>
+    );
+  }
+  
+  // Show login page if explicitly requested
+  if (showLogin && !isAuthenticated) {
     return <LoginPage />;
   }
   
+  // Show landing page if not authenticated
   if (!isAuthenticated) {
     return <LandingPage onShowLogin={() => setShowLogin(true)} />;
   }
   
+  // User is authenticated, show the main app
   return (
     <Switch>
       <Route path="/" component={() => <MedicalForm language={language} onLanguageChange={setLanguage} />} />
