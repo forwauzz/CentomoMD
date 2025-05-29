@@ -1176,7 +1176,21 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
 
                     {/* Rachis Lombaire */}
                     <Card className="border p-4">
-                      <h4 className="font-semibold mb-3">Rachis Lombaire :</h4>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">Rachis Lombaire :</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            form.setValue('rachisPalpation', 'aucune douleur au niveau des apophyses épineuses et en para lombaire droit et gauche.');
+                            form.setValue('rachisInspection', 'Lordose lombaire conservée. Masse musculaire paravertébrale préservée. Aucune cicatrice observée.');
+                          }}
+                          className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                        >
+                          NORMAL
+                        </Button>
+                      </div>
                       <div className="space-y-3">
                         <FormField
                           control={form.control}
