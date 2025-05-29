@@ -1,6 +1,6 @@
-import { medicalForms, users, type MedicalForm, type InsertMedicalForm, type User, type InsertUser } from "@shared/schema";
+import { medicalForms, users, savedForms, type MedicalForm, type InsertMedicalForm, type User, type InsertUser, type SavedForm, type InsertSavedForm } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 
 export interface IStorage {
   // Medical forms
@@ -18,6 +18,14 @@ export interface IStorage {
   updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: string): Promise<boolean>;
   getAllUsers(): Promise<User[]>;
+
+  // Saved forms management
+  getSavedForm(id: number): Promise<SavedForm | undefined>;
+  getSavedFormsByUserId(userId: string): Promise<SavedForm[]>;
+  saveMedicalForm(userId: string, title: string, formData: any, retentionDays: number): Promise<SavedForm>;
+  updateSavedForm(id: number, title: string, formData: any, retentionDays: number): Promise<SavedForm | undefined>;
+  deleteSavedForm(id: number): Promise<boolean>;
+  deleteExpiredForms(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -89,12 +97,71 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: string): Promise<boolean> {
     const result = await db.delete(users).where(eq(users.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getAllUsers(): Promise<User[]> {
     const allUsers = await db.select().from(users);
     return allUsers;
+  }
+
+  // Saved forms management
+  async getSavedForm(id: number): Promise<SavedForm | undefined> {
+    const [form] = await db.select().from(savedForms).where(eq(savedForms.id, id));
+    return form || undefined;
+  }
+
+  async getSavedFormsByUserId(userId: string): Promise<SavedForm[]> {
+    const forms = await db.select().from(savedForms)
+      .where(eq(savedForms.userId, userId))
+      .orderBy(savedForms.createdAt);
+    return forms;
+  }
+
+  async saveMedicalForm(userId: string, title: string, formData: any, retentionDays: number): Promise<SavedForm> {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + Math.min(retentionDays, 30)); // Cap at 30 days
+
+    const [savedForm] = await db
+      .insert(savedForms)
+      .values({
+        userId,
+        title,
+        formData,
+        expiresAt,
+      })
+      .returning();
+    return savedForm;
+  }
+
+  async updateSavedForm(id: number, title: string, formData: any, retentionDays: number): Promise<SavedForm | undefined> {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + Math.min(retentionDays, 30)); // Cap at 30 days
+
+    const [updatedForm] = await db
+      .update(savedForms)
+      .set({
+        title,
+        formData,
+        expiresAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(savedForms.id, id))
+      .returning();
+    return updatedForm || undefined;
+  }
+
+  async deleteSavedForm(id: number): Promise<boolean> {
+    const result = await db.delete(savedForms).where(eq(savedForms.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async deleteExpiredForms(): Promise<number> {
+    const now = new Date();
+    const result = await db.delete(savedForms).where(
+      lt(savedForms.expiresAt, now)
+    );
+    return result.rowCount || 0;
   }
 }
 
