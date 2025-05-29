@@ -799,8 +799,8 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b no-print">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b no-print">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
@@ -871,9 +871,9 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
           </div>
         </div>
       </div>
-
-      {/* Main Form */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      
+      {/* Main Form - with top padding to account for fixed header */}
+      <div className="max-w-4xl mx-auto px-6 py-8 pt-32">
         <Form {...form}>
           <form className="space-y-6">
             
