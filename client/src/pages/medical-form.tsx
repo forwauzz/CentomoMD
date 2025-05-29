@@ -790,50 +790,60 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b no-print">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-blue-600">{t.title}</h1>
               <p className="text-sm text-gray-600">{t.subtitle}</p>
             </div>
-            <div className="flex items-center gap-3">
+            
+            {/* Welcome Message */}
+            <div className="flex-1 text-center">
+              <div className="text-lg font-medium text-gray-700">
+                Bon retour, Dr. {user?.firstName || 'Centomo'}
+              </div>
+              <div className="text-sm text-gray-500">
+                Rapport d'Évaluation Médicale
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 flex-wrap">
               <Select value={language} onValueChange={(value: 'fr' | 'en') => onLanguageChange(value)}>
-                <SelectTrigger className="w-32">
-                  <Globe className="w-4 h-4 mr-2" />
+                <SelectTrigger className="w-24">
+                  <Globe className="w-4 h-4" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fr">Français</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="fr">FR</SelectItem>
+                  <SelectItem value="en">EN</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
-                <Save className="w-4 h-4 mr-2" />
-                {t.save}
+              
+              <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700 whitespace-nowrap">
+                <Save className="w-4 h-4" />
+                <span className="hidden sm:inline ml-2">{t.save}</span>
               </Button>
-              <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
-                <Printer className="w-4 h-4 mr-2" />
-                {t.print}
+              
+              <Button onClick={handlePrint} size="sm" className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">
+                <Printer className="w-4 h-4" />
+                <span className="hidden sm:inline ml-2">{t.print}</span>
               </Button>
-              <Button onClick={handleClearForm} variant="destructive">
-                <Trash2 className="w-4 h-4 mr-2" />
-                {t.clear}
+              
+              <Button onClick={handleClearForm} size="sm" variant="destructive" className="whitespace-nowrap">
+                <Trash2 className="w-4 h-4" />
+                <span className="hidden sm:inline ml-2">{t.clear}</span>
               </Button>
               
               {/* User Info and Logout */}
-              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-gray-300">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User className="w-4 h-4" />
-                  <span>{user?.firstName} {user?.lastName}</span>
-                </div>
+              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-300">
                 <Button 
                   onClick={handleLogout} 
                   variant="outline" 
                   size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 whitespace-nowrap"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Déconnexion
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline ml-2">Déconnexion</span>
                 </Button>
               </div>
             </div>
