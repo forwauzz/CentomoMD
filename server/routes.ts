@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
 import { insertMedicalFormSchema } from "@shared/schema";
-import { formatSection7Text, enhanceSection7Dictation, formatSection8Text, enhanceSection8Dictation } from "./ai-formatter";
+import { formatSection7Text, enhanceSection7Dictation, formatSection8Text, enhanceSection8Dictation, generateSection11Conclusion } from "./ai-formatter";
 import { hashPassword, verifyPassword, generateUserId, getSessionConfig, requireAuth, requireAdmin } from "./auth";
 import { setupInitialUsers } from "./setup-users";
 import "./types";
@@ -405,6 +405,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Enhance Section 8 dictation error:', error);
       res.status(500).json({ message: "Failed to enhance dictation" });
+    }
+  });
+
+  // AI generation for Section 11 Conclusion
+  app.post("/api/generate-section11", async (req, res) => {
+    try {
+      const { formData, language = 'fr' } = req.body;
+      
+      if (!formData) {
+        return res.status(400).json({ message: "Form data is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING"
+        });
+      }
+
+      const conclusion = await generateSection11Conclusion(formData, language);
+      res.json(conclusion);
+    } catch (error) {
+      console.error('Generate Section 11 error:', error);
+      
+      // Check if it's an OpenAI API error
+      if (error.message && error.message.includes('API')) {
+        return res.status(500).json({ 
+          message: "OpenAI API error - please check your API key",
+          error: "API_ERROR"
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to generate conclusion", 
+        error: error.message || "Unknown error"
+      });
     }
   });
 

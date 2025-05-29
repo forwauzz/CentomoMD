@@ -354,3 +354,123 @@ Respond in JSON with:
     };
   }
 }
+
+export async function generateSection11Conclusion(formData: any, language: 'fr' | 'en' = 'fr'): Promise<{
+  resume: string;
+  diagnostic: string;
+  dateConsolidation: string;
+  soinsTraitements: string;
+  atteintePermanente: string;
+  limitationsFonctionnelles: string;
+  evaluationLimitations: string;
+}> {
+  try {
+    const medicalHistory = formData.antecedentsMedicaux || '';
+    const surgicalHistory = formData.antecedentsChirurgicaux || '';
+    const medication = formData.medicationActuelle || '';
+    const historyEvolution = formData.historiqueEvolution || '';
+    const subjectiveAssessment = formData.appreciationEvolution || '';
+    const complaintsProblems = formData.plaintesproblemes || '';
+    const impactADL = formData.impactAvq || '';
+    const physicalExam = formData.observationGenerale || '';
+    
+    const prompt = language === 'fr' 
+      ? `Tu es Dr. Centomo, expert en évaluations médicales CNESST. Génère une conclusion complète basée sur les données médicales suivantes:
+
+ANTÉCÉDENTS MÉDICAUX: ${medicalHistory}
+ANTÉCÉDENTS CHIRURGICAUX: ${surgicalHistory}
+MÉDICATION ACTUELLE: ${medication}
+HISTORIQUE DES FAITS ET ÉVOLUTION: ${historyEvolution}
+APPRÉCIATION SUBJECTIVE: ${subjectiveAssessment}
+PLAINTES ET PROBLÈMES: ${complaintsProblems}
+IMPACT SUR AVQ/AVD: ${impactADL}
+EXAMEN PHYSIQUE: ${physicalExam}
+
+Utilise l'exemple suivant comme référence pour le style et la structure:
+
+EXEMPLE RÉSUMÉ:
+"Il s'agit d'une femme de 49 ans, sans antécédent connu au membre inférieur droit avant l'événement d'origine du 12 août 2020. Elle s'est infligé une déchirure du mollet droit, cette lésion a fait l'objet de traitement par un protocole de réadaptation en physiothérapie et ergothérapie avec atteinte de plateau thérapeutique en août 2021..."
+
+EXEMPLE DIAGNOSTIC:
+"À la lumière du mécanisme de blessure, de l'évaluation subjective et de l'examen objectif d'aujourd'hui, nous sommes en mesure de conclure qu'il y a eu présence d'une déchirure du mollet droit. Nous retenons donc le diagnostic de déchirure du mollet droit."
+
+EXEMPLE DATE CONSOLIDATION:
+"Considérant le diagnostic retenu par la CNESST... Considérant l'examen objectif... Considérant que la travailleuse a été traitée de façon appropriée et adéquate... À mon avis, il y a une atteinte du plateau thérapeutique et stabilisation de la condition. Pour toutes ses raisons évoquées, je consolide donc la lésion en date du [DATE]."
+
+Génère une conclusion professionnelle en respectant le style médical québécois avec des considérants appropriés.
+
+Réponds en JSON:
+{
+  "resume": "...",
+  "diagnostic": "...",
+  "dateConsolidation": "...",
+  "soinsTraitements": "...",
+  "atteintePermanente": "...",
+  "limitationsFonctionnelles": "...",
+  "evaluationLimitations": "..."
+}`
+      : `You are Dr. Centomo, expert in CNESST medical evaluations. Generate a complete conclusion based on the following medical data:
+
+MEDICAL HISTORY: ${medicalHistory}
+SURGICAL HISTORY: ${surgicalHistory}
+CURRENT MEDICATION: ${medication}
+HISTORY OF FACTS AND EVOLUTION: ${historyEvolution}
+SUBJECTIVE ASSESSMENT: ${subjectiveAssessment}
+COMPLAINTS AND PROBLEMS: ${complaintsProblems}
+IMPACT ON ADL/IADL: ${impactADL}
+PHYSICAL EXAMINATION: ${physicalExam}
+
+Generate a professional conclusion using Quebec medical style with appropriate considerations.
+
+Respond in JSON format:
+{
+  "resume": "...",
+  "diagnostic": "...",
+  "dateConsolidation": "...",
+  "soinsTraitements": "...",
+  "atteintePermanente": "...",
+  "limitationsFonctionnelles": "...",
+  "evaluationLimitations": "..."
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "Tu es un médecin expert en évaluations CNESST québécoises. Réponds toujours en JSON valide."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.3,
+      max_tokens: 2500
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    
+    return {
+      resume: result.resume || '',
+      diagnostic: result.diagnostic || '',
+      dateConsolidation: result.dateConsolidation || '',
+      soinsTraitements: result.soinsTraitements || '',
+      atteintePermanente: result.atteintePermanente || '',
+      limitationsFonctionnelles: result.limitationsFonctionnelles || '',
+      evaluationLimitations: result.evaluationLimitations || ''
+    };
+  } catch (error) {
+    console.error('Error generating section 11 conclusion:', error);
+    return {
+      resume: '',
+      diagnostic: '',
+      dateConsolidation: '',
+      soinsTraitements: '',
+      atteintePermanente: '',
+      limitationsFonctionnelles: '',
+      evaluationLimitations: ''
+    };
+  }
+}
