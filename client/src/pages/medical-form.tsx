@@ -177,6 +177,44 @@ const formSchema = z.object({
   // Neuro-vasculaire pieds/chevilles
   piedsNeuroVasculaire: z.string().optional(),
   
+  // Forces neuro pieds/chevilles
+  piedsForceL2Droit: z.string().optional(),
+  piedsForceL2Gauche: z.string().optional(),
+  piedsForceL3Droit: z.string().optional(),
+  piedsForceL3Gauche: z.string().optional(),
+  piedsForceL4Droit: z.string().optional(),
+  piedsForceL4Gauche: z.string().optional(),
+  piedsForceL5Droit: z.string().optional(),
+  piedsForceL5Gauche: z.string().optional(),
+  piedsForceS1Droit: z.string().optional(),
+  piedsForceS1Gauche: z.string().optional(),
+  
+  // Sensibilités neuro pieds/chevilles
+  piedsSensibiliteL2Droit: z.string().optional(),
+  piedsSensibiliteL2Gauche: z.string().optional(),
+  piedsSensibiliteL3Droit: z.string().optional(),
+  piedsSensibiliteL3Gauche: z.string().optional(),
+  piedsSensibiliteL4Droit: z.string().optional(),
+  piedsSensibiliteL4Gauche: z.string().optional(),
+  piedsSensibiliteL5Droit: z.string().optional(),
+  piedsSensibiliteL5Gauche: z.string().optional(),
+  piedsSensibiliteS1Droit: z.string().optional(),
+  piedsSensibiliteS1Gauche: z.string().optional(),
+  
+  // Réflexes neuro pieds/chevilles
+  piedsReflexeRotulienDroit: z.string().optional(),
+  piedsReflexeRotulienGauche: z.string().optional(),
+  piedsReflexeAchilleenDroit: z.string().optional(),
+  piedsReflexeAchilleenGauche: z.string().optional(),
+  piedsReflexeBabinskiDroit: z.string().optional(),
+  piedsReflexeBabinskiGauche: z.string().optional(),
+  
+  // Pouls neuro pieds/chevilles
+  piedsPoulsTibialPosterieurDroit: z.string().optional(),
+  piedsPoulsTibialPosterieurGauche: z.string().optional(),
+  piedsPoulsPedieuxDroit: z.string().optional(),
+  piedsPoulsPedieuxGauche: z.string().optional(),
+  
   examensAdditionnels: z.string().optional(),
 });
 
@@ -586,6 +624,44 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       
       // Neuro-vasculaire pieds/chevilles default
       piedsNeuroVasculaire: "",
+      
+      // Forces neuro pieds/chevilles defaults
+      piedsForceL2Droit: "5/5",
+      piedsForceL2Gauche: "5/5",
+      piedsForceL3Droit: "5/5",
+      piedsForceL3Gauche: "5/5",
+      piedsForceL4Droit: "5/5",
+      piedsForceL4Gauche: "5/5",
+      piedsForceL5Droit: "5/5",
+      piedsForceL5Gauche: "5/5",
+      piedsForceS1Droit: "5/5",
+      piedsForceS1Gauche: "5/5",
+      
+      // Sensibilités neuro pieds/chevilles defaults
+      piedsSensibiliteL2Droit: "2/2",
+      piedsSensibiliteL2Gauche: "2/2",
+      piedsSensibiliteL3Droit: "2/2",
+      piedsSensibiliteL3Gauche: "2/2",
+      piedsSensibiliteL4Droit: "2/2",
+      piedsSensibiliteL4Gauche: "2/2",
+      piedsSensibiliteL5Droit: "2/2",
+      piedsSensibiliteL5Gauche: "2/2",
+      piedsSensibiliteS1Droit: "2/2",
+      piedsSensibiliteS1Gauche: "2/2",
+      
+      // Réflexes neuro pieds/chevilles defaults
+      piedsReflexeRotulienDroit: "2+",
+      piedsReflexeRotulienGauche: "2+",
+      piedsReflexeAchilleenDroit: "2+",
+      piedsReflexeAchilleenGauche: "2+",
+      piedsReflexeBabinskiDroit: "Neg",
+      piedsReflexeBabinskiGauche: "Neg",
+      
+      // Pouls neuro pieds/chevilles defaults
+      piedsPoulsTibialPosterieurDroit: "2",
+      piedsPoulsTibialPosterieurGauche: "2",
+      piedsPoulsPedieuxDroit: "2",
+      piedsPoulsPedieuxGauche: "2",
     },
   });
 
@@ -2917,6 +2993,393 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                               </FormItem>
                             )}
                           />
+                        </div>
+
+                        {/* Forces neuro table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Forces :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Racine (ASIA)</th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">L2 (flexion hanche)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL2Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL2Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L3 (extension genou)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL3Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL3Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L4 (dorsiflexion cheville)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL4Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL4Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L5 (extension D1 pied)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL5Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL5Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">S1 (flexion plantaire cheville)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceS1Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceS1Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Sensibilités neuro table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Sensibilités :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Racine</th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">L2</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL2Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL2Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L3</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL3Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL3Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L4</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL4Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL4Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L5</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL5Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL5Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">S1</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteS1Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteS1Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Réflexes neuro table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Réflexes :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Réflexes</th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Rotulien</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeRotulienDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeRotulienGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Achilléen</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeAchilleenDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeAchilleenGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Babinski</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeBabinskiDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeBabinskiGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Pouls neuro table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Pouls :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Tibial postérieur</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPoulsTibialPosterieurDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPoulsTibialPosterieurGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Pédieux</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPoulsPedieuxDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPoulsPedieuxGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </div>
                     </Card>

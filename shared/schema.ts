@@ -162,6 +162,44 @@ export const medicalForms = pgTable("medical_forms", {
   // Neuro-vasculaire pieds/chevilles
   piedsNeuroVasculaire: text("pieds_neuro_vasculaire"),
   
+  // Forces neuro pieds/chevilles
+  piedsForceL2Droit: text("pieds_force_l2_droit"),
+  piedsForceL2Gauche: text("pieds_force_l2_gauche"),
+  piedsForceL3Droit: text("pieds_force_l3_droit"),
+  piedsForceL3Gauche: text("pieds_force_l3_gauche"),
+  piedsForceL4Droit: text("pieds_force_l4_droit"),
+  piedsForceL4Gauche: text("pieds_force_l4_gauche"),
+  piedsForceL5Droit: text("pieds_force_l5_droit"),
+  piedsForceL5Gauche: text("pieds_force_l5_gauche"),
+  piedsForceS1Droit: text("pieds_force_s1_droit"),
+  piedsForceS1Gauche: text("pieds_force_s1_gauche"),
+  
+  // Sensibilités neuro pieds/chevilles
+  piedsSensibiliteL2Droit: text("pieds_sensibilite_l2_droit"),
+  piedsSensibiliteL2Gauche: text("pieds_sensibilite_l2_gauche"),
+  piedsSensibiliteL3Droit: text("pieds_sensibilite_l3_droit"),
+  piedsSensibiliteL3Gauche: text("pieds_sensibilite_l3_gauche"),
+  piedsSensibiliteL4Droit: text("pieds_sensibilite_l4_droit"),
+  piedsSensibiliteL4Gauche: text("pieds_sensibilite_l4_gauche"),
+  piedsSensibiliteL5Droit: text("pieds_sensibilite_l5_droit"),
+  piedsSensibiliteL5Gauche: text("pieds_sensibilite_l5_gauche"),
+  piedsSensibiliteS1Droit: text("pieds_sensibilite_s1_droit"),
+  piedsSensibiliteS1Gauche: text("pieds_sensibilite_s1_gauche"),
+  
+  // Réflexes neuro pieds/chevilles
+  piedsReflexeRotulienDroit: text("pieds_reflexe_rotulien_droit"),
+  piedsReflexeRotulienGauche: text("pieds_reflexe_rotulien_gauche"),
+  piedsReflexeAchilleenDroit: text("pieds_reflexe_achilleen_droit"),
+  piedsReflexeAchilleenGauche: text("pieds_reflexe_achilleen_gauche"),
+  piedsReflexeBabinskiDroit: text("pieds_reflexe_babinski_droit"),
+  piedsReflexeBabinskiGauche: text("pieds_reflexe_babinski_gauche"),
+  
+  // Pouls neuro pieds/chevilles
+  piedsPoulsTibialPosterieurDroit: text("pieds_pouls_tibial_posterieur_droit"),
+  piedsPoulsTibialPosterieurGauche: text("pieds_pouls_tibial_posterieur_gauche"),
+  piedsPoulsPedieuxDroit: text("pieds_pouls_pedieux_droit"),
+  piedsPoulsPedieuxGauche: text("pieds_pouls_pedieux_gauche"),
+  
   examensAdditionnels: text("examens_additionnels"),
   
   createdAt: timestamp("created_at").defaultNow(),
