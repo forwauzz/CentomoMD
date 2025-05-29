@@ -19,7 +19,7 @@ import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useAuth } from "@/hooks/useAuth";
 import { exportToPDF } from "@/lib/pdf-export";
-import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User } from "lucide-react";
+import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive, FolderOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -454,6 +454,8 @@ interface MedicalFormProps {
 export default function MedicalForm({ language, onLanguageChange }: MedicalFormProps) {
   const [currentDictationField, setCurrentDictationField] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showSavedForms, setShowSavedForms] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>({
     section1: false,
     section2: false,
@@ -771,6 +773,12 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
     exportToPDF(data);
   };
 
+  const handleLoadForm = (formData: any) => {
+    form.reset(formData);
+    setLastSaved("Formulaire chargé");
+    setShowSavedForms(false);
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -824,6 +832,16 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
               <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700 whitespace-nowrap">
                 <Save className="w-4 h-4" />
                 <span className="hidden sm:inline ml-2">{t.save}</span>
+              </Button>
+              
+              <Button onClick={() => setShowSaveDialog(true)} size="sm" className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap">
+                <Archive className="w-4 h-4" />
+                <span className="hidden sm:inline ml-2">Sauvegarder</span>
+              </Button>
+              
+              <Button onClick={() => setShowSavedForms(true)} size="sm" variant="outline" className="whitespace-nowrap">
+                <FolderOpen className="w-4 h-4" />
+                <span className="hidden sm:inline ml-2">Charger</span>
               </Button>
               
               <Button onClick={handlePrint} size="sm" className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap">
@@ -3534,6 +3552,29 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
         error={error}
         language={language}
       />
+
+      {/* Save Form Dialog */}
+      <SaveFormDialog
+        open={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+        formData={form.getValues()}
+        language={language}
+      />
+
+      {/* Saved Forms Manager Dialog */}
+      <Dialog open={showSavedForms} onOpenChange={setShowSavedForms}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'fr' ? 'Formulaires sauvegardés' : 'Saved Forms'}
+            </DialogTitle>
+          </DialogHeader>
+          <SavedFormsManager
+            language={language}
+            onLoadForm={handleLoadForm}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
