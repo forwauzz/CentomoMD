@@ -5,8 +5,13 @@ import { storage } from "./storage";
 import { insertMedicalFormSchema } from "@shared/schema";
 import { formatSection7Text, enhanceSection7Dictation, formatSection8Text, enhanceSection8Dictation } from "./ai-formatter";
 import { hashPassword, verifyPassword, generateUserId, getSessionConfig, requireAuth, requireAdmin } from "./auth";
+import { setupInitialUsers } from "./setup-users";
+import "./types";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Setup initial users
+  await setupInitialUsers();
   
   // Setup session middleware
   app.use(getSessionConfig());
