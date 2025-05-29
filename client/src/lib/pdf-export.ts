@@ -406,5 +406,10 @@ function generateFormSections(formData: any): string {
     <div class="text-content">
       ${formData.examensAdditionnels || ''}
     </div>
+
+    <div style="font-weight: bold; margin: 15px 0 10px 0;">10. Examens paracliniques</div>
+    <div class="text-content">
+      Vous référez au point 7, Historique des faits et évolution.
+    </div>
   `;
 }
