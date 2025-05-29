@@ -32,7 +32,7 @@ export function AIFormatSection8({ value, onValueChange, language }: AIFormatSec
 
     setIsFormatting(true);
     try {
-      const response = await apiRequest('/api/format-section8', {
+      const response = await fetch('/api/format-section8', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: value, language }),
