@@ -140,6 +140,7 @@ const formSchema = z.object({
   genouxCirconferenceMolletDroit: z.string().optional(),
   genouxCirconferenceMolletGauche: z.string().optional(),
   
+  atrophieMusculaire: z.string().optional(),
   examensAdditionnels: z.string().optional(),
 });
 
@@ -511,6 +512,9 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       genouxCirconferenceCuisseGauche: "",
       genouxCirconferenceMolletDroit: "",
       genouxCirconferenceMolletGauche: "",
+      
+      // Atrophie musculaire default
+      atrophieMusculaire: "TBD by Dr Centomo",
     },
   });
 
@@ -2385,6 +2389,24 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                         </div>
                       </div>
                     </Card>
+
+                    {/* Atrophie musculaire section */}
+                    <FormField
+                      control={form.control}
+                      name="atrophieMusculaire"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="mb-2 block">Atrophie musculaire :</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[80px]" 
+                              placeholder="TBD by Dr Centomo"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
                     {/* Additional examination sections */}
                     <FormField

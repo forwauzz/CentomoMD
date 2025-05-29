@@ -125,6 +125,7 @@ export const medicalForms = pgTable("medical_forms", {
   genouxCirconferenceMolletDroit: text("genoux_circonference_mollet_droit"),
   genouxCirconferenceMolletGauche: text("genoux_circonference_mollet_gauche"),
   
+  atrophieMusculaire: text("atrophie_musculaire"),
   examensAdditionnels: text("examens_additionnels"),
   
   createdAt: timestamp("created_at").defaultNow(),
