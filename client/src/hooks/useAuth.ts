@@ -26,7 +26,9 @@ export function useAuth() {
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      const response = await fetch("/api/auth/me");
+      const response = await fetch("/api/auth/me", {
+        credentials: "include"
+      });
       if (response.status === 401) {
         return null; // Not authenticated, but not an error
       }
@@ -42,6 +44,7 @@ export function useAuth() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(credentials),
       });
       if (!response.ok) {
@@ -59,6 +62,7 @@ export function useAuth() {
     mutationFn: async () => {
       const response = await fetch("/api/auth/logout", {
         method: "POST",
+        credentials: "include",
       });
       if (!response.ok) {
         throw new Error("Logout failed");
