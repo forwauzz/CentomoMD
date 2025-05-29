@@ -21,6 +21,8 @@ export default function LoginPage() {
         title: "Connexion réussie",
         description: "Bienvenue dans CentomoMD",
       });
+      // Reload the page to trigger auth state update
+      window.location.reload();
     } catch (error: any) {
       toast({
         title: "Erreur de connexion",
