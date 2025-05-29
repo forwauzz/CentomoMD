@@ -3482,9 +3482,8 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       )}
                     />
                   </div>
-                </div>
-              </div>
-            </CollapsibleSection>
+                </CollapsibleSection>
+                </CollapsibleSection>
 
             {/* Footer Actions */}
             <div className="flex justify-between items-center pt-6 no-print">
