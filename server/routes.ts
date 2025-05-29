@@ -4,11 +4,67 @@ import { z } from "zod";
 import { storage } from "./storage";
 import { insertMedicalFormSchema } from "@shared/schema";
 import { formatSection7Text, enhanceSection7Dictation, formatSection8Text, enhanceSection8Dictation } from "./ai-formatter";
+import { hashPassword, verifyPassword, generateUserId, getSessionConfig, requireAuth, requireAdmin } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Get all medical forms
-  app.get("/api/medical-forms", async (req, res) => {
+  // Setup session middleware
+  app.use(getSessionConfig());
+  
+  // Authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      const isValidPassword = await verifyPassword(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
+      
+      // Return user without password hash
+      const { passwordHash, ...userWithoutPassword } = user;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy(() => {
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+  
+  app.get("/api/auth/me", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUserById(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { passwordHash, ...userWithoutPassword } = user;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error('Get current user error:', error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Protected medical forms routes
+  app.get("/api/medical-forms", requireAuth, async (req, res) => {
     try {
       const forms = await storage.getAllMedicalForms();
       res.json(forms);
