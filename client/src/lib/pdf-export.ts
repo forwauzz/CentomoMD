@@ -111,6 +111,19 @@ function generatePrintableHTML(formData: any): string {
   `;
 }
 
+function formatTextWithParagraphs(text: string): string {
+  if (!text) return '';
+  
+  // Convert double line breaks to paragraph breaks
+  // Convert single line breaks to <br> tags
+  return text
+    .split('\n\n')
+    .map(paragraph => paragraph.trim())
+    .filter(paragraph => paragraph)
+    .map(paragraph => `<p style="margin-bottom: 12px; text-align: justify;">${paragraph.replace(/\n/g, '<br>')}</p>`)
+    .join('');
+}
+
 function generateFormSections(formData: any): string {
   return `
     <div class="section-title">A. RENSEIGNEMENTS SUR LE TRAVAILLEUR</div>
@@ -289,24 +302,24 @@ function generateFormSections(formData: any): string {
     <div style="font-weight: bold; margin: 15px 0 10px 0;">7. Historique de faits et évolution</div>
     
     <div class="text-content">
-      ${formData.historiqueEvolution || ''}
+      ${formatTextWithParagraphs(formData.historiqueEvolution || '')}
     </div>
 
     <div style="font-weight: bold; margin: 15px 0 10px 0;">8. Questionnaire subjectif et état actuel</div>
     
     <div style="font-weight: bold; margin: 10px 0 5px 0;">Appréciation subjective de l'évolution :</div>
     <div class="text-content">
-      ${formData.appreciationEvolution || ''}
+      ${formatTextWithParagraphs(formData.appreciationEvolution || '')}
     </div>
     
     <div style="font-weight: bold; margin: 10px 0 5px 0;">Plaintes et problèmes :</div>
     <div class="text-content">
-      ${formData.plaintesproblemes || ''}
+      ${formatTextWithParagraphs(formData.plaintesproblemes || '')}
     </div>
     
     <div style="font-weight: bold; margin: 10px 0 5px 0;">Impact sur AVQ/AVD :</div>
     <div class="text-content">
-      ${formData.impactAvq || ''}
+      ${formatTextWithParagraphs(formData.impactAvq || '')}
     </div>
 
     <div style="font-weight: bold; margin: 15px 0 10px 0;">9. Examen Physique</div>
