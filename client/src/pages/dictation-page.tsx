@@ -125,6 +125,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editableText, setEditableText] = useState<string>("");
   const [currentLanguage, setCurrentLanguage] = useState<'fr' | 'en'>(propLanguage);
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const { toast } = useToast();
   
   const t = translations[currentLanguage];
@@ -154,6 +155,13 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
         }
       }
     }
+    
+    // Simulate initialization delay for speech recognition setup
+    const timer = setTimeout(() => {
+      setIsInitializing(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const {
@@ -312,6 +320,23 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     // Navigate back to form without saving
     setLocation('/');
   };
+
+  // Show loading spinner while initializing
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="text-lg text-gray-600">
+            {currentLanguage === 'fr' 
+              ? "Initialisation de la reconnaissance vocale..."
+              : "Initializing speech recognition..."
+            }
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isSupported) {
     return (
