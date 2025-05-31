@@ -3591,9 +3591,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       name="conclusionResume"
                       render={({ field }) => (
                         <FormItem>
-                          <div className="field-group">
-                            <div className="flex items-center justify-between mb-2">
-                              <FormLabel className="field-label">{t.conclusionSummary}</FormLabel>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionSummary}</FormLabel>
                               <Button
                                 type="button"
                                 size="sm"
@@ -3606,7 +3606,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                             <FormControl>
                               <Textarea 
                                 {...field} 
-                                className="field-input min-h-[100px]" 
+                                className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="Résumé du cas et des principales constatations"
                               />
                             </FormControl>
@@ -3621,9 +3621,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       name="conclusionDiagnostic"
                       render={({ field }) => (
                         <FormItem>
-                          <div className="field-group">
-                            <div className="flex items-center justify-between mb-2">
-                              <FormLabel className="field-label">{t.conclusionDiagnosis}</FormLabel>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionDiagnosis}</FormLabel>
                               <Button
                                 type="button"
                                 size="sm"
@@ -3636,7 +3636,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                             <FormControl>
                               <Textarea 
                                 {...field} 
-                                className="field-input min-h-[80px]" 
+                                className="w-full min-h-[80px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="Diagnostic médical principal et secondaires"
                               />
                             </FormControl>
@@ -3651,9 +3651,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       name="conclusionDateConsolidation"
                       render={({ field }) => (
                         <FormItem>
-                          <div className="field-group">
-                            <div className="flex items-center justify-between mb-2">
-                              <FormLabel className="field-label">{t.conclusionConsolidationDate}</FormLabel>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionConsolidationDate}</FormLabel>
                               <Button
                                 type="button"
                                 size="sm"
@@ -3666,7 +3666,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                             <FormControl>
                               <Textarea 
                                 {...field} 
-                                className="field-input min-h-[80px]" 
+                                className="w-full min-h-[80px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="Date de consolidation médicale avec justification"
                               />
                             </FormControl>
@@ -3681,9 +3681,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       name="conclusionSoinsTraitements"
                       render={({ field }) => (
                         <FormItem>
-                          <div className="field-group">
-                            <div className="flex items-center justify-between mb-2">
-                              <FormLabel className="field-label">{t.conclusionCareNecessity}</FormLabel>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionCareNecessity}</FormLabel>
                               <Button
                                 type="button"
                                 size="sm"
@@ -3696,7 +3696,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                             <FormControl>
                               <Textarea 
                                 {...field} 
-                                className="field-input min-h-[120px]" 
+                                className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="Décrivez la nature, nécessité, suffisance et durée des soins"
                               />
                             </FormControl>
@@ -3711,9 +3711,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       name="conclusionAtteintePermanente"
                       render={({ field }) => (
                         <FormItem>
-                          <div className="field-group">
-                            <div className="flex items-center justify-between mb-2">
-                              <FormLabel className="field-label">{t.conclusionPermanentImpairment}</FormLabel>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionPermanentImpairment}</FormLabel>
                               <Button
                                 type="button"
                                 size="sm"
@@ -3726,7 +3726,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                             <FormControl>
                               <Textarea 
                                 {...field} 
-                                className="field-input min-h-[100px]" 
+                                className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="Évaluez l'existence d'une atteinte permanente"
                               />
                             </FormControl>
@@ -3741,9 +3741,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       name="conclusionLimitationsFonctionnelles"
                       render={({ field }) => (
                         <FormItem>
-                          <div className="field-group">
-                            <div className="flex items-center justify-between mb-2">
-                              <FormLabel className="field-label">{t.conclusionFunctionalLimitations}</FormLabel>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionFunctionalLimitations}</FormLabel>
                               <Button
                                 type="button"
                                 size="sm"
@@ -3756,7 +3756,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                             <FormControl>
                               <Textarea 
                                 {...field} 
-                                className="field-input min-h-[100px]" 
+                                className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="Décrivez l'existence de limitations fonctionnelles"
                               />
                             </FormControl>
@@ -3771,9 +3771,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       name="conclusionEvaluationLimitations"
                       render={({ field }) => (
                         <FormItem>
-                          <div className="field-group">
-                            <div className="flex items-center justify-between mb-2">
-                              <FormLabel className="field-label">{t.conclusionLimitationsEvaluation}</FormLabel>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionLimitationsEvaluation}</FormLabel>
                               <Button
                                 type="button"
                                 size="sm"
@@ -3786,7 +3786,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                             <FormControl>
                               <Textarea 
                                 {...field} 
-                                className="field-input min-h-[120px]" 
+                                className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                 placeholder="Évaluez en détail les limitations fonctionnelles"
                               />
                             </FormControl>
