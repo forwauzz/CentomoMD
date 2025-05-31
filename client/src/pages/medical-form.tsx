@@ -3592,7 +3592,17 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       render={({ field }) => (
                         <FormItem>
                           <div className="field-group">
-                            <FormLabel className="field-label">{t.conclusionSummary}</FormLabel>
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="field-label">{t.conclusionSummary}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionResume')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
                             <FormControl>
                               <Textarea 
                                 {...field} 
@@ -3612,7 +3622,17 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       render={({ field }) => (
                         <FormItem>
                           <div className="field-group">
-                            <FormLabel className="field-label">{t.conclusionDiagnosis}</FormLabel>
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="field-label">{t.conclusionDiagnosis}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionDiagnostic')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
                             <FormControl>
                               <Textarea 
                                 {...field} 
@@ -3632,12 +3652,22 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       render={({ field }) => (
                         <FormItem>
                           <div className="field-group">
-                            <FormLabel className="field-label">{t.conclusionConsolidationDate}</FormLabel>
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="field-label">{t.conclusionConsolidationDate}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionDateConsolidation')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
                             <FormControl>
-                              <Input 
+                              <Textarea 
                                 {...field} 
-                                className="field-input" 
-                                placeholder="Date de consolidation médicale"
+                                className="field-input min-h-[80px]" 
+                                placeholder="Date de consolidation médicale avec justification"
                               />
                             </FormControl>
                           </div>
@@ -3652,7 +3682,17 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       render={({ field }) => (
                         <FormItem>
                           <div className="field-group">
-                            <FormLabel className="field-label">{t.conclusionCareNecessity}</FormLabel>
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="field-label">{t.conclusionCareNecessity}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionSoinsTraitements')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
                             <FormControl>
                               <Textarea 
                                 {...field} 
@@ -3672,7 +3712,17 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       render={({ field }) => (
                         <FormItem>
                           <div className="field-group">
-                            <FormLabel className="field-label">{t.conclusionPermanentImpairment}</FormLabel>
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="field-label">{t.conclusionPermanentImpairment}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionAtteintePermanente')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
                             <FormControl>
                               <Textarea 
                                 {...field} 
@@ -3692,7 +3742,17 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       render={({ field }) => (
                         <FormItem>
                           <div className="field-group">
-                            <FormLabel className="field-label">{t.conclusionFunctionalLimitations}</FormLabel>
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="field-label">{t.conclusionFunctionalLimitations}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionLimitationsFonctionnelles')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
                             <FormControl>
                               <Textarea 
                                 {...field} 
@@ -3712,7 +3772,17 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                       render={({ field }) => (
                         <FormItem>
                           <div className="field-group">
-                            <FormLabel className="field-label">{t.conclusionLimitationsEvaluation}</FormLabel>
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="field-label">{t.conclusionLimitationsEvaluation}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionEvaluationLimitations')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
                             <FormControl>
                               <Textarea 
                                 {...field} 
