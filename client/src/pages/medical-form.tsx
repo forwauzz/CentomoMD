@@ -1639,16 +1639,36 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                           <Mic className="w-4 h-4" />
                         </Button>
                       </div>
-                      <AIFormatSection8
-                        value=""
-                        onValueChange={(formattedText) => {
-                          // Parse the AI-formatted text and distribute to appropriate fields
-                          const sections = parseSection8Content(formattedText);
-                          if (sections.appreciation) form.setValue('appreciationEvolution', sections.appreciation);
-                          if (sections.plaintes) form.setValue('plaintesproblemes', sections.plaintes);
-                          if (sections.impact) form.setValue('impactAvq', sections.impact);
-                        }}
-                        language={language}
+                      <FormField
+                        control={form.control}
+                        name="section8Input"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="space-y-3">
+                                <Textarea
+                                  {...field}
+                                  placeholder={language === 'fr' 
+                                    ? "Entrez ici toutes les informations du questionnaire subjectif. L'IA les distribuera automatiquement dans les sections appropriées ci-dessous."
+                                    : "Enter all subjective questionnaire information here. AI will automatically distribute it to appropriate sections below."
+                                  }
+                                  className="min-h-[120px] resize-none"
+                                />
+                                <AIFormatSection8
+                                  value={field.value}
+                                  onValueChange={(formattedText) => {
+                                    // Parse the AI-formatted text and distribute to appropriate fields
+                                    const sections = parseSection8Content(formattedText);
+                                    if (sections.appreciation) form.setValue('appreciationEvolution', sections.appreciation);
+                                    if (sections.plaintes) form.setValue('plaintesproblemes', sections.plaintes);
+                                    if (sections.impact) form.setValue('impactAvq', sections.impact);
+                                  }}
+                                  language={language}
+                                />
+                              </div>
+                            </FormControl>
+                          </FormItem>
+                        )}
                       />
                     </div>
                   </div>
