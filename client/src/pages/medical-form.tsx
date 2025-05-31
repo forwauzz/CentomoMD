@@ -34,6 +34,9 @@ const formSchema = z.object({
   mandatAtteinte: z.boolean().optional(),
   mandatLimitations: z.boolean().optional(),
   
+  // Section 2: Diagnostics acceptés par la CNESST
+  diagnosticsCnesst: z.string().optional(),
+  
   // Section 5: Antécédents
   antecedentsMedicaux: z.string().optional(),
   antecedentsChirurgicaux: z.string().optional(),
@@ -536,6 +539,9 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       mandatSoins: false,
       mandatAtteinte: false,
       mandatLimitations: false,
+      
+      // Section 2: Diagnostics acceptés par la CNESST
+      diagnosticsCnesst: "Déchirure mollet droit.",
       
       antecedentsMedicaux: "Diabète type 2, syndrome tunnel carpien",
       antecedentsChirurgicaux: "décompression tunnel carpien bilatéral (2014), hystérectomie (2016)",
@@ -1123,9 +1129,34 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
 
                 {/* 2. Diagnostics acceptés par la CNESST */}
                 <CollapsibleSection title="2. Diagnostics acceptés par la CNESST" defaultOpen={false}>
-                  <div>
-                    <p>Déchirure mollet droit.</p>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="diagnosticsCnesst"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <FormLabel className="text-sm font-semibold text-gray-700">Diagnostics acceptés :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleDictation('diagnosticsCnesst')}
+                              className="no-print bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Mic className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[80px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                              placeholder="Ex: Déchirure mollet droit, entorse cheville gauche..."
+                            />
+                          </FormControl>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
                 </CollapsibleSection>
 
                 {/* 3. Modalité de l'entrevue */}

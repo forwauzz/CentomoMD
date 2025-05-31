@@ -12,6 +12,9 @@ export const medicalForms = pgTable("medical_forms", {
   mandatAtteinte: boolean("mandat_atteinte").default(false),
   mandatLimitations: boolean("mandat_limitations").default(false),
   
+  // Section 2: Diagnostics acceptés par la CNESST
+  diagnosticsCnesst: text("diagnostics_cnesst"),
+  
   // Section 5: Antécédents
   antecedentsMedicaux: text("antecedents_medicaux"),
   antecedentsChirurgicaux: text("antecedents_chirurgicaux"),
