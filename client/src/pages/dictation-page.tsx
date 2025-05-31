@@ -46,7 +46,14 @@ const translations = {
       rachisInspection: "9. Rachis - Inspection",
       hanchesPalpation: "9. Hanches - Palpation",
       hanchesInspection: "9. Hanches - Inspection",
-      examensAdditionnels: "9. Examens additionnels"
+      examensAdditionnels: "9. Examens additionnels",
+      conclusionResume: "11. Conclusion - Résumé",
+      conclusionDiagnostic: "11. Conclusion - Diagnostic",
+      conclusionDateConsolidation: "11. Conclusion - Date de consolidation",
+      conclusionSoinsTraitements: "11. Conclusion - Nature des soins",
+      conclusionAtteintePermanente: "11. Conclusion - Atteinte permanente",
+      conclusionLimitationsFonctionnelles: "11. Conclusion - Limitations fonctionnelles",
+      conclusionEvaluationLimitations: "11. Conclusion - Évaluation des limitations"
     }
   },
   en: {
@@ -83,7 +90,14 @@ const translations = {
       rachisInspection: "9. Spine - Inspection",
       hanchesPalpation: "9. Hips - Palpation",
       hanchesInspection: "9. Hips - Inspection",
-      examensAdditionnels: "9. Additional Examinations"
+      examensAdditionnels: "9. Additional Examinations",
+      conclusionResume: "11. Conclusion - Summary",
+      conclusionDiagnostic: "11. Conclusion - Diagnosis",
+      conclusionDateConsolidation: "11. Conclusion - Consolidation Date",
+      conclusionSoinsTraitements: "11. Conclusion - Nature of Care",
+      conclusionAtteintePermanente: "11. Conclusion - Permanent Impairment",
+      conclusionLimitationsFonctionnelles: "11. Conclusion - Functional Limitations",
+      conclusionEvaluationLimitations: "11. Conclusion - Limitations Assessment"
     }
   }
 };
