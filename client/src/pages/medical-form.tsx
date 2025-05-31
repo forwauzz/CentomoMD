@@ -795,21 +795,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   }, [form, debouncedSave]);
 
   const handleDictation = (fieldName: string) => {
-    if (!isSupported) {
-      toast({
-        title: "Erreur",
-        description: "La reconnaissance vocale n'est pas supportée par votre navigateur.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setCurrentDictationField(fieldName);
-    resetTranscript();
-    startListening((transcript) => {
-      const currentValue = form.getValues(fieldName as keyof FormData) || '';
-      form.setValue(fieldName as keyof FormData, currentValue + ' ' + transcript);
-    });
+    // Store the field name in sessionStorage for the dictation page
+    sessionStorage.setItem('activeField', fieldName);
+    
+    // Navigate to the dedicated dictation page
+    window.location.href = '/dictation';
   };
 
   const handleDirectDictation = (text: string, fieldName: string) => {
@@ -4143,15 +4133,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
         onDirectDictation={handleDirectDictation}
       />
 
-      <DictationModal
-        open={!!currentDictationField}
-        onClose={() => setCurrentDictationField(null)}
-        isListening={isListening}
-        onStartDictation={() => {}} // Already handled in handleDictation
-        onStopDictation={handleStopDictation}
-        error={error}
-        language={language}
-      />
+
 
       {/* Save Form Dialog */}
       <SaveFormDialog
