@@ -40,6 +40,9 @@ const formSchema = z.object({
   // Section 3: Modalité de l'entrevue
   modaliteEntrevue: z.string().optional(),
   
+  // Section 4: Identification
+  identification: z.string().optional(),
+  
   // Section 5: Antécédents
   antecedentsMedicaux: z.string().optional(),
   antecedentsChirurgicaux: z.string().optional(),
@@ -548,6 +551,9 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       
       // Section 3: Modalité de l'entrevue
       modaliteEntrevue: "L'évaluation suivante s'est tenue dans les locaux de la clinique du Complexe Médical Nord-de-Île (CMNDI). Nous avons clairement expliqué à notre mandat d'évaluateur indépendant désigné par la CNESST dans le cadre de l'application de l'article 204 de la LATMP. Nous lui avons précisé que nous n'agirons pas en tant que médecins traitants. Notre rapport d'évaluation sera d'abord envoyé́ à la CNESST.\n\nNous avons procédé́ au questionnaire subjectif ainsi qu'à un examen physique détaillé́ en relation avec les lésions à évaluer, nous nous sommes assurés à la fin de l'entrevue d'avoir couvert l'ensemble de la problématique.\n\nNous avons revu le dossier CNESST de même que le dossier médical. Nous avons pu consulter l'ensemble des rapports et des bilans radiologiques réalisés dans le cadre de l'évaluation de la lésion.\n\nL'entrevue s'est effectuée cordialement, la patiente participait pleinement à son entrevue. L'entrevue s'est déroulée entre.\n\nÀ la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.",
+      
+      // Section 4: Identification
+      identification: "Âge : Il s'agit d'une femme de 49 ans.\n\nDominance : Elle est droitière\n\nEmploi : Elle travaillait comme chauffeuse de taxi / transport adapté à l'emploi de Taxi Ormstown inc. depuis janvier 2016.\n\nElle travaille à temps complet soit 40 heures par semaine.\n\nElle est en arrêt de travail depuis l'accident\n\nComme activité de loisir elle pratique le baseball.",
       
       antecedentsMedicaux: "Diabète type 2, syndrome tunnel carpien",
       antecedentsChirurgicaux: "décompression tunnel carpien bilatéral (2014), hystérectomie (2016)",
@@ -1199,14 +1205,34 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
 
                 {/* 4. Identification */}
                 <CollapsibleSection title="4. Identification" defaultOpen={false}>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Âge :</strong> Il s'agit d'une femme de 49 ans.</p>
-                    <p><strong>Dominance :</strong> Elle est droitière</p>
-                    <p><strong>Emploi :</strong> Elle travaillait comme chauffeuse de taxi / transport adapté à l'emploi de Taxi Ormstown inc. depuis janvier 2016.</p>
-                    <p>Elle travaille à temps complet soit 40 heures par semaine.</p>
-                    <p>Elle est en arrêt de travail depuis l'accident</p>
-                    <p>Comme activité de loisir elle pratique le baseball.</p>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="identification"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <FormLabel className="text-sm font-semibold text-gray-700">Identification :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleDictation('identification')}
+                              className="no-print bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Mic className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[150px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                              placeholder="Décrivez l'identification du patient..."
+                            />
+                          </FormControl>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
                 </CollapsibleSection>
 
                 {/* 5. Antécédents */}

@@ -18,6 +18,9 @@ export const medicalForms = pgTable("medical_forms", {
   // Section 3: Modalité de l'entrevue
   modaliteEntrevue: text("modalite_entrevue"),
   
+  // Section 4: Identification
+  identification: text("identification"),
+  
   // Section 5: Antécédents
   antecedentsMedicaux: text("antecedents_medicaux"),
   antecedentsChirurgicaux: text("antecedents_chirurgicaux"),
