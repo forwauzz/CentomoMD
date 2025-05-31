@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DictationModal } from "@/components/dictation-modal";
 import { FloatingRecordButton } from "@/components/floating-record-button";
+import { FloatingNavigation } from "@/components/floating-navigation";
 import { AIFormatSection7 } from "@/components/ai-format-section7";
 import { AIFormatSection8 } from "@/components/ai-format-section8";
 import { AIGenerateSection11 } from "@/components/ai-generate-section11";
@@ -4158,6 +4159,11 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
       <FloatingRecordButton 
         language={language}
         onDirectDictation={handleDirectDictation}
+      />
+
+      {/* Floating Navigation */}
+      <FloatingNavigation 
+        language={language}
       />
 
 
