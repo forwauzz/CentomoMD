@@ -18,6 +18,7 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
 
   const {
     isListening,
+    transcript,
     startListening,
     stopListening,
     resetTranscript,
@@ -41,7 +42,8 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
     };
 
     const handleBlur = () => {
-      setActiveField(null);
+      // Keep a small delay to prevent immediate field loss when clicking record button
+      setTimeout(() => setActiveField(null), 100);
     };
 
     document.addEventListener('focusin', handleFocus);
@@ -52,6 +54,13 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
       document.removeEventListener('focusout', handleBlur);
     };
   }, []);
+
+  // Handle transcript updates during listening
+  useEffect(() => {
+    if (isListening && transcript && activeField && onDirectDictation) {
+      onDirectDictation(transcript, activeField);
+    }
+  }, [transcript, isListening, activeField, onDirectDictation]);
 
   // Hide button when scrolling (optional UX improvement)
   useEffect(() => {
@@ -88,9 +97,7 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
         stopListening();
       } else {
         resetTranscript();
-        startListening((transcript) => {
-          onDirectDictation(transcript, activeField);
-        });
+        startListening();
       }
     } else {
       // Navigate to dedicated dictation page
