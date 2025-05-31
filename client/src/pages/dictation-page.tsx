@@ -128,6 +128,27 @@ export default function DictationPage({ language }: DictationPageProps) {
   
   const t = translations[language];
 
+  // Initialize with activeField from sessionStorage
+  useEffect(() => {
+    const activeField = sessionStorage.getItem('activeField');
+    if (activeField) {
+      setSelectedSection(activeField);
+      // Load existing text for this field if available
+      const savedData = localStorage.getItem('medical-form-draft');
+      if (savedData) {
+        try {
+          const formData = JSON.parse(savedData);
+          if (formData[activeField]) {
+            setFinalText(formData[activeField]);
+            setEditableText(formData[activeField]);
+          }
+        } catch (error) {
+          console.error('Error loading saved form data:', error);
+        }
+      }
+    }
+  }, []);
+
   const {
     isListening,
     transcript,
@@ -137,7 +158,7 @@ export default function DictationPage({ language }: DictationPageProps) {
     stopListening,
     resetTranscript,
   } = useSpeechRecognition({
-    language: language === 'fr' ? 'fr-FR' : 'en-US',
+    language: language === 'fr' ? 'fr-CA' : 'en-US',
     continuous: true,
     interimResults: true,
   });
@@ -228,18 +249,24 @@ export default function DictationPage({ language }: DictationPageProps) {
     const textToSave = isEditing ? editableText : finalText;
     if (!selectedSection || !textToSave) return;
     
-    // Save to localStorage with the section key
-    const savedData = localStorage.getItem('centMD_formData');
+    // Save to localStorage for form to pick up
+    const savedData = localStorage.getItem('medical-form-draft');
     const formData = savedData ? JSON.parse(savedData) : {};
     
     formData[selectedSection] = textToSave;
-    localStorage.setItem('centMD_formData', JSON.stringify(formData));
+    localStorage.setItem('medical-form-draft', JSON.stringify(formData));
+    
+    // Also save to sessionStorage for immediate field update
+    sessionStorage.setItem(`dictation_${selectedSection}`, textToSave);
     
     toast({
       title: t.textSaved,
       description: t.sections[selectedSection as keyof typeof t.sections],
     });
 
+    // Clear the activeField from sessionStorage
+    sessionStorage.removeItem('activeField');
+    
     // Reset editing state
     setIsEditing(false);
     setEditableText("");
@@ -266,6 +293,13 @@ export default function DictationPage({ language }: DictationPageProps) {
   const handleSaveEdits = () => {
     setFinalText(editableText);
     setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    // Clear the activeField from sessionStorage
+    sessionStorage.removeItem('activeField');
+    // Navigate back to form without saving
+    setLocation('/');
   };
 
   if (!isSupported) {
@@ -474,14 +508,24 @@ export default function DictationPage({ language }: DictationPageProps) {
                   </Button>
                 </div>
                 
-                <Button
-                  onClick={handleSaveToSection}
-                  disabled={!selectedSection || (!finalText && !editableText)}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  {t.saveToSection}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSaveToSection}
+                    disabled={!selectedSection || (!finalText && !editableText)}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {t.saveToSection}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    className="flex-1"
+                  >
+                    {language === 'fr' ? 'Annuler' : 'Cancel'}
+                  </Button>
+                </div>
               </div>
               
               {error && (
