@@ -394,37 +394,75 @@ EXEMPLE RÉSUMÉ 1:
 "Il s'agit d'une femme de 49 ans, sans antécédent connu au membre inférieur droit avant l'événement d'origine du 12 août 2020. Elle s'est infligé une déchirure du mollet droit, cette lésion a fait l'objet de traitement par un protocole de réadaptation en physiothérapie et ergothérapie avec atteinte de plateau thérapeutique en août 2021..."
 
 EXEMPLE RÉSUMÉ 2:
-"Il s'agit d'un homme de 40 ans sans antécédents connus à la cheville droite avant l'événement d'origine du 3 mars 2021. Il s'est infligé une entorse de la cheville droite ainsi qu'une entorse du 3e doigt de la main droite. La lésion au niveau du doigt est consolidée sans séquelle ni limitations fonctionnelles en expertise médicale. Pour ce qui est de la lésion à la cheville droite, le travailleur bénéficiera d'investigation par résonance magnétique..."
+"Il s'agit d'un homme de 58 ans sans antécédents connus au membre inférieur droit avant l'événement d'origine du 9 novembre 2022. Il s'est infligé une entorse du genou droit, une déchirure du ménisque interne et une déchirure du ligament croisé antérieur du genou droit. Ces lésions sont objectivées par résonance magnétique. Le travailleur bénéficiera de traitements en physiothérapie, ergothérapie et acupuncture. Évolution favorable, il reprendra le travail. Sur le plan subjectif, le travailleur se plaint d'une douleur en interne de son genou droit qui est exacerbée par les tâches de monter et descendre dans les échelles, les escaliers, s'accroupir ou se mettre à genoux. Il note la nécessité de porter une orthèse au travail sinon il ressent de l'instabilité au niveau de son genou droit."
 
 EXEMPLE DIAGNOSTIC:
-"À la lumière du mécanisme de blessure, de l'évaluation subjective et de l'examen objectif d'aujourd'hui, nous sommes en mesure de conclure qu'il y a eu présence d'une déchirure du mollet droit. Nous retenons donc le diagnostic de déchirure du mollet droit."
+"Entorse au genou droit, déchirure ménisque interne et ligament croisé antérieur du genou droit."
 
 EXEMPLE DATE CONSOLIDATION:
-"Considérant le diagnostic retenu par la CNESST et faisant l'objet de la présente demande, soit une entorse de la cheville droite;
-Considérant que le travailleur a été traitée de façon appropriée et adéquate, incluant une immobilisation et un protocole de réadaptation en physiothérapie et ergothérapie;
-Considérant que le travailleur a atteint un plateau thérapeutique en physiothérapie et ergothérapie;
-Considérant l'examen objectif d'aujourd'hui, mettant en évidence une légère diminution de l'amplitude articulaire sans signe franc d'instabilité.
-Je consolide la lésion en date d'aujourd'hui soit le [DATE].
-À mon avis, il y a une atteinte du plateau thérapeutique et stabilisation de la condition pour le diagnostic retenu."
+"Le médecin qui a charge le travailleur a rencontré ce dernier le 19 juin 2024, il ne s'est pas prononcé sur ce point a maintenu le travailleur à ses tâches régulières à horaire régulier et demande un avis de la CNESST.
+
+Considérant le diagnostic retenu par la CNESST et faisant l'objet de la présente demande, soit une entorse au genou droit, une déchirure du ménisque interne et une déchirure du ligament croisé antérieur du genou droit;
+
+Considérant que le travailleur a été traité de façon appropriée et adéquate, incluant une un protocole de réadaptation en physiothérapie, ergothérapie et acupuncture et qu'il a atteint un plateau thérapeutique;
+
+Considérant que le travailleur ne rapporte pas de symptôme de blocage au genou droit et note une bonne stabilité de son genou droit avec le port de l'orthèse ;
+
+Considérant l'examen objectif du membre inférieur droit d'aujourd'hui, mettant en évidence une ankylose résiduelle au genou droit sans signe d'instabilité au niveau du ligament croisé antérieur droit et sans signe d'appel aux manœuvres méniscales;
+
+À mon avis, il y a une atteinte du plateau thérapeutique et stabilisation de la condition pour le diagnostic retenu. 
+
+Pour toutes ses raisons évoquées, je consolide donc la lésion en date du 9 septembre 2024."
 
 EXEMPLE SOINS/TRAITEMENTS:
-"Considérant le diagnostic retenu par la CNESST ainsi que sa consolidation;
+"Le médecin qui a charge le travailleur a rencontré ce dernier le 19 juin 2024, il ne s'est pas prononcé sur ce point a maintenu le travailleur à ses tâches régulières à horaire régulier et demande un avis de la CNESST. 
+
+Considérant le diagnostic retenu par la CNESST et faisant l'objet de la présente demande, soit une entorse au genou droit, une déchirure du ménisque interne et une déchirure du ligament croisé antérieur du genou droit;
+
+Considérant que le travailleur a été traité de façon appropriée et adéquate, incluant une un protocole de réadaptation en physiothérapie, ergothérapie et acupuncture et qu'il a atteint un plateau thérapeutique;
+
+Considérant que le travailleur ne rapporte pas de symptôme de blocage au genou droit et note une bonne stabilité de son genou droit avec le port de l'orthèse ;
+
+Considérant l'examen objectif du membre inférieur droit d'aujourd'hui, mettant en évidence une ankylose résiduelle au genou droit sans signe d'instabilité au niveau du ligament croisé antérieur droit et sans signe d'appel aux manœuvres méniscales;
+
+À mon avis, il y a une atteinte du plateau thérapeutique et stabilisation de la condition pour le diagnostic retenu. 
+
+Considérant les diagnostics retenus par la CNESST ainsi que sa consolidation;
+
 Considérant tous les éléments mentionnés aux points précédents;
-Je suis d'avis qu'il y a suffisance de traitements en date de consolidation soit aujourd'hui le [DATE].
-Je ne crois pas qu'une résonance magnétique supplémentaire ou une infiltration cortisonée modifieront l'évolution clinique du travailleur."
+
+Je suis d'avis qu'il y a suffisance de traitements en date de consolidation soit le 9 septembre 2024.
+
+Je recommande que le travailleur bénéficie d'un programme d'entraînement à domicile en renforcement musculaire créer par un kinésiologue."
 
 EXEMPLE ATTEINTE PERMANENTE:
-"Considérant le diagnostic retenu par la CNESST ainsi que sa consolidation;
+"Le médecin qui a charge ne se prononce pas sur ce point;
+
+Considérant le diagnostic retenu par la CNESST ainsi que sa consolidation;
+
 Considérant tous les points mentionnés aux points précédents;
-J'attribue aucune atteinte permanente à l'intégrité physique."
+
+J'attribue une atteinte permanente à l'intégrité physique.
+
+Les pourcentages de l'atteinte permanente à l'intégrité physique seront présentés au point 12."
 
 EXEMPLE LIMITATIONS FONCTIONNELLES:
-"Considérant le diagnostic retenu par la CNESST ainsi que sa consolidation;
+"Le médecin qui a charge ne se prononce pas sur ce point;
+
+Considérant le diagnostic retenu par la CNESST ainsi que sa consolidation;
+
 Considérant tous les points mentionnés aux points précédents;
+
 J'attribue des limitations fonctionnelles résultant de la lésion professionnelle."
 
 EXEMPLE ÉVALUATION LIMITATIONS:
-"Le travailleur doit éviter la marche prolongée (plus de 20 minutes), marcher en terrain accidenté ou glissant. Éviter de monter descendre des escaliers à plusieurs reprises ou manière fréquente dans la journée et éviter de monter dans des échelles, escabeaux, échafauds. Il doit éviter la position debout statique de plus de 30 minutes."
+"Au niveau du membre inférieur droit :
+        Le travailleur nécessite le port d'une orthèse à son genou droit.
+        Éviter de travailler de façon répétitive en position accroupie.
+        Éviter de travailler de façon répétitive en position à genoux.
+        Éviter de marcher de façon répétitive en terrain accidenté ou glissant.
+        Éviter de travailler dans une position instable (échafaud, échelle et escaliers).
+        Éviter de ramper."
 
 Génère une conclusion professionnelle en respectant le style médical québécois avec des considérants appropriés.
 
