@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CollapsibleSection } from "@/components/collapsible-section";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
@@ -26,6 +27,13 @@ import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
+  // Section 1: Mandat de l'évaluation (checkboxes)
+  mandatDiagnostic: z.boolean().optional(),
+  mandatConsolidation: z.boolean().optional(),
+  mandatSoins: z.boolean().optional(),
+  mandatAtteinte: z.boolean().optional(),
+  mandatLimitations: z.boolean().optional(),
+  
   // Section 5: Antécédents
   antecedentsMedicaux: z.string().optional(),
   antecedentsChirurgicaux: z.string().optional(),
@@ -522,6 +530,13 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      // Section 1: Mandat de l'évaluation checkboxes
+      mandatDiagnostic: false,
+      mandatConsolidation: false,
+      mandatSoins: false,
+      mandatAtteinte: false,
+      mandatLimitations: false,
+      
       antecedentsMedicaux: "Diabète type 2, syndrome tunnel carpien",
       antecedentsChirurgicaux: "décompression tunnel carpien bilatéral (2014), hystérectomie (2016)",
       antecedentsLesion: "Aucun",
@@ -1000,14 +1015,108 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 <CollapsibleSection title="1. Mandat de l'évaluation" defaultOpen={false}>
                   <div className="space-y-3 text-sm">
                     <p>Le but de l'évaluation est de répondre aux points suivants de l'article de la LATMP :</p>
-                    <div className="space-y-2 pl-4">
-                      <p>1) Diagnostic.</p>
-                      <p>2) Date de consolidation.</p>
-                      <p>3) Nature, nécessité́, suffisance, durée des soins ou traitements administrés ou prescrits.</p>
-                      <p>4) a) Existence de l'atteinte permanente à l'intégrité́ physique ou psychique.</p>
-                      <p className="pl-4">b) Pourcentage de l'atteinte permanente à l'intégrité́ physique ou psychique.</p>
-                      <p>5) a) Existence de limitations fonctionnelles résultant de la lésion professionnelle.</p>
-                      <p className="pl-4">b) Évaluation des limitations fonctionnelles résultant de la lésion professionnelle.</p>
+                    <div className="space-y-3 pl-4">
+                      <FormField
+                        control={form.control}
+                        name="mandatDiagnostic"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">
+                              1) Diagnostic.
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="mandatConsolidation"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">
+                              2) Date de consolidation.
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="mandatSoins"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">
+                              3) Nature, nécessité́, suffisance, durée des soins ou traitements administrés ou prescrits.
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="mandatAtteinte"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="mt-0.5"
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel className="text-sm font-normal">
+                                4) a) Existence de l'atteinte permanente à l'intégrité́ physique ou psychique.
+                              </FormLabel>
+                              <p className="text-sm text-gray-600 pl-4">
+                                b) Pourcentage de l'atteinte permanente à l'intégrité́ physique ou psychique.
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="mandatLimitations"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="mt-0.5"
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel className="text-sm font-normal">
+                                5) a) Existence de limitations fonctionnelles résultant de la lésion professionnelle.
+                              </FormLabel>
+                              <p className="text-sm text-gray-600 pl-4">
+                                b) Évaluation des limitations fonctionnelles résultant de la lésion professionnelle.
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   </div>
                 </CollapsibleSection>

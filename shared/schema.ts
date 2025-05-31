@@ -4,6 +4,14 @@ import { z } from "zod";
 
 export const medicalForms = pgTable("medical_forms", {
   id: serial("id").primaryKey(),
+  
+  // Section 1: Mandat de l'évaluation (checkboxes)
+  mandatDiagnostic: boolean("mandat_diagnostic").default(false),
+  mandatConsolidation: boolean("mandat_consolidation").default(false),
+  mandatSoins: boolean("mandat_soins").default(false),
+  mandatAtteinte: boolean("mandat_atteinte").default(false),
+  mandatLimitations: boolean("mandat_limitations").default(false),
+  
   // Section 5: Antécédents
   antecedentsMedicaux: text("antecedents_medicaux"),
   antecedentsChirurgicaux: text("antecedents_chirurgicaux"),
