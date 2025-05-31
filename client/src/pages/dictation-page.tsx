@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { Mic, MicOff, ArrowLeft, Copy, Trash2, Save } from "lucide-react";
+import { Mic, MicOff, ArrowLeft, Copy, Trash2, Save, Sparkles, Edit } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface DictationPageProps {
   language: 'fr' | 'en';
@@ -117,6 +120,8 @@ export default function DictationPage({ language }: DictationPageProps) {
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [finalText, setFinalText] = useState<string>("");
   const [interimText, setInterimText] = useState<string>("");
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editableText, setEditableText] = useState<string>("");
   const { toast } = useToast();
   
   const t = translations[language];
@@ -133,6 +138,34 @@ export default function DictationPage({ language }: DictationPageProps) {
     language: language === 'fr' ? 'fr-FR' : 'en-US',
     continuous: true,
     interimResults: true,
+  });
+
+  // AI formatting mutation
+  const formatTextMutation = useMutation({
+    mutationFn: async (text: string) => {
+      if (!selectedSection) return text;
+      
+      const endpoint = selectedSection === 'historiqueEvolution' ? '/api/format-section7' : '/api/format-section8';
+      const response = await apiRequest('POST', endpoint, { text, language });
+      const data = await response.json();
+      return data.formattedText;
+    },
+    onSuccess: (formattedText) => {
+      setFinalText(formattedText);
+      setEditableText(formattedText);
+      setIsEditing(true);
+      toast({
+        title: language === 'fr' ? "Texte formaté" : "Text formatted",
+        description: language === 'fr' ? "Le texte a été formaté avec l'IA" : "Text has been formatted with AI",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: language === 'fr' ? "Erreur lors du formatage" : "Error during formatting",
+        variant: "destructive",
+      });
+    },
   });
 
   // Handle transcript updates
@@ -190,22 +223,47 @@ export default function DictationPage({ language }: DictationPageProps) {
   };
 
   const handleSaveToSection = () => {
-    if (!selectedSection || !finalText) return;
+    const textToSave = isEditing ? editableText : finalText;
+    if (!selectedSection || !textToSave) return;
     
     // Save to localStorage with the section key
     const savedData = localStorage.getItem('centMD_formData');
     const formData = savedData ? JSON.parse(savedData) : {};
     
-    formData[selectedSection] = finalText;
+    formData[selectedSection] = textToSave;
     localStorage.setItem('centMD_formData', JSON.stringify(formData));
     
     toast({
       title: t.textSaved,
       description: t.sections[selectedSection as keyof typeof t.sections],
     });
+
+    // Reset editing state
+    setIsEditing(false);
+    setEditableText("");
     
     // Navigate back to form
     setLocation('/');
+  };
+
+  const handleFormatText = () => {
+    if (!finalText) return;
+    formatTextMutation.mutate(finalText);
+  };
+
+  const handleStartEditing = () => {
+    setEditableText(finalText);
+    setIsEditing(true);
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditing(false);
+    setEditableText("");
+  };
+
+  const handleSaveEdits = () => {
+    setFinalText(editableText);
+    setIsEditing(false);
   };
 
   if (!isSupported) {
