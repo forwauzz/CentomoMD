@@ -1,0 +1,4180 @@
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CollapsibleSection } from "@/components/collapsible-section";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DictationModal } from "@/components/dictation-modal";
+import { FloatingRecordButton } from "@/components/floating-record-button";
+import { AIFormatSection7 } from "@/components/ai-format-section7";
+import { AIFormatSection8 } from "@/components/ai-format-section8";
+import { AIGenerateSection11 } from "@/components/ai-generate-section11";
+import { CopySection11 } from "@/components/copy-section11";
+import { SaveFormDialog } from "@/components/save-form-dialog";
+import { SavedFormsManager } from "@/components/saved-forms-manager";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { useAuth } from "@/hooks/useAuth";
+import { exportToPDF } from "@/lib/pdf-export";
+import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive, FolderOpen } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+const formSchema = z.object({
+  // Section 1: Mandat de l'évaluation (checkboxes)
+  mandatDiagnostic: z.boolean().optional(),
+  mandatConsolidation: z.boolean().optional(),
+  mandatSoins: z.boolean().optional(),
+  mandatAtteinte: z.boolean().optional(),
+  mandatLimitations: z.boolean().optional(),
+  
+  // Section 2: Diagnostics acceptés par la CNESST
+  diagnosticsCnesst: z.string().optional(),
+  
+  // Section 3: Modalité de l'entrevue
+  modaliteEntrevue: z.string().optional(),
+  
+  // Section 4: Identification
+  age: z.string().optional(),
+  dominance: z.string().optional(),
+  emploi: z.string().optional(),
+  
+  // Section 5: Antécédents
+  antecedentsMedicaux: z.string().optional(),
+  antecedentsChirurgicaux: z.string().optional(),
+  antecedentsLesion: z.string().optional(),
+  antecedentsCnesst: z.string().optional(),
+  antecedentsSaaq: z.string().optional(),
+  antecedentsAutres: z.string().optional(),
+  antecedentsAllergie: z.string().optional(),
+  antecedentsTabac: z.string().optional(),
+  antecedentsCannabis: z.string().optional(),
+  antecedentsAlcool: z.string().optional(),
+  
+  // Section 6: Médication actuelle
+  medicationActuelle: z.string().optional(),
+  
+  // Section 7: Historique de faits et évolution
+  historiqueEvolution: z.string().optional(),
+  
+  // Section 8: Questionnaire subjectif et état actuel
+  section8Input: z.string().optional(),
+  appreciationEvolution: z.string().optional(),
+  plaintesproblemes: z.string().optional(),
+  impactAvq: z.string().optional(),
+  
+  // Section 9: Examen Physique
+  examenPoids: z.string().optional(),
+  examenTaille: z.string().optional(),
+  examenDominance: z.string().optional(),
+  observationGenerale: z.string().optional(),
+  rachisPalpation: z.string().optional(),
+  rachisInspection: z.string().optional(),
+  rachisFlexion: z.string().optional(),
+  rachisExtension: z.string().optional(),
+  rachisFlexionLateraleG: z.string().optional(),
+  rachisFlexionLateraleD: z.string().optional(),
+  rachisRotationG: z.string().optional(),
+  rachisRotationD: z.string().optional(),
+  rachisSlrDroit: z.string().optional(),
+  rachisSlrGauche: z.string().optional(),
+  rachisTripodeDroit: z.string().optional(),
+  rachisTripodesGauche: z.string().optional(),
+  rachisLasegueDroit: z.string().optional(),
+  rachisLasegueGauche: z.string().optional(),
+  rachisLasegueInverseDroit: z.string().optional(),
+  rachisLasegueInverseGauche: z.string().optional(),
+  hanchesPalpation: z.string().optional(),
+  hanchesInspection: z.string().optional(),
+  hanchesFlexionDroitActif: z.string().optional(),
+  hanchesFlexionDroitPassif: z.string().optional(),
+  hanchesFlexionGaucheActif: z.string().optional(),
+  hanchesFlexionGauchePassif: z.string().optional(),
+  hanchesExtensionDroitActif: z.string().optional(),
+  hanchesExtensionDroitPassif: z.string().optional(),
+  hanchesExtensionGaucheActif: z.string().optional(),
+  hanchesExtensionGauchePassif: z.string().optional(),
+  hanchesRotationInterneDroitActif: z.string().optional(),
+  hanchesRotationInterneDroitPassif: z.string().optional(),
+  hanchesRotationInterneGaucheActif: z.string().optional(),
+  hanchesRotationInterneGauchePassif: z.string().optional(),
+  hanchesRotationExterneDroitActif: z.string().optional(),
+  hanchesRotationExterneDroitPassif: z.string().optional(),
+  hanchesRotationExterneGaucheActif: z.string().optional(),
+  hanchesRotationExterneGauchePassif: z.string().optional(),
+  hanchesAbductionDroitActif: z.string().optional(),
+  hanchesAbductionDroitPassif: z.string().optional(),
+  hanchesAbductionGaucheActif: z.string().optional(),
+  hanchesAbductionGauchePassif: z.string().optional(),
+  hanchesAdductionDroitActif: z.string().optional(),
+  hanchesAdductionDroitPassif: z.string().optional(),
+  hanchesAdductionGaucheActif: z.string().optional(),
+  hanchesAdductionGauchePassif: z.string().optional(),
+  
+  // Genoux
+  genouxPalpation: z.string().optional(),
+  genouxInspection: z.string().optional(),
+  genouxFlexionDroitActif: z.string().optional(),
+  genouxFlexionDroitPassif: z.string().optional(),
+  genouxFlexionGaucheActif: z.string().optional(),
+  genouxFlexionGauchePassif: z.string().optional(),
+  genouxExtensionDroitActif: z.string().optional(),
+  genouxExtensionDroitPassif: z.string().optional(),
+  genouxExtensionGaucheActif: z.string().optional(),
+  genouxExtensionGauchePassif: z.string().optional(),
+  
+  // Manœuvres ligamentaires genoux
+  genouxLci0Droit: z.string().optional(),
+  genouxLci0Gauche: z.string().optional(),
+  genouxLci20Droit: z.string().optional(),
+  genouxLci20Gauche: z.string().optional(),
+  genouxLce0Droit: z.string().optional(),
+  genouxLce0Gauche: z.string().optional(),
+  genouxLce20Droit: z.string().optional(),
+  genouxLce20Gauche: z.string().optional(),
+  genouxLachmanDroit: z.string().optional(),
+  genouxLachmanGauche: z.string().optional(),
+  genouxPivotDroit: z.string().optional(),
+  genouxPivotGauche: z.string().optional(),
+  genouxTiroirAnterieurDroit: z.string().optional(),
+  genouxTiroirAnterieurGauche: z.string().optional(),
+  genouxTiroirPosterieurDroit: z.string().optional(),
+  genouxTiroirPosterieurGauche: z.string().optional(),
+  genouxSagPosterieurDroit: z.string().optional(),
+  genouxSagPosterieurGauche: z.string().optional(),
+  genouxDial30Droit: z.string().optional(),
+  genouxDial30Gauche: z.string().optional(),
+  genouxDial90Droit: z.string().optional(),
+  genouxDial90Gauche: z.string().optional(),
+  
+  // Manœuvres méniscales genoux
+  genouxApleyDroit: z.string().optional(),
+  genouxApleyGauche: z.string().optional(),
+  genouxMcMurrayDroit: z.string().optional(),
+  genouxMcMurrayGauche: z.string().optional(),
+  genouxThessalyDroit: z.string().optional(),
+  genouxThessalyGauche: z.string().optional(),
+  
+  // Circonférence genoux
+  genouxCirconferenceCuisseDroit: z.string().optional(),
+  genouxCirconferenceCuisseGauche: z.string().optional(),
+  genouxCirconferenceMolletDroit: z.string().optional(),
+  genouxCirconferenceMolletGauche: z.string().optional(),
+  
+  atrophieMusculaire: z.string().optional(),
+  
+  // Pieds / Chevilles
+  piedsCheillesPalpation: z.string().optional(),
+  piedsChevillesInspection: z.string().optional(),
+  
+  // Amplitude articulaire pieds/chevilles
+  piedsDorsiflexionCheville: z.string().optional(),
+  piedsPlantifexionCheville: z.string().optional(),
+  piedsMvtsSousAstragaliensDroit: z.string().optional(),
+  piedsMvtsSousAstragaliensGauche: z.string().optional(),
+  piedsMvtsMidTarsienDroit: z.string().optional(),
+  piedsMvtsMidTarsienGauche: z.string().optional(),
+  
+  // Manœuvres ligamentaires pieds/chevilles
+  piedsTiroir0Droit: z.string().optional(),
+  piedsTiroir0Gauche: z.string().optional(),
+  piedsTiroir20Droit: z.string().optional(),
+  piedsTiroir20Gauche: z.string().optional(),
+  piedsVarusStressDroit: z.string().optional(),
+  piedsVarusStressGauche: z.string().optional(),
+  piedsLaxiteCalcaneoFibulaireDroit: z.string().optional(),
+  piedsLaxiteCalcaneoFibulaireGauche: z.string().optional(),
+  piedsSqueezeTestDroit: z.string().optional(),
+  piedsSqueezeTestGauche: z.string().optional(),
+  
+  // Manœuvres spécifiques tendons pieds/chevilles
+  piedsSingleHeelRaiseDroit: z.string().optional(),
+  piedsSingleHeelRaiseGauche: z.string().optional(),
+  piedsThompsonDroit: z.string().optional(),
+  piedsThompsonGauche: z.string().optional(),
+  piedsTestApprehensionDroit: z.string().optional(),
+  piedsTestApprehensionGauche: z.string().optional(),
+  
+  // Neuro-vasculaire pieds/chevilles
+  piedsNeuroVasculaire: z.string().optional(),
+  
+  // Forces neuro pieds/chevilles
+  piedsForceL2Droit: z.string().optional(),
+  piedsForceL2Gauche: z.string().optional(),
+  piedsForceL3Droit: z.string().optional(),
+  piedsForceL3Gauche: z.string().optional(),
+  piedsForceL4Droit: z.string().optional(),
+  piedsForceL4Gauche: z.string().optional(),
+  piedsForceL5Droit: z.string().optional(),
+  piedsForceL5Gauche: z.string().optional(),
+  piedsForceS1Droit: z.string().optional(),
+  piedsForceS1Gauche: z.string().optional(),
+  
+  // Sensibilités neuro pieds/chevilles
+  piedsSensibiliteL2Droit: z.string().optional(),
+  piedsSensibiliteL2Gauche: z.string().optional(),
+  piedsSensibiliteL3Droit: z.string().optional(),
+  piedsSensibiliteL3Gauche: z.string().optional(),
+  piedsSensibiliteL4Droit: z.string().optional(),
+  piedsSensibiliteL4Gauche: z.string().optional(),
+  piedsSensibiliteL5Droit: z.string().optional(),
+  piedsSensibiliteL5Gauche: z.string().optional(),
+  piedsSensibiliteS1Droit: z.string().optional(),
+  piedsSensibiliteS1Gauche: z.string().optional(),
+  
+  // Réflexes neuro pieds/chevilles
+  piedsReflexeRotulienDroit: z.string().optional(),
+  piedsReflexeRotulienGauche: z.string().optional(),
+  piedsReflexeAchilleenDroit: z.string().optional(),
+  piedsReflexeAchilleenGauche: z.string().optional(),
+  piedsReflexeBabinskiDroit: z.string().optional(),
+  piedsReflexeBabinskiGauche: z.string().optional(),
+  
+  // Pouls neuro pieds/chevilles
+  piedsPoulsTibialPosterieurDroit: z.string().optional(),
+  piedsPoulsTibialPosterieurGauche: z.string().optional(),
+  piedsPoulsPedieuxDroit: z.string().optional(),
+  piedsPoulsPedieuxGauche: z.string().optional(),
+  
+  examensAdditionnels: z.string().optional(),
+  
+  // Section 11: Conclusion
+  conclusionResume: z.string().optional(),
+  conclusionDiagnostic: z.string().optional(),
+  conclusionDateConsolidation: z.string().optional(),
+  conclusionSoinsTraitements: z.string().optional(),
+  conclusionAtteintePermanente: z.string().optional(),
+  conclusionLimitationsFonctionnelles: z.string().optional(),
+  conclusionEvaluationLimitations: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+// Language translations
+const translations = {
+  fr: {
+    title: "CentomoMD",
+    subtitle: "Rapport d'Évaluation Médicale",
+    save: "Sauvegarder",
+    print: "Imprimer",
+    clear: "Effacer",
+    language: "Langue",
+    notSaved: "Non sauvegardé",
+    saved: "Sauvegardé",
+    formCleared: "Formulaire effacé",
+    allDataDeleted: "Toutes les données ont été supprimées.",
+    confirmClear: "Êtes-vous sûr de vouloir effacer toutes les données du formulaire?",
+    lastSaved: "Dernière sauvegarde :",
+    
+    // Section A
+    sectionA: "A. RENSEIGNEMENTS SUR LE TRAVAILLEUR",
+    workerName: "Nom :",
+    workerFirstName: "Prénom :",
+    healthInsuranceNo: "No d'assurance maladie :",
+    birthDate: "Date de naissance :",
+    address: "Adresse :",
+    phone: "Téléphone :",
+    workerFileNo: "No de dossier du travailleur :",
+    originEventDate: "Date de l'évènement d'origine :",
+    recurrenceDate: "Date de la récidive, rechute ou aggravation :",
+    
+    // Section B
+    sectionB: "B. RENSEIGNEMENTS SUR LE MÉDECIN",
+    doctorName: "Nom :",
+    doctorFirstName: "Prénom :",
+    licenseNo: "No permis :",
+    doctorAddress: "Adresse :",
+    doctorPhone: "Téléphone :",
+    email: "Courriel :",
+    
+    // Section C
+    sectionC: "C. RAPPORT",
+    evaluationMandate: "1. Mandat de l'évaluation",
+    acceptedDiagnosis: "2. Diagnostics acceptés par la CNESST",
+    interviewModality: "3. Modalité de l'entrevue",
+    identification: "4. Identification",
+    
+    // Section 5
+    section5: "5. Antécédents",
+    medicalHistory: "Médicaux :",
+    surgicalHistory: "Chirurgicaux :",
+    lesionHistory: "Au site et au pourtour de la lésion :",
+    cnsstHistory: "CNESST :",
+    saaqHistory: "SAAQ :",
+    otherHistory: "Autres :",
+    allergies: "Allergie :",
+    tobacco: "Tabac :",
+    cannabis: "Cannabis :",
+    alcohol: "Alcool :",
+    
+    // Section 6
+    section6: "6. Médication actuelle et mesures thérapeutiques en cours",
+    currentMedication: "Médication actuelle :",
+    
+    // Section 7
+    section7: "7. Historique de faits et évolution",
+    historyEvolution: "Historique de faits et évolution :",
+    
+    // Section 8
+    section8: "8. Questionnaire subjectif et état actuel",
+    evolutionAppreciation: "Appréciation subjective de l'évolution :",
+    complaintsProblems: "Plaintes et problèmes :",
+    avqImpact: "Impact sur AVQ/AVD :",
+    
+    // Section 9
+    section9: "9. Examen Physique",
+    weight: "Poids :",
+    height: "Taille :",
+    dominance: "Dominance :",
+    generalObservation: "Observation générale et attitude :",
+    lumbarSpine: "Rachis Lombaire :",
+    palpation: "Palpation :",
+    inspection: "Inspection :",
+    flexion: "Flexion :",
+    extension: "Extension :",
+    lateralFlexionL: "Flexion Latérale G. :",
+    lateralFlexionR: "Flexion Latérale D. :",
+    rotationL: "Rotation G. :",
+    rotationR: "Rotation D. :",
+    radicularManeuvers: "Manœuvres radiculaires :",
+    slrRight: "S.L.R. Droit :",
+    slrLeft: "S.L.R. Gauche :",
+    tripodeRight: "Tripode Droit :",
+    tripodeLeft: "Tripode Gauche :",
+    lasegueRight: "Lasègue Droit :",
+    lasegueLeft: "Lasègue Gauche :",
+    reverseLasegueRight: "Lasègue inversé Droit :",
+    reverseLasegueLeft: "Lasègue inversé Gauche :",
+    hips: "Hanches :",
+    hipsPalpation: "Palpation :",
+    hipsInspection: "Inspection :",
+    articulateRange: "Amplitude articulaire :",
+    activeRight: "Actif Droit :",
+    passiveRight: "Passif Droit :",
+    activeLeft: "Actif Gauche :",
+    passiveLeft: "Passif Gauche :",
+    hipsFlexion: "Flexion :",
+    hipsExtension: "Extension :",
+    internalRotation: "Rotation interne :",
+    externalRotation: "Rotation externe :",
+    abduction: "Abduction :",
+    adduction: "Adduction :",
+    additionalExams: "Examens additionnels :",
+    
+    // Section 10
+    section10: "10. Examens paracliniques",
+    paraclinicalExamsText: "Vous référez au point 7, Historique des faits et évolution.",
+    
+    // Section 11
+    section11: "11. Conclusion",
+    conclusionSummary: "Résumé :",
+    conclusionDiagnosis: "Diagnostic :",
+    conclusionConsolidationDate: "Date de consolidation :",
+    conclusionCareNecessity: "Nature, nécessité́, suffisance, durée des soins ou traitements administrés ou prescrits :",
+    conclusionPermanentImpairment: "Existence de l'atteinte permanente à l'intégrité́ physique ou psychique :",
+    conclusionFunctionalLimitations: "Existence de limitations fonctionnelles résultant de la lésion professionnelle :",
+    conclusionLimitationsEvaluation: "Évaluation des limitations fonctionnelles résultant de la lésion professionnelle :"
+  },
+  en: {
+    title: "CentomoMD",
+    subtitle: "Medical Evaluation Report",
+    save: "Save",
+    print: "Print",
+    clear: "Clear",
+    language: "Language",
+    notSaved: "Not saved",
+    saved: "Saved",
+    formCleared: "Form cleared",
+    allDataDeleted: "All data has been deleted.",
+    confirmClear: "Are you sure you want to clear all form data?",
+    lastSaved: "Last saved:",
+    
+    // Section A
+    sectionA: "A. WORKER INFORMATION",
+    workerName: "Last Name:",
+    workerFirstName: "First Name:",
+    healthInsuranceNo: "Health Insurance No:",
+    birthDate: "Date of Birth:",
+    address: "Address:",
+    phone: "Phone:",
+    workerFileNo: "Worker File No:",
+    originEventDate: "Original Event Date:",
+    recurrenceDate: "Recurrence, Relapse or Aggravation Date:",
+    
+    // Section B
+    sectionB: "B. PHYSICIAN INFORMATION",
+    doctorName: "Last Name:",
+    doctorFirstName: "First Name:",
+    licenseNo: "License No:",
+    doctorAddress: "Address:",
+    doctorPhone: "Phone:",
+    email: "Email:",
+    
+    // Section C
+    sectionC: "C. REPORT",
+    evaluationMandate: "1. Evaluation Mandate",
+    acceptedDiagnosis: "2. Diagnoses Accepted by CNESST",
+    interviewModality: "3. Interview Modality",
+    identification: "4. Identification",
+    
+    // Section 5
+    section5: "5. Medical History",
+    medicalHistory: "Medical:",
+    surgicalHistory: "Surgical:",
+    lesionHistory: "At and around lesion site:",
+    cnsstHistory: "CNESST:",
+    saaqHistory: "SAAQ:",
+    otherHistory: "Other:",
+    allergies: "Allergies:",
+    tobacco: "Tobacco:",
+    cannabis: "Cannabis:",
+    alcohol: "Alcohol:",
+    
+    // Section 6
+    section6: "6. Current Medication and Ongoing Therapeutic Measures",
+    currentMedication: "Current Medication:",
+    
+    // Section 7
+    section7: "7. History of Facts and Evolution",
+    historyEvolution: "History of Facts and Evolution:",
+    
+    // Section 8
+    section8: "8. Subjective Questionnaire and Current State",
+    evolutionAppreciation: "Subjective Appreciation of Evolution:",
+    complaintsProblems: "Complaints and Problems:",
+    avqImpact: "Impact on ADL/IADL:",
+    
+    // Section 9
+    section9: "9. Physical Examination",
+    weight: "Weight:",
+    height: "Height:",
+    dominance: "Dominance:",
+    generalObservation: "General Observation and Attitude:",
+    lumbarSpine: "Lumbar Spine:",
+    palpation: "Palpation:",
+    inspection: "Inspection:",
+    flexion: "Flexion:",
+    extension: "Extension:",
+    lateralFlexionL: "Lateral Flexion L:",
+    lateralFlexionR: "Lateral Flexion R:",
+    rotationL: "Rotation L:",
+    rotationR: "Rotation R:",
+    radicularManeuvers: "Radicular Maneuvers:",
+    slrRight: "S.L.R. Right:",
+    slrLeft: "S.L.R. Left:",
+    tripodeRight: "Tripod Right:",
+    tripodeLeft: "Tripod Left:",
+    lasegueRight: "Lasègue Right:",
+    lasegueLeft: "Lasègue Left:",
+    reverseLasegueRight: "Reverse Lasègue Right:",
+    reverseLasegueLeft: "Reverse Lasègue Left:",
+    hips: "Hips:",
+    hipsPalpation: "Palpation:",
+    hipsInspection: "Inspection:",
+    articulateRange: "Range of Motion:",
+    activeRight: "Active Right:",
+    passiveRight: "Passive Right:",
+    activeLeft: "Active Left:",
+    passiveLeft: "Passive Left:",
+    hipsFlexion: "Flexion:",
+    hipsExtension: "Extension:",
+    internalRotation: "Internal Rotation:",
+    externalRotation: "External Rotation:",
+    abduction: "Abduction:",
+    adduction: "Adduction:",
+    additionalExams: "Additional Examinations:",
+    
+    // Section 10
+    section10: "10. Paraclinical Examinations",
+    paraclinicalExamsText: "You refer to point 7, History of facts and evolution.",
+    
+    // Section 11
+    section11: "11. Conclusion",
+    conclusionSummary: "Summary:",
+    conclusionDiagnosis: "Diagnosis:",
+    conclusionConsolidationDate: "Consolidation Date:",
+    conclusionCareNecessity: "Nature, necessity, sufficiency, duration of care or treatments administered or prescribed:",
+    conclusionPermanentImpairment: "Existence of permanent impairment to physical or psychological integrity:",
+    conclusionFunctionalLimitations: "Existence of functional limitations resulting from occupational injury:",
+    conclusionLimitationsEvaluation: "Evaluation of functional limitations resulting from occupational injury:"
+  }
+};
+
+interface MedicalFormProps {
+  language: 'fr' | 'en';
+  onLanguageChange: (language: 'fr' | 'en') => void;
+}
+
+export default function MedicalForm({ language, onLanguageChange }: MedicalFormProps) {
+  const [currentDictationField, setCurrentDictationField] = useState<string | null>(null);
+  const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showSavedForms, setShowSavedForms] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>({
+    section1: false,
+    section2: false,
+    section3: false,
+    section4: false,
+    section5: false,
+    section6: false,
+    section7: false,
+    section8: false,
+    section9: false,
+  });
+  const { toast } = useToast();
+  const { user, logout } = useAuth();
+  
+  const t = translations[language];
+
+  const toggleSection = (sectionKey: string) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }));
+  };
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      // Section 1: Mandat de l'évaluation checkboxes
+      mandatDiagnostic: false,
+      mandatConsolidation: false,
+      mandatSoins: false,
+      mandatAtteinte: false,
+      mandatLimitations: false,
+      
+      // Section 2: Diagnostics acceptés par la CNESST
+      diagnosticsCnesst: "Déchirure mollet droit.",
+      
+      // Section 3: Modalité de l'entrevue
+      modaliteEntrevue: "L'évaluation suivante s'est tenue dans les locaux de la clinique du Complexe Médical Nord-de-Île (CMNDI). Nous avons clairement expliqué à notre mandat d'évaluateur indépendant désigné par la CNESST dans le cadre de l'application de l'article 204 de la LATMP. Nous lui avons précisé que nous n'agirons pas en tant que médecins traitants. Notre rapport d'évaluation sera d'abord envoyé́ à la CNESST.\n\nNous avons procédé́ au questionnaire subjectif ainsi qu'à un examen physique détaillé́ en relation avec les lésions à évaluer, nous nous sommes assurés à la fin de l'entrevue d'avoir couvert l'ensemble de la problématique.\n\nNous avons revu le dossier CNESST de même que le dossier médical. Nous avons pu consulter l'ensemble des rapports et des bilans radiologiques réalisés dans le cadre de l'évaluation de la lésion.\n\nL'entrevue s'est effectuée cordialement, la patiente participait pleinement à son entrevue. L'entrevue s'est déroulée entre.\n\nÀ la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.",
+      
+      // Section 4: Identification
+      age: "Il s'agit d'une femme de 49 ans.",
+      dominance: "Elle est droitière",
+      emploi: "Elle travaillait comme chauffeuse de taxi / transport adapté à l'emploi de Taxi Ormstown inc. depuis janvier 2016.\n\nElle travaille à temps complet soit 40 heures par semaine.\n\nElle est en arrêt de travail depuis l'accident\n\nComme activité de loisir elle pratique le baseball.",
+      
+      antecedentsMedicaux: "Diabète type 2, syndrome tunnel carpien",
+      antecedentsChirurgicaux: "décompression tunnel carpien bilatéral (2014), hystérectomie (2016)",
+      antecedentsLesion: "Aucun",
+      antecedentsCnesst: "Aucun",
+      antecedentsSaaq: "Aucun",
+      antecedentsAutres: "Aucun",
+      antecedentsAllergie: "Pénicilline et sulfonamides",
+      antecedentsTabac: "négatif",
+      antecedentsCannabis: "négatif",
+      antecedentsAlcool: "négatif",
+      medicationActuelle: "Arrêt de tout traitement en lien avec sa lésion (physiothérapie et ergothérapie) : atteinte de plateau thérapeutique;\n\nExercices à domicile",
+      historiqueEvolution: "La travailleuse et une chauffeuse de taxi adapté. Ses tâches consistent à conduire un taxi de transport adapté, elle accompagne les gens en fauteuil roulant et donc doit monter et descendre des rampes d'accès avec les patients en fauteuil et parfois elle doit transporter des marchandises médicales d'un hôpital à l'autre. Parfois elle doit conduire jusqu'à Montréal.\n\nLa fiche de réclamation de la travailleuse décrit l'événement suivant survenu le 12 août 2020 :\n\n« Je montais une pente à l'hôpital de Valleyfield en poussant un chariot avec des glacières dessus et à la fin de la pentente j'ai senti grosse douleur au niveau du mollet droit avec sensation de brûlure… Quand fut le temps de reposer mon pied par terre, j'en étais incapable j'ai tout de suite communiqué avec mon employeur pour lui expliquer ce qui venait de se passer… comme j'étais déjà dans un hôpital, il m'a dit d'aller tout de suite consulter…",
+      section8Input: "",
+      appreciationEvolution: "La travailleuse rapporte une nette amélioration depuis son accident. Elle rapporte que dans les derniers mois, elle a observé peu d'amélioration au niveau de sa condition et juge d'elle-même qu'elle a atteint un plateau thérapeutique en physiothérapie et ergothérapie...",
+      plaintesproblemes: "Elle se plaint principalement de sensations de brûlure intermittente au niveau de son mollet droite et au niveau antérieur de sa jambe droite. Elle ne peut rapporter d'éléments déclencheurs de ses douleurs et elles surviennent subitement...",
+      impactAvq: "cf feuille en annexe.",
+      examenPoids: "60kg",
+      examenTaille: "1.60m",
+      examenDominance: "Droitière",
+      observationGenerale: "La travailleuse s'est présentée avec 10 minutes de retard pour son évaluation. À l'accueil elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique...",
+      rachisPalpation: "apophyses épineuses et para spinal sans douleur",
+      rachisInspection: "lordose lombaire conservée",
+      rachisFlexion: "90",
+      rachisExtension: "30",
+      rachisFlexionLateraleG: "30",
+      rachisFlexionLateraleD: "30",
+      rachisRotationG: "30",
+      rachisRotationD: "30",
+      rachisSlrDroit: "Neg",
+      rachisSlrGauche: "Neg",
+      rachisTripodeDroit: "Neg",
+      rachisTripodesGauche: "Neg",
+      rachisLasegueDroit: "Neg",
+      rachisLasegueGauche: "Neg",
+      rachisLasegueInverseDroit: "Neg",
+      rachisLasegueInverseGauche: "Neg",
+      hanchesPalpation: "grands trochanters sans douleur",
+      hanchesInspection: "pas d'atrophie fessiers ou cuisse. Aucune cicatrice",
+      hanchesFlexionDroitActif: "120",
+      hanchesFlexionDroitPassif: "-",
+      hanchesFlexionGaucheActif: "120",
+      hanchesFlexionGauchePassif: "-",
+      hanchesExtensionDroitActif: "30",
+      hanchesExtensionDroitPassif: "-",
+      hanchesExtensionGaucheActif: "30",
+      hanchesExtensionGauchePassif: "-",
+      hanchesRotationInterneDroitActif: "40",
+      hanchesRotationInterneDroitPassif: "-",
+      hanchesRotationInterneGaucheActif: "40",
+      hanchesRotationInterneGauchePassif: "-",
+      hanchesRotationExterneDroitActif: "50",
+      hanchesRotationExterneDroitPassif: "-",
+      hanchesRotationExterneGaucheActif: "50",
+      hanchesRotationExterneGauchePassif: "-",
+      hanchesAbductionDroitActif: "40",
+      hanchesAbductionDroitPassif: "-",
+      hanchesAbductionGaucheActif: "40",
+      hanchesAbductionGauchePassif: "-",
+      hanchesAdductionDroitActif: "20",
+      hanchesAdductionDroitPassif: "-",
+      hanchesAdductionGaucheActif: "20",
+      hanchesAdductionGauchePassif: "-",
+      
+      // Genoux default values
+      genouxPalpation: "",
+      genouxInspection: "",
+      genouxFlexionDroitActif: "",
+      genouxFlexionDroitPassif: "",
+      genouxFlexionGaucheActif: "",
+      genouxFlexionGauchePassif: "",
+      genouxExtensionDroitActif: "",
+      genouxExtensionDroitPassif: "",
+      genouxExtensionGaucheActif: "",
+      genouxExtensionGauchePassif: "",
+      
+      // Manœuvres ligamentaires defaults
+      genouxLci0Droit: "Sec",
+      genouxLci0Gauche: "Sec",
+      genouxLci20Droit: "Sec",
+      genouxLci20Gauche: "Sec",
+      genouxLce0Droit: "Sec",
+      genouxLce0Gauche: "Sec",
+      genouxLce20Droit: "Sec",
+      genouxLce20Gauche: "Sec",
+      genouxLachmanDroit: "Sec",
+      genouxLachmanGauche: "Sec",
+      genouxPivotDroit: "Neg",
+      genouxPivotGauche: "Neg",
+      genouxTiroirAnterieurDroit: "Sec",
+      genouxTiroirAnterieurGauche: "Sec",
+      genouxTiroirPosterieurDroit: "Sec",
+      genouxTiroirPosterieurGauche: "Sec",
+      genouxSagPosterieurDroit: "Neg",
+      genouxSagPosterieurGauche: "Neg",
+      genouxDial30Droit: "Neg",
+      genouxDial30Gauche: "Neg",
+      genouxDial90Droit: "Neg",
+      genouxDial90Gauche: "Neg",
+      
+      // Manœuvres méniscales defaults
+      genouxApleyDroit: "Neg",
+      genouxApleyGauche: "Neg",
+      genouxMcMurrayDroit: "Neg",
+      genouxMcMurrayGauche: "Neg",
+      genouxThessalyDroit: "Neg",
+      genouxThessalyGauche: "Neg",
+      
+      // Circonférence defaults (empty for measurements)
+      genouxCirconferenceCuisseDroit: "",
+      genouxCirconferenceCuisseGauche: "",
+      genouxCirconferenceMolletDroit: "",
+      genouxCirconferenceMolletGauche: "",
+      
+      // Atrophie musculaire default
+      atrophieMusculaire: "TBD by Dr Centomo",
+      
+      // Pieds / Chevilles defaults
+      piedsCheillesPalpation: "",
+      piedsChevillesInspection: "",
+      
+      // Amplitude articulaire pieds/chevilles defaults
+      piedsDorsiflexionCheville: "20",
+      piedsPlantifexionCheville: "40",
+      piedsMvtsSousAstragaliensDroit: "Présent",
+      piedsMvtsSousAstragaliensGauche: "Présent",
+      piedsMvtsMidTarsienDroit: "Présent",
+      piedsMvtsMidTarsienGauche: "Présent",
+      
+      // Manœuvres ligamentaires pieds/chevilles defaults
+      piedsTiroir0Droit: "Neg",
+      piedsTiroir0Gauche: "Neg",
+      piedsTiroir20Droit: "Neg",
+      piedsTiroir20Gauche: "Neg",
+      piedsVarusStressDroit: "Neg",
+      piedsVarusStressGauche: "Neg",
+      piedsLaxiteCalcaneoFibulaireDroit: "Neg",
+      piedsLaxiteCalcaneoFibulaireGauche: "Neg",
+      piedsSqueezeTestDroit: "Neg",
+      piedsSqueezeTestGauche: "Neg",
+      
+      // Manœuvres spécifiques tendons pieds/chevilles defaults
+      piedsSingleHeelRaiseDroit: "Neg",
+      piedsSingleHeelRaiseGauche: "Neg",
+      piedsThompsonDroit: "Neg",
+      piedsThompsonGauche: "Neg",
+      piedsTestApprehensionDroit: "Neg",
+      piedsTestApprehensionGauche: "Neg",
+      
+      // Neuro-vasculaire pieds/chevilles default
+      piedsNeuroVasculaire: "",
+      
+      // Forces neuro pieds/chevilles defaults
+      piedsForceL2Droit: "5/5",
+      piedsForceL2Gauche: "5/5",
+      piedsForceL3Droit: "5/5",
+      piedsForceL3Gauche: "5/5",
+      piedsForceL4Droit: "5/5",
+      piedsForceL4Gauche: "5/5",
+      piedsForceL5Droit: "5/5",
+      piedsForceL5Gauche: "5/5",
+      piedsForceS1Droit: "5/5",
+      piedsForceS1Gauche: "5/5",
+      
+      // Sensibilités neuro pieds/chevilles defaults
+      piedsSensibiliteL2Droit: "2/2",
+      piedsSensibiliteL2Gauche: "2/2",
+      piedsSensibiliteL3Droit: "2/2",
+      piedsSensibiliteL3Gauche: "2/2",
+      piedsSensibiliteL4Droit: "2/2",
+      piedsSensibiliteL4Gauche: "2/2",
+      piedsSensibiliteL5Droit: "2/2",
+      piedsSensibiliteL5Gauche: "2/2",
+      piedsSensibiliteS1Droit: "2/2",
+      piedsSensibiliteS1Gauche: "2/2",
+      
+      // Réflexes neuro pieds/chevilles defaults
+      piedsReflexeRotulienDroit: "2+",
+      piedsReflexeRotulienGauche: "2+",
+      piedsReflexeAchilleenDroit: "2+",
+      piedsReflexeAchilleenGauche: "2+",
+      piedsReflexeBabinskiDroit: "Neg",
+      piedsReflexeBabinskiGauche: "Neg",
+      
+      // Pouls neuro pieds/chevilles defaults
+      piedsPoulsTibialPosterieurDroit: "2",
+      piedsPoulsTibialPosterieurGauche: "2",
+      piedsPoulsPedieuxDroit: "2",
+      piedsPoulsPedieuxGauche: "2",
+    },
+  });
+
+  const { saveData, loadData, clearData, debouncedSave } = useAutoSave({
+    key: 'centMD_formData',
+    onSave: () => setLastSaved(new Date().toLocaleString('fr-FR')),
+  });
+
+  const {
+    isListening,
+    transcript,
+    error,
+    isSupported,
+    startListening,
+    stopListening,
+    resetTranscript,
+  } = useSpeechRecognition({
+    language: language === 'fr' ? 'fr-FR' : 'en-US',
+    continuous: true,
+    interimResults: true,
+  });
+
+  // Update speech recognition language when language changes
+  useEffect(() => {
+    if (isListening) {
+      stopListening();
+    }
+  }, [language, stopListening, isListening]);
+
+  // Load saved data on mount
+  useEffect(() => {
+    const savedData = loadData();
+    if (savedData) {
+      form.reset(savedData);
+      setLastSaved('Données récupérées');
+    }
+  }, [form, loadData]);
+
+  // Auto-save on form changes
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      debouncedSave(data);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, debouncedSave]);
+
+  const handleDictation = (fieldName: string) => {
+    if (!isSupported) {
+      toast({
+        title: "Erreur",
+        description: "La reconnaissance vocale n'est pas supportée par votre navigateur.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCurrentDictationField(fieldName);
+    resetTranscript();
+    startListening((transcript) => {
+      const currentValue = form.getValues(fieldName as keyof FormData) || '';
+      form.setValue(fieldName as keyof FormData, currentValue + ' ' + transcript);
+    });
+  };
+
+  const handleDirectDictation = (text: string, fieldName: string) => {
+    const currentValue = form.getValues(fieldName as keyof FormData) || '';
+    form.setValue(fieldName as keyof FormData, currentValue + ' ' + text);
+  };
+
+  const handleStopDictation = () => {
+    stopListening();
+    setCurrentDictationField(null);
+  };
+
+  const handleClearForm = () => {
+    if (confirm(t.confirmClear)) {
+      form.reset();
+      clearData();
+      setLastSaved(t.notSaved);
+      toast({
+        title: t.formCleared,
+        description: t.allDataDeleted,
+      });
+    }
+  };
+
+  const parseSection8Content = (formattedText: string) => {
+    const sections = {
+      appreciation: '',
+      plaintes: '',
+      impact: ''
+    };
+
+    const lines = formattedText.split('\n').filter(line => line.trim());
+    let currentSection = '';
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      if (trimmedLine.includes('Appréciation subjective de l\'évolution') || 
+          trimmedLine.includes('Appréciation subjective') ||
+          trimmedLine.includes('évolution')) {
+        currentSection = 'appreciation';
+        continue;
+      } else if (trimmedLine.includes('Plaintes et problèmes') || 
+                 trimmedLine.includes('Plaintes') ||
+                 trimmedLine.includes('problèmes')) {
+        currentSection = 'plaintes';
+        continue;
+      } else if (trimmedLine.includes('Impact sur AVQ/AVD') || 
+                 trimmedLine.includes('Impact sur AVQ') ||
+                 trimmedLine.includes('Impact')) {
+        currentSection = 'impact';
+        continue;
+      }
+      
+      if (currentSection && trimmedLine && !trimmedLine.includes(':')) {
+        if (currentSection === 'appreciation') {
+          sections.appreciation += (sections.appreciation ? '\n' : '') + trimmedLine;
+        } else if (currentSection === 'plaintes') {
+          sections.plaintes += (sections.plaintes ? '\n' : '') + trimmedLine;
+        } else if (currentSection === 'impact') {
+          sections.impact += (sections.impact ? '\n' : '') + trimmedLine;
+        }
+      }
+    }
+    
+    return sections;
+  };
+
+  const handleSave = () => {
+    const data = form.getValues();
+    saveData(data);
+    toast({
+      title: t.saved,
+      description: language === 'fr' ? "Le formulaire a été sauvegardé avec succès." : "The form has been saved successfully.",
+    });
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExportPDF = () => {
+    const data = form.getValues();
+    exportToPDF(data);
+  };
+
+  const handleLoadForm = (formData: any) => {
+    form.reset(formData);
+    setLastSaved("Formulaire chargé");
+    setShowSavedForms(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès.",
+      });
+      window.location.href = "/";
+    } catch (error) {
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Une erreur est survenue lors de la déconnexion.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b no-print">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          {/* Top Row */}
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-8">
+              <div>
+                <h1 className="text-xl font-bold text-blue-600 leading-tight">{t.title}</h1>
+                <p className="text-xs text-gray-600">{t.subtitle}</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-base font-medium text-gray-700 leading-tight">
+                  Bon retour, Dr. Centomo
+                </div>
+                <div className="text-xs text-gray-500">
+                  Rapport d'Évaluation Médicale
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Select value={language} onValueChange={(value: 'fr' | 'en') => onLanguageChange(value)}>
+                <SelectTrigger className="w-20">
+                  <Globe className="w-3 h-3" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fr">FR</SelectItem>
+                  <SelectItem value="en">EN</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button 
+                onClick={handleLogout} 
+                variant="outline" 
+                size="sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="w-3 h-3" />
+                <span className="ml-1 text-xs">Déconnexion</span>
+              </Button>
+            </div>
+          </div>
+          
+          {/* Bottom Row - Action Buttons */}
+          <div className="flex justify-center">
+            <div className="flex items-center gap-2">
+              <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700">
+                <Save className="w-4 h-4" />
+                <span className="ml-1">Sauvegarder</span>
+              </Button>
+              
+              <Button onClick={() => setShowSaveDialog(true)} size="sm" className="bg-orange-600 hover:bg-orange-700">
+                <Archive className="w-4 h-4" />
+                <span className="ml-1">Sauvegarder</span>
+              </Button>
+              
+              <Button onClick={() => setShowSavedForms(true)} size="sm" variant="outline">
+                <FolderOpen className="w-4 h-4" />
+                <span className="ml-1">Charger</span>
+              </Button>
+              
+              <Button onClick={handleExportPDF} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                <Printer className="w-4 h-4" />
+                <span className="ml-1">Imprimer</span>
+              </Button>
+              
+              <Button onClick={handleClearForm} size="sm" variant="destructive">
+                <Trash2 className="w-4 h-4" />
+                <span className="ml-1">Effacer</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Form */}
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <Form {...form}>
+          <form className="space-y-6">
+            
+            {/* Section A: Renseignements sur le travailleur (Static) */}
+            <CollapsibleSection title={t.sectionA}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="field-group">
+                  <label className="field-label">{t.workerName}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.workerFirstName}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.healthInsuranceNo}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.birthDate}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.address}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.phone}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.workerFileNo}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">{t.originEventDate}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
+                </div>
+                <div className="field-group col-span-2">
+                  <label className="field-label">{t.recurrenceDate}</label>
+                  <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">Nil</div>
+                </div>
+              </div>
+            </CollapsibleSection>
+
+            {/* Section B: Renseignements sur le médecin (Static) */}
+            <CollapsibleSection title="B. RENSEIGNEMENTS SUR LE MÉDECIN">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="field-group">
+                    <label className="field-label">Nom :</label>
+                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">CENTOMO</div>
+                  </div>
+                  <div className="field-group">
+                    <label className="field-label">Prénom :</label>
+                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">Hugo</div>
+                  </div>
+                  <div className="field-group">
+                    <label className="field-label">No permis :</label>
+                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">1-18154</div>
+                  </div>
+                  <div className="field-group">
+                    <label className="field-label">Téléphone :</label>
+                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">514-331-1400</div>
+                  </div>
+                  <div className="field-group col-span-2">
+                    <label className="field-label">Adresse :</label>
+                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">5777 Boul. Gouin Ouest, Suite 370, Montréal, Qc, H4J 1E3</div>
+                  </div>
+                  <div className="field-group col-span-2">
+                    <label className="field-label">Courriel :</label>
+                    <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">adjointe.orthopedie@gmail.com</div>
+                  </div>
+                </div>
+            </CollapsibleSection>
+
+            {/* Section C: Rapport */}
+            <CollapsibleSection title="C. RAPPORT">
+              <div className="space-y-4">
+
+                {/* 1. Mandat de l'évaluation */}
+                <CollapsibleSection title="1. Mandat de l'évaluation" defaultOpen={false}>
+                  <div className="space-y-3 text-sm">
+                    <p>Le but de l'évaluation est de répondre aux points suivants de l'article de la LATMP :</p>
+                    <div className="space-y-3 pl-4">
+                      <FormField
+                        control={form.control}
+                        name="mandatDiagnostic"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">
+                              1) Diagnostic.
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="mandatConsolidation"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">
+                              2) Date de consolidation.
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="mandatSoins"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">
+                              3) Nature, nécessité́, suffisance, durée des soins ou traitements administrés ou prescrits.
+                            </FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="mandatAtteinte"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="mt-0.5"
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel className="text-sm font-normal">
+                                4) a) Existence de l'atteinte permanente à l'intégrité́ physique ou psychique.
+                              </FormLabel>
+                              <p className="text-sm text-gray-600 pl-4">
+                                b) Pourcentage de l'atteinte permanente à l'intégrité́ physique ou psychique.
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="mandatLimitations"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="mt-0.5"
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel className="text-sm font-normal">
+                                5) a) Existence de limitations fonctionnelles résultant de la lésion professionnelle.
+                              </FormLabel>
+                              <p className="text-sm text-gray-600 pl-4">
+                                b) Évaluation des limitations fonctionnelles résultant de la lésion professionnelle.
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </CollapsibleSection>
+
+                {/* 2. Diagnostics acceptés par la CNESST */}
+                <CollapsibleSection title="2. Diagnostics acceptés par la CNESST" defaultOpen={false}>
+                  <FormField
+                    control={form.control}
+                    name="diagnosticsCnesst"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <FormLabel className="text-sm font-semibold text-gray-700">Diagnostics acceptés :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleDictation('diagnosticsCnesst')}
+                              className="no-print bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Mic className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[80px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                              placeholder="Ex: Déchirure mollet droit, entorse cheville gauche..."
+                            />
+                          </FormControl>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </CollapsibleSection>
+
+                {/* 3. Modalité de l'entrevue */}
+                <CollapsibleSection title="3. Modalité de l'entrevue" defaultOpen={false}>
+                  <FormField
+                    control={form.control}
+                    name="modaliteEntrevue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <FormLabel className="text-sm font-semibold text-gray-700">Modalité de l'entrevue :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleDictation('modaliteEntrevue')}
+                              className="no-print bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Mic className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[200px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                              placeholder="Décrivez la modalité de l'entrevue..."
+                            />
+                          </FormControl>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </CollapsibleSection>
+
+                {/* 4. Identification */}
+                <CollapsibleSection title="4. Identification" defaultOpen={false}>
+                  <div className="space-y-6">
+                    {/* Âge */}
+                    <FormField
+                      control={form.control}
+                      name="age"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">Âge :</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('age')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[60px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Indiquez l'âge du patient..."
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Dominance */}
+                    <FormField
+                      control={form.control}
+                      name="dominance"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">Dominance :</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('dominance')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[60px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Indiquez la dominance du patient..."
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Emploi */}
+                    <FormField
+                      control={form.control}
+                      name="emploi"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">Emploi :</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('emploi')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Décrivez l'emploi et les activités du patient..."
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* 5. Antécédents */}
+                <CollapsibleSection title="5. Antécédents" defaultOpen={false}>
+                  <div className="flex items-center justify-end mb-4">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleDictation('antecedentsMedicaux')}
+                      className="no-print bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Mic className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="pl-4 space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="antecedentsMedicaux"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">Médicaux :</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[60px]" 
+                                placeholder="Ex: Diabète type 2, syndrome tunnel carpien"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="antecedentsChirurgicaux"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">Chirurgicaux :</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[60px]" 
+                                placeholder="Ex: décompression tunnel carpien bilatéral"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="antecedentsLesion"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">Au site et au pourtour de la lésion :</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="field-input min-h-[60px]" 
+                                placeholder="Aucun"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="space-y-2">
+                      <FormLabel className="field-label">Accidentels :</FormLabel>
+                      <div className="pl-4 space-y-2">
+                        <FormField
+                          control={form.control}
+                          name="antecedentsCnesst"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">CNESST :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="Aucun" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="antecedentsSaaq"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">SAAQ :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="Aucun" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="antecedentsAutres"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Autres :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="Aucun" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="antecedentsAllergie"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="field-group">
+                            <FormLabel className="field-label">Allergie :</FormLabel>
+                            <FormControl>
+                              <Input {...field} className="field-input" placeholder="Pénicilline et sulfonamides" />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="antecedentsTabac"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="field-group">
+                              <FormLabel className="field-label">Tabac :</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="field-input">
+                                    <SelectValue placeholder="négatif" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="négatif">négatif</SelectItem>
+                                  <SelectItem value="positif">positif</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="antecedentsCannabis"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="field-group">
+                              <FormLabel className="field-label">Cannabis :</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="field-input">
+                                    <SelectValue placeholder="négatif" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="négatif">négatif</SelectItem>
+                                  <SelectItem value="positif">positif</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="antecedentsAlcool"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="field-group">
+                              <FormLabel className="field-label">Alcool :</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="field-input">
+                                    <SelectValue placeholder="négatif" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="négatif">négatif</SelectItem>
+                                  <SelectItem value="positif">positif</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </CollapsibleSection>
+
+                {/* 6. Médication actuelle */}
+                <CollapsibleSection title="6. Médication actuelle et mesures thérapeutiques en cours" defaultOpen={false}>
+                  <div className="flex items-center justify-end mb-4">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleDictation('medicationActuelle')}
+                      className="no-print bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Mic className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="pl-4">
+                    <FormField
+                      control={form.control}
+                      name="medicationActuelle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[120px]" 
+                              placeholder="Détaillez la médication actuelle et les mesures thérapeutiques en cours"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* 7. Historique de faits et évolution (FILLABLE with AI) */}
+                <CollapsibleSection title={t.section7} defaultOpen={false}>
+                  <div className="flex items-center justify-end mb-4">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleDictation('historiqueEvolution')}
+                      className="no-print bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Mic className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="pl-4">
+                    <FormField
+                      control={form.control}
+                      name="historiqueEvolution"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <AIFormatSection7 
+                              value={field.value || ''}
+                              onValueChange={field.onChange}
+                              language={language}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* 8. Questionnaire subjectif et état actuel (FILLABLE) */}
+                <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={false}>
+                  <div className="space-y-4">
+                    {/* Single Input for AI Distribution */}
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="text-sm font-semibold text-blue-800">
+                          {language === 'fr' 
+                            ? 'Saisie globale (l\'IA distribuera automatiquement le contenu)' 
+                            : 'Global Input (AI will automatically distribute content)'
+                          }
+                        </label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => handleDictation('section8Input')}
+                          className="no-print bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Mic className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <FormField
+                        control={form.control}
+                        name="section8Input"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="space-y-3">
+                                <Textarea
+                                  {...field}
+                                  placeholder={language === 'fr' 
+                                    ? "Entrez ici toutes les informations du questionnaire subjectif. L'IA les distribuera automatiquement dans les sections appropriées ci-dessous."
+                                    : "Enter all subjective questionnaire information here. AI will automatically distribute it to appropriate sections below."
+                                  }
+                                  className="min-h-[120px] resize-none"
+                                />
+                                <AIFormatSection8
+                                  value={field.value}
+                                  onValueChange={(formattedText) => {
+                                    // Parse the AI-formatted text and distribute to appropriate fields
+                                    const sections = parseSection8Content(formattedText);
+                                    if (sections.appreciation) form.setValue('appreciationEvolution', sections.appreciation);
+                                    if (sections.plaintes) form.setValue('plaintesproblemes', sections.plaintes);
+                                    if (sections.impact) form.setValue('impactAvq', sections.impact);
+                                  }}
+                                  language={language}
+                                />
+                              </div>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="pl-4 space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="appreciationEvolution"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="mb-2 block">Appréciation subjective de l'évolution :</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[100px]" 
+                              placeholder="Décrivez l'appréciation subjective de l'évolution"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="plaintesproblemes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="mb-2 block">Plaintes et problèmes :</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[120px]" 
+                              placeholder="Décrivez les plaintes et problèmes actuels"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="impactAvq"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="mb-2 block">Impact sur AVQ/AVD :</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[80px]" 
+                              placeholder="Décrivez l'impact sur les activités de la vie quotidienne"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* 9. Examen Physique (FILLABLE) */}
+                <CollapsibleSection title="9. Examen Physique" defaultOpen={false}>
+                  <div className="flex items-center justify-end mb-4">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleDictation('observationGenerale')}
+                      className="no-print bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Mic className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="pl-4 space-y-6">
+                    
+                    {/* Informations générales */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="examenPoids"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="field-group">
+                              <FormLabel className="field-label">Poids :</FormLabel>
+                              <FormControl>
+                                <Input {...field} className="field-input" placeholder="60kg" />
+                              </FormControl>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="examenTaille"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="field-group">
+                              <FormLabel className="field-label">Taille :</FormLabel>
+                              <FormControl>
+                                <Input {...field} className="field-input" placeholder="1.60m" />
+                              </FormControl>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="examenDominance"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="field-group">
+                              <FormLabel className="field-label">Dominance :</FormLabel>
+                              <FormControl>
+                                <Input {...field} className="field-input" placeholder="Droitière" />
+                              </FormControl>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Observation générale */}
+                    <FormField
+                      control={form.control}
+                      name="observationGenerale"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="mb-2">
+                            <div className="flex items-center justify-between mb-2">
+                              <FormLabel className="block">Observation générale et attitude :</FormLabel>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 mb-3 no-print">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const normalRightText = `Le travailleur s'est présenté à l'heure pour l'évaluation. À l'accueil, il se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur droit. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et le travailleur n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, le travailleur présente des gestes fluides sans surprotection.
+
+Le travailleur est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
+
+La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu de façon à bien exposer les zones anatomiques à évaluer.`;
+                                  field.onChange(normalRightText);
+                                }}
+                                className="text-xs px-3 py-2 h-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200 whitespace-nowrap"
+                              >
+                                Normal Right Lower Limb Male
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const normalLeftText = `Le travailleur s'est présenté à l'heure pour l'évaluation. À l'accueil, il se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur gauche. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et le travailleur n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, le travailleur présente des gestes fluides sans surprotection.
+
+Le travailleur est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
+
+La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu de façon à bien exposer les zones anatomiques à évaluer.`;
+                                  field.onChange(normalLeftText);
+                                }}
+                                className="text-xs px-3 py-2 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 whitespace-nowrap"
+                              >
+                                Normal Left Lower Limb Male
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const normalRightFemaleText = `La travailleuse s'est présentée à l'heure pour l'évaluation. À l'accueil, elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur droit. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et la travailleuse n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, la travailleuse présente des gestes fluides sans surprotection.
+
+La travailleuse est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
+
+La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue de façon à bien exposer les zones anatomiques à évaluer.`;
+                                  field.onChange(normalRightFemaleText);
+                                }}
+                                className="text-xs px-3 py-2 h-auto bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200 whitespace-nowrap"
+                              >
+                                Normal Right Lower Limb Female
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const normalLeftFemaleText = `La travailleuse s'est présentée à l'heure pour l'évaluation. À l'accueil, elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur gauche. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et la travailleuse n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, la travailleuse présente des gestes fluides sans surprotection.
+
+La travailleuse est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
+
+La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue de façon à bien exposer les zones anatomiques à évaluer.`;
+                                  field.onChange(normalLeftFemaleText);
+                                }}
+                                className="text-xs px-3 py-2 h-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 whitespace-nowrap"
+                              >
+                                Normal Left Lower Limb Female
+                              </Button>
+                            </div>
+                          </div>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[100px]" 
+                              placeholder="Décrivez l'observation générale et l'attitude du patient"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Rachis Lombaire */}
+                    <Card className="border p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">Rachis Lombaire :</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            form.setValue('rachisPalpation', 'aucune douleur au niveau des apophyses épineuses et en para lombaire droit et gauche.');
+                            form.setValue('rachisInspection', 'Lordose lombaire conservée. Masse musculaire paravertébrale préservée. Aucune cicatrice observée.');
+                          }}
+                          className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                        >
+                          NORMAL
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        <FormField
+                          control={form.control}
+                          name="rachisPalpation"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Palpation :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="apophyses épineuses et para spinal sans douleur" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="rachisInspection"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Inspection :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="lordose lombaire conservée" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Amplitude articulaire table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Amplitude articulaire :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Mouvement</th>
+                                  <th className="border p-2 text-left">Patient(e)</th>
+                                  <th className="border p-2 text-left">Normale</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Flexion</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisFlexion"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">90°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Extension</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisExtension"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">30°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Flexion Latérale G.</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisFlexionLateraleG"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">30°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Flexion Latérale D.</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisFlexionLateraleD"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">30°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Rotation G.</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisRotationG"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">30°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Rotation D.</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisRotationD"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">30°</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Manœuvres radiculaires table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Manœuvres radiculaires :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Test</th>
+                                  <th className="border p-2 text-left">Droit</th>
+                                  <th className="border p-2 text-left">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">S.L.R.</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisSlrDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisSlrGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Tripode</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisTripodeDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisTripodesGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Lasègue</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisLasegueDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisLasegueGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Lasègue inversé (Ely)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisLasegueInverseDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="rachisLasegueInverseGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Hanches section */}
+                    <Card className="border p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">Hanches :</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            form.setValue('hanchesPalpation', 'Aucune douleur au niveau des grands trochanters.');
+                            form.setValue('hanchesInspection', 'Aucune atrophie musculaire au niveau des fessiers ou des cuisses. Aucune cicatrice observée.');
+                          }}
+                          className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                        >
+                          NORMAL
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        <FormField
+                          control={form.control}
+                          name="hanchesPalpation"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Palpation :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="grands trochanters sans douleur" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="hanchesInspection"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Inspection :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="pas d'atrophie fessiers ou cuisse. Aucune cicatrice" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Amplitude articulaire hanches table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Amplitude articulaire :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Mouvement</th>
+                                  <th className="border p-2 text-center" colSpan={2}>Droit</th>
+                                  <th className="border p-2 text-center" colSpan={2}>Gauche</th>
+                                  <th className="border p-2 text-left">Normale</th>
+                                </tr>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2"></th>
+                                  <th className="border p-2 text-center">Actif</th>
+                                  <th className="border p-2 text-center">Passif</th>
+                                  <th className="border p-2 text-center">Actif</th>
+                                  <th className="border p-2 text-center">Passif</th>
+                                  <th className="border p-2"></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Flexion</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesFlexionDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesFlexionDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesFlexionGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesFlexionGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">120°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Extension</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesExtensionDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesExtensionDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesExtensionGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesExtensionGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">30°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Rotation interne</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesRotationInterneDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesRotationInterneDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesRotationInterneGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesRotationInterneGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">40°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Rotation externe</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesRotationExterneDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesRotationExterneDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesRotationExterneGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesRotationExterneGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">50°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Abduction</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesAbductionDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesAbductionDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesAbductionGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesAbductionGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">40°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Adduction</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesAdductionDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesAdductionDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesAdductionGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="hanchesAdductionGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">20°</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Genoux section */}
+                    <Card className="border p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">Genoux :</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            form.setValue('genouxPalpation', 'Aucune douleur à l\'interligne articulaire, au niveau des rotules et au niveau des insertions ligamentaires et tendineuses.');
+                            form.setValue('genouxInspection', 'Aucune atrophie musculaire. Aucune déformation ou de cicatrice');
+                          }}
+                          className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                        >
+                          NORMAL
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        <FormField
+                          control={form.control}
+                          name="genouxPalpation"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Palpation :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="interligne articulaire, rotules, insertions sans douleur" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="genouxInspection"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Inspection :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="pas d'atrophie musculaire, déformation ou cicatrice" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Amplitude articulaire genoux table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Amplitude articulaire :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Mouvement</th>
+                                  <th className="border p-2 text-center" colSpan={2}>Droit</th>
+                                  <th className="border p-2 text-center" colSpan={2}>Gauche</th>
+                                  <th className="border p-2 text-left">Normale</th>
+                                </tr>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2"></th>
+                                  <th className="border p-2 text-center">Actif</th>
+                                  <th className="border p-2 text-center">Passif</th>
+                                  <th className="border p-2 text-center">Actif</th>
+                                  <th className="border p-2 text-center">Passif</th>
+                                  <th className="border p-2"></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Flexion</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxFlexionDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxFlexionDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxFlexionGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxFlexionGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">135°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Extension</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxExtensionDroitActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxExtensionDroitPassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxExtensionGaucheActif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxExtensionGauchePassif"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">0°</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Manœuvres ligamentaires table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Manœuvres ligamentaires :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">LCI 0°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLci0Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLci0Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">LCI 20°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLci20Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLci20Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">LCE 0°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLce0Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLce0Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">LCE 20°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLce20Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLce20Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Lachman</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLachmanDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxLachmanGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Pivot</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxPivotDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxPivotGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Tiroir antérieur</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTiroirAnterieurDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTiroirAnterieurGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Tiroir postérieur</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTiroirPosterieurDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTiroirPosterieurGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Sag postérieur</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxSagPosterieurDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxSagPosterieurGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Dial à 30°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxDial30Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxDial30Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Dial à 90°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxDial90Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxDial90Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Manœuvres méniscales table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Manœuvres méniscales :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Apley</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxApleyDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxApleyGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">McMurray</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxMcMurrayDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxMcMurrayGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Thessaly</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxThessalyDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxThessalyGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Circonférence table */}
+                        <div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Circonférence cuisse (cm)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxCirconferenceCuisseDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxCirconferenceCuisseGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Circonférence mollet (cm)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxCirconferenceMolletDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxCirconferenceMolletGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Atrophie musculaire section */}
+                    <FormField
+                      control={form.control}
+                      name="atrophieMusculaire"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="mb-2 block">Atrophie musculaire :</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[80px]" 
+                              placeholder="TBD by Dr Centomo"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Pieds / Chevilles section */}
+                    <Card className="border p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">Pieds / Chevilles :</h4>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            form.setValue('piedsCheillesPalpation', 'Aucune douleur aux malléoles, aucune douleur à l\'interligne articulaire des chevilles, aucune douleur au mi-pied.');
+                            form.setValue('piedsChevillesInspection', 'Aucune déformation. Arches plantaires présente et normale. Aucune cicatrice');
+                          }}
+                          className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                        >
+                          NORMAL
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        <FormField
+                          control={form.control}
+                          name="piedsCheillesPalpation"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Palpation :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="malléoles, interligne articulaire, mi-pied sans douleur" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="piedsChevillesInspection"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="field-group">
+                                <FormLabel className="field-label">Inspection :</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="field-input" placeholder="pas de déformation, arches plantaires normales, aucune cicatrice" />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Amplitude articulaire pieds/chevilles table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Amplitude articulaire :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center" colSpan={2}>Droit</th>
+                                  <th className="border p-2 text-center" colSpan={2}>Gauche</th>
+                                  <th className="border p-2 text-left">Normale</th>
+                                </tr>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2"></th>
+                                  <th className="border p-2 text-center">Actif</th>
+                                  <th className="border p-2 text-center">Passif</th>
+                                  <th className="border p-2 text-center">Actif</th>
+                                  <th className="border p-2 text-center">Passif</th>
+                                  <th className="border p-2"></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Dorsiflexion cheville</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsDorsiflexionCheville"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">-</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsDorsiflexionCheville"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">-</td>
+                                  <td className="border p-2">20°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Plantiflexion cheville</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPlantifexionCheville"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">-</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPlantifexionCheville"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">-</td>
+                                  <td className="border p-2">40°</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Mvts sous-astragaliens</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsMvtsSousAstragaliensDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsMvtsSousAstragaliensDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsMvtsSousAstragaliensGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsMvtsSousAstragaliensGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">-</td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Mvts mid-tarsien</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsMvtsMidTarsienDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsMvtsMidTarsienDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsMvtsMidTarsienGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsMvtsMidTarsienGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">-</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Manœuvres ligamentaires pieds/chevilles table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Manœuvres ligamentaires :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Tiroir 0°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsTiroir0Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsTiroir0Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Tiroir 20°</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsTiroir20Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsTiroir20Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Varus stress</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsVarusStressDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsVarusStressGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Laxité calcanéo-fibulaire</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsLaxiteCalcaneoFibulaireDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsLaxiteCalcaneoFibulaireGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Squeeze test</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSqueezeTestDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSqueezeTestGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Manœuvres spécifiques tendons pieds/chevilles table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Manœuvres spécifiques tendons :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Single heel raise (Tib post)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSingleHeelRaiseDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSingleHeelRaiseGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Thompson (Tendon d'Achille)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsThompsonDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsThompsonGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Test d'appréhension (Fibulaires)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsTestApprehensionDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsTestApprehensionGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Neuro-vasculaire section */}
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <FormLabel className="mb-0">Neuro-vasculaire :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                form.setValue('piedsNeuroVasculaire', 'TBD by Dr Centomo');
+                              }}
+                              className="text-xs px-3 py-1 h-auto bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200 no-print"
+                            >
+                              NORMAL
+                            </Button>
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name="piedsNeuroVasculaire"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Textarea 
+                                    {...field} 
+                                    className="w-full min-h-[80px]" 
+                                    placeholder="Évaluation neuro-vasculaire..."
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Forces neuro table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Forces :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Racine (ASIA)</th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">L2 (flexion hanche)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL2Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL2Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L3 (extension genou)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL3Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL3Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L4 (dorsiflexion cheville)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL4Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL4Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L5 (extension D1 pied)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL5Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceL5Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">S1 (flexion plantaire cheville)</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceS1Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsForceS1Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Sensibilités neuro table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Sensibilités :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Racine</th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">L2</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL2Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL2Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L3</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL3Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL3Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L4</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL4Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL4Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">L5</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL5Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteL5Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">S1</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteS1Droit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsSensibiliteS1Gauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Réflexes neuro table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Réflexes :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left">Réflexes</th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Rotulien</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeRotulienDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeRotulienGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Achilléen</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeAchilleenDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeAchilleenGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Babinski</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeBabinskiDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsReflexeBabinskiGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Pouls neuro table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Pouls :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droit</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Tibial postérieur</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPoulsTibialPosterieurDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPoulsTibialPosterieurGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Pédieux</td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPoulsPedieuxDroit"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-2">
+                                    <FormField
+                                      control={form.control}
+                                      name="piedsPoulsPedieuxGauche"
+                                      render={({ field }) => (
+                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Additional examination sections */}
+                    <FormField
+                      control={form.control}
+                      name="examensAdditionnels"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="mb-2 block">Examens additionnels :</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              {...field} 
+                              className="w-full min-h-[120px]" 
+                              placeholder="Ajoutez ici d'autres examens physiques ou observations"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* 10. Examens paracliniques (STATIC) */}
+                <CollapsibleSection title={t.section10} defaultOpen={false}>
+                  <div className="pl-4 space-y-4">
+                    <div className="bg-gray-50 p-4 rounded border">
+                      <p className="text-sm text-gray-700">
+                        {t.paraclinicalExamsText}
+                      </p>
+                    </div>
+                  </div>
+                </CollapsibleSection>
+
+                {/* 11. Conclusion (FILLABLE) */}
+                <CollapsibleSection title={t.section11} defaultOpen={false}>
+                  <div className="pl-4 space-y-6">
+                    {/* AI Generation and Copy Components */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <AIGenerateSection11
+                        formData={form.getValues()}
+                        language={language}
+                        onGenerated={(conclusion) => {
+                          form.setValue('conclusionResume', conclusion.resume);
+                          form.setValue('conclusionDiagnostic', conclusion.diagnostic);
+                          form.setValue('conclusionDateConsolidation', conclusion.dateConsolidation);
+                          form.setValue('conclusionSoinsTraitements', conclusion.soinsTraitements);
+                          form.setValue('conclusionAtteintePermanente', conclusion.atteintePermanente);
+                          form.setValue('conclusionLimitationsFonctionnelles', conclusion.limitationsFonctionnelles);
+                          form.setValue('conclusionEvaluationLimitations', conclusion.evaluationLimitations);
+                        }}
+                      />
+                      <div className="flex items-end">
+                        <CopySection11
+                          formData={form.watch()}
+                          language={language}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Résumé */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionResume"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionSummary}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionResume')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Résumé du cas et des principales constatations"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Diagnostic */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionDiagnostic"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionDiagnosis}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionDiagnostic')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[80px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Diagnostic médical principal et secondaires"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Date de consolidation */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionDateConsolidation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionConsolidationDate}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionDateConsolidation')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[80px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Date de consolidation médicale avec justification"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Nature, nécessité, suffisance, durée des soins */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionSoinsTraitements"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionCareNecessity}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionSoinsTraitements')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Décrivez la nature, nécessité, suffisance et durée des soins"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Existence de l'atteinte permanente */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionAtteintePermanente"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionPermanentImpairment}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionAtteintePermanente')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Évaluez l'existence d'une atteinte permanente"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Existence de limitations fonctionnelles */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionLimitationsFonctionnelles"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionFunctionalLimitations}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionLimitationsFonctionnelles')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Décrivez l'existence de limitations fonctionnelles"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Évaluation des limitations fonctionnelles */}
+                    <FormField
+                      control={form.control}
+                      name="conclusionEvaluationLimitations"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel className="text-sm font-semibold text-gray-700">{t.conclusionLimitationsEvaluation}</FormLabel>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('conclusionEvaluationLimitations')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Évaluez en détail les limitations fonctionnelles"
+                              />
+                            </FormControl>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CollapsibleSection>
+              </div>
+            </CollapsibleSection>
+
+            {/* Footer Actions */}
+            <div className="flex justify-between items-center pt-6 no-print">
+              <div className="text-sm text-gray-500">
+                Dernière sauvegarde: <span>{lastSaved}</span>
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  type="button" 
+                  onClick={() => window.open('', '_blank')} 
+                  variant="outline"
+                  className="bg-gray-600 hover:bg-gray-700 text-white"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Aperçu
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={handleExportPDF}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Exporter PDF
+                </Button>
+              </div>
+            </div>
+
+          </form>
+        </Form>
+      </div>
+
+      {/* Voice Recognition Modal */}
+      {/* Floating Record Button */}
+      <FloatingRecordButton 
+        language={language}
+        onDirectDictation={handleDirectDictation}
+      />
+
+      <DictationModal
+        open={!!currentDictationField}
+        onClose={() => setCurrentDictationField(null)}
+        isListening={isListening}
+        onStartDictation={() => {}} // Already handled in handleDictation
+        onStopDictation={handleStopDictation}
+        error={error}
+        language={language}
+      />
+
+      {/* Save Form Dialog */}
+      <SaveFormDialog
+        open={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+        formData={form.getValues()}
+        language={language}
+      />
+
+      {/* Saved Forms Manager Dialog */}
+      <Dialog open={showSavedForms} onOpenChange={setShowSavedForms}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'fr' ? 'Formulaires sauvegardés' : 'Saved Forms'}
+            </DialogTitle>
+          </DialogHeader>
+          <SavedFormsManager
+            language={language}
+            onLoadForm={handleLoadForm}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
