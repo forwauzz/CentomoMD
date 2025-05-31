@@ -353,13 +353,63 @@ export default function DictationPage({ language }: DictationPageProps) {
               <CardTitle className="text-lg">{t.finalText}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 p-6 flex flex-col">
-              <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-y-auto mb-6">
-                <div className="text-gray-800 whitespace-pre-wrap">
-                  {finalText || (language === 'fr' 
-                    ? "Le texte final apparaîtra ici..." 
-                    : "Final text will appear here..."
-                  )}
-                </div>
+              {/* Final Text Display/Editor */}
+              <div className="flex-1 mb-6">
+                {isEditing ? (
+                  <div className="h-full flex flex-col">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">
+                        {language === 'fr' ? 'Modifier le texte :' : 'Edit text:'}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleSaveEdits}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Save className="w-3 h-3 mr-1" />
+                          {language === 'fr' ? 'Confirmer' : 'Confirm'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleCancelEditing}
+                        >
+                          {language === 'fr' ? 'Annuler' : 'Cancel'}
+                        </Button>
+                      </div>
+                    </div>
+                    <Textarea
+                      value={editableText}
+                      onChange={(e) => setEditableText(e.target.value)}
+                      className="flex-1 min-h-[300px] resize-none"
+                      placeholder={language === 'fr' 
+                        ? "Modifiez le texte ici..." 
+                        : "Edit text here..."
+                      }
+                    />
+                  </div>
+                ) : (
+                  <div className="h-full bg-gray-50 rounded-lg p-4 overflow-y-auto relative">
+                    <div className="text-gray-800 whitespace-pre-wrap">
+                      {finalText || (language === 'fr' 
+                        ? "Le texte final apparaîtra ici..." 
+                        : "Final text will appear here..."
+                      )}
+                    </div>
+                    {finalText && !isEditing && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleStartEditing}
+                        className="absolute top-2 right-2"
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        {language === 'fr' ? 'Modifier' : 'Edit'}
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
               
               {/* Controls */}
@@ -385,6 +435,21 @@ export default function DictationPage({ language }: DictationPageProps) {
                   )}
                 </div>
                 
+                {/* AI Formatting Button */}
+                {finalText && (selectedSection === 'historiqueEvolution' || selectedSection === 'appreciationEvolution') && (
+                  <Button
+                    onClick={handleFormatText}
+                    disabled={formatTextMutation.isPending}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white mb-2"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    {formatTextMutation.isPending 
+                      ? (language === 'fr' ? 'Formatage en cours...' : 'Formatting...') 
+                      : (language === 'fr' ? 'Formater avec IA' : 'Format with AI')
+                    }
+                  </Button>
+                )}
+
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -409,7 +474,7 @@ export default function DictationPage({ language }: DictationPageProps) {
                 
                 <Button
                   onClick={handleSaveToSection}
-                  disabled={!selectedSection || !finalText}
+                  disabled={!selectedSection || (!finalText && !editableText)}
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
