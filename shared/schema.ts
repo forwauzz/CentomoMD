@@ -42,6 +42,7 @@ export const medicalForms = pgTable("medical_forms", {
   historiqueEvolution: text("historique_evolution"),
   
   // Section 8: Questionnaire subjectif et état actuel
+  section8Input: text("section8_input"),
   appreciationEvolution: text("appreciation_evolution"),
   plaintesproblemes: text("plaintes_problemes"),
   impactAvq: text("impact_avq"),

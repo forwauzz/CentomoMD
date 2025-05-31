@@ -37,6 +37,7 @@ const translations = {
       age: "4. Identification - Âge",
       dominance: "4. Identification - Dominance",
       emploi: "4. Identification - Emploi",
+      section8Input: "8. Saisie globale - Questionnaire subjectif",
       antecedentsMedicaux: "5. Antécédents - Médicaux",
       antecedentsChirurgicaux: "5. Antécédents - Chirurgicaux",
       antecedentsLesion: "5. Antécédents - Au site et au pourtour de la lésion",

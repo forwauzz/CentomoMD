@@ -64,6 +64,7 @@ const formSchema = z.object({
   historiqueEvolution: z.string().optional(),
   
   // Section 8: Questionnaire subjectif et état actuel
+  section8Input: z.string().optional(),
   appreciationEvolution: z.string().optional(),
   plaintesproblemes: z.string().optional(),
   impactAvq: z.string().optional(),
@@ -571,6 +572,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       antecedentsAlcool: "négatif",
       medicationActuelle: "Arrêt de tout traitement en lien avec sa lésion (physiothérapie et ergothérapie) : atteinte de plateau thérapeutique;\n\nExercices à domicile",
       historiqueEvolution: "La travailleuse et une chauffeuse de taxi adapté. Ses tâches consistent à conduire un taxi de transport adapté, elle accompagne les gens en fauteuil roulant et donc doit monter et descendre des rampes d'accès avec les patients en fauteuil et parfois elle doit transporter des marchandises médicales d'un hôpital à l'autre. Parfois elle doit conduire jusqu'à Montréal.\n\nLa fiche de réclamation de la travailleuse décrit l'événement suivant survenu le 12 août 2020 :\n\n« Je montais une pente à l'hôpital de Valleyfield en poussant un chariot avec des glacières dessus et à la fin de la pentente j'ai senti grosse douleur au niveau du mollet droit avec sensation de brûlure… Quand fut le temps de reposer mon pied par terre, j'en étais incapable j'ai tout de suite communiqué avec mon employeur pour lui expliquer ce qui venait de se passer… comme j'étais déjà dans un hôpital, il m'a dit d'aller tout de suite consulter…",
+      section8Input: "",
       appreciationEvolution: "La travailleuse rapporte une nette amélioration depuis son accident. Elle rapporte que dans les derniers mois, elle a observé peu d'amélioration au niveau de sa condition et juge d'elle-même qu'elle a atteint un plateau thérapeutique en physiothérapie et ergothérapie...",
       plaintesproblemes: "Elle se plaint principalement de sensations de brûlure intermittente au niveau de son mollet droite et au niveau antérieur de sa jambe droite. Elle ne peut rapporter d'éléments déclencheurs de ses douleurs et elles surviennent subitement...",
       impactAvq: "cf feuille en annexe.",
@@ -830,6 +832,50 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
         description: t.allDataDeleted,
       });
     }
+  };
+
+  const parseSection8Content = (formattedText: string) => {
+    const sections = {
+      appreciation: '',
+      plaintes: '',
+      impact: ''
+    };
+
+    const lines = formattedText.split('\n').filter(line => line.trim());
+    let currentSection = '';
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      if (trimmedLine.includes('Appréciation subjective de l\'évolution') || 
+          trimmedLine.includes('Appréciation subjective') ||
+          trimmedLine.includes('évolution')) {
+        currentSection = 'appreciation';
+        continue;
+      } else if (trimmedLine.includes('Plaintes et problèmes') || 
+                 trimmedLine.includes('Plaintes') ||
+                 trimmedLine.includes('problèmes')) {
+        currentSection = 'plaintes';
+        continue;
+      } else if (trimmedLine.includes('Impact sur AVQ/AVD') || 
+                 trimmedLine.includes('Impact sur AVQ') ||
+                 trimmedLine.includes('Impact')) {
+        currentSection = 'impact';
+        continue;
+      }
+      
+      if (currentSection && trimmedLine && !trimmedLine.includes(':')) {
+        if (currentSection === 'appreciation') {
+          sections.appreciation += (sections.appreciation ? '\n' : '') + trimmedLine;
+        } else if (currentSection === 'plaintes') {
+          sections.plaintes += (sections.plaintes ? '\n' : '') + trimmedLine;
+        } else if (currentSection === 'impact') {
+          sections.impact += (sections.impact ? '\n' : '') + trimmedLine;
+        }
+      }
+    }
+    
+    return sections;
   };
 
   const handleSave = () => {
@@ -1574,56 +1620,37 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
 
                 {/* 8. Questionnaire subjectif et état actuel (FILLABLE) */}
                 <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={false}>
-                  <div className="flex items-center justify-end mb-4">
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => handleDictation('appreciationEvolution')}
-                      className="no-print bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Mic className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  {/* AI Formatting for entire Section 8 */}
-                  <div className="mb-4">
-                    <AIFormatSection8
-                      value={`${form.getValues('appreciationEvolution') || ''}${form.getValues('plaintesproblemes') || ''}${form.getValues('impactAvq') || ''}`}
-                      onValueChange={(formattedText) => {
-                        // Parse the formatted text and distribute to appropriate fields
-                        const lines = formattedText.split('\n').filter(line => line.trim());
-                        let currentSection = '';
-                        let appreciationText = '';
-                        let plaintesText = '';
-                        let impactText = '';
-                        
-                        for (const line of lines) {
-                          if (line.includes('Appréciation subjective de l\'évolution')) {
-                            currentSection = 'appreciation';
-                            continue;
-                          } else if (line.includes('Plaintes et problèmes')) {
-                            currentSection = 'plaintes';
-                            continue;
-                          } else if (line.includes('Impact sur AVQ/AVD')) {
-                            currentSection = 'impact';
-                            continue;
+                  <div className="space-y-4">
+                    {/* Single Input for AI Distribution */}
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="text-sm font-semibold text-blue-800">
+                          {language === 'fr' 
+                            ? 'Saisie globale (l\'IA distribuera automatiquement le contenu)' 
+                            : 'Global Input (AI will automatically distribute content)'
                           }
-                          
-                          if (currentSection === 'appreciation' && line.trim()) {
-                            appreciationText += (appreciationText ? '\n' : '') + line;
-                          } else if (currentSection === 'plaintes' && line.trim()) {
-                            plaintesText += (plaintesText ? '\n' : '') + line;
-                          } else if (currentSection === 'impact' && line.trim()) {
-                            impactText += (impactText ? '\n' : '') + line;
-                          }
-                        }
-                        
-                        if (appreciationText) form.setValue('appreciationEvolution', appreciationText);
-                        if (plaintesText) form.setValue('plaintesproblemes', plaintesText);
-                        if (impactText) form.setValue('impactAvq', impactText);
-                      }}
-                      language={language}
-                    />
+                        </label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => handleDictation('section8Input')}
+                          className="no-print bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Mic className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <AIFormatSection8
+                        value=""
+                        onValueChange={(formattedText) => {
+                          // Parse the AI-formatted text and distribute to appropriate fields
+                          const sections = parseSection8Content(formattedText);
+                          if (sections.appreciation) form.setValue('appreciationEvolution', sections.appreciation);
+                          if (sections.plaintes) form.setValue('plaintesproblemes', sections.plaintes);
+                          if (sections.impact) form.setValue('impactAvq', sections.impact);
+                        }}
+                        language={language}
+                      />
+                    </div>
                   </div>
                   
                   <div className="pl-4 space-y-4">
