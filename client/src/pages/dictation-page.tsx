@@ -87,6 +87,7 @@ const translations = {
       age: "4. Identification - Age",
       dominance: "4. Identification - Dominance",
       emploi: "4. Identification - Employment",
+      section8Input: "8. Global Input - Subjective Questionnaire",
       antecedentsMedicaux: "5. Medical History - Medical",
       antecedentsChirurgicaux: "5. Medical History - Surgical",
       antecedentsLesion: "5. Medical History - At and around lesion site",
