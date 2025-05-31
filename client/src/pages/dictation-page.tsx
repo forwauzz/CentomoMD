@@ -117,20 +117,27 @@ const translations = {
   }
 };
 
-export default function DictationPage({ language }: DictationPageProps) {
+export default function DictationPage({ language: propLanguage }: DictationPageProps) {
   const [, setLocation] = useLocation();
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [finalText, setFinalText] = useState<string>("");
   const [interimText, setInterimText] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editableText, setEditableText] = useState<string>("");
+  const [currentLanguage, setCurrentLanguage] = useState<'fr' | 'en'>(propLanguage);
   const { toast } = useToast();
   
-  const t = translations[language];
+  const t = translations[currentLanguage];
 
-  // Initialize with activeField from sessionStorage
+  // Initialize with activeField and language from sessionStorage
   useEffect(() => {
     const activeField = sessionStorage.getItem('activeField');
+    const storedLanguage = sessionStorage.getItem('dictationLanguage') as 'fr' | 'en';
+    
+    if (storedLanguage) {
+      setCurrentLanguage(storedLanguage);
+    }
+    
     if (activeField) {
       setSelectedSection(activeField);
       // Load existing text for this field if available
@@ -158,7 +165,7 @@ export default function DictationPage({ language }: DictationPageProps) {
     stopListening,
     resetTranscript,
   } = useSpeechRecognition({
-    language: language === 'fr' ? 'fr-CA' : 'en-US',
+    language: currentLanguage === 'fr' ? 'fr-CA' : 'en-US',
     continuous: true,
     interimResults: true,
   });
@@ -169,7 +176,7 @@ export default function DictationPage({ language }: DictationPageProps) {
       if (!selectedSection) return text;
       
       const endpoint = selectedSection === 'historiqueEvolution' ? '/api/format-section7' : '/api/format-section8';
-      const response = await apiRequest('POST', endpoint, { text, language });
+      const response = await apiRequest('POST', endpoint, { text, language: currentLanguage });
       const data = await response.json();
       return data.formattedText;
     },

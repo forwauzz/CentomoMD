@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { exportToPDF } from "@/lib/pdf-export";
 import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive, FolderOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 const formSchema = z.object({
   // Section 1: Mandat de l'évaluation (checkboxes)
@@ -512,6 +513,7 @@ interface MedicalFormProps {
 }
 
 export default function MedicalForm({ language, onLanguageChange }: MedicalFormProps) {
+  const [, setLocation] = useLocation();
   const [currentDictationField, setCurrentDictationField] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -795,11 +797,12 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   }, [form, debouncedSave]);
 
   const handleDictation = (fieldName: string) => {
-    // Store the field name in sessionStorage for the dictation page
+    // Store the field name and language in sessionStorage for the dictation page
     sessionStorage.setItem('activeField', fieldName);
+    sessionStorage.setItem('dictationLanguage', language);
     
-    // Navigate to the dedicated dictation page
-    window.location.href = '/dictation';
+    // Navigate to the dedicated dictation page using router
+    setLocation('/dictation');
   };
 
   const handleDirectDictation = (text: string, fieldName: string) => {
