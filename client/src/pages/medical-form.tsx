@@ -1575,7 +1575,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 6. Médication actuelle */}
-                <CollapsibleSection title="6. Médication actuelle et mesures thérapeutiques en cours" defaultOpen={false}>
+                <CollapsibleSection title="6. Médication actuelle et mesures thérapeutiques en cours" defaultOpen={false} id="section6">
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -1606,7 +1606,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 7. Historique de faits et évolution (FILLABLE with AI) */}
-                <CollapsibleSection title={t.section7} defaultOpen={false}>
+                <CollapsibleSection title={t.section7} defaultOpen={false} id="section7">
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -1637,7 +1637,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 8. Questionnaire subjectif et état actuel (FILLABLE) */}
-                <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={false}>
+                <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={false} id="section8">
                   <div className="space-y-4">
                     {/* Single Input for AI Distribution */}
                     <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -1746,7 +1746,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 9. Examen Physique (FILLABLE) */}
-                <CollapsibleSection title="9. Examen Physique" defaultOpen={false}>
+                <CollapsibleSection title="9. Examen Physique" defaultOpen={false} id="section9">
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -3874,7 +3874,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                 </CollapsibleSection>
 
                 {/* 10. Examens paracliniques (STATIC) */}
-                <CollapsibleSection title={t.section10} defaultOpen={false}>
+                <CollapsibleSection title={t.section10} defaultOpen={false} id="section10">
                   <div className="pl-4 space-y-4">
                     <div className="bg-gray-50 p-4 rounded border">
                       <p className="text-sm text-gray-700">
@@ -3885,7 +3885,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                 </CollapsibleSection>
 
                 {/* 11. Conclusion (FILLABLE) */}
-                <CollapsibleSection title={t.section11} defaultOpen={false}>
+                <CollapsibleSection title={t.section11} defaultOpen={false} id="section11">
                   <div className="pl-4 space-y-6">
                     {/* AI Generation and Copy Components */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
