@@ -6,13 +6,14 @@ interface CollapsibleSectionProps {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  id?: string;
 }
 
-export function CollapsibleSection({ title, children, defaultOpen = true }: CollapsibleSectionProps) {
+export function CollapsibleSection({ title, children, defaultOpen = true, id }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <Card className="form-section">
+    <Card id={id} className="form-section">
       <CardHeader 
         className="bg-gray-50 border-b cursor-pointer hover:bg-gray-100 transition-colors"
         onClick={() => setIsOpen(!isOpen)}

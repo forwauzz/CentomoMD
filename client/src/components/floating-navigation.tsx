@@ -34,6 +34,18 @@ export function FloatingNavigation({ language }: FloatingNavigationProps) {
     setIsOpen(!isOpen);
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+      // Close navigation after scrolling
+      setIsOpen(false);
+    }
+  };
+
   return (
     <div className="fixed top-1/2 right-4 transform -translate-y-1/2 z-40 no-print">
       {/* Toggle Button */}
@@ -66,6 +78,7 @@ export function FloatingNavigation({ language }: FloatingNavigationProps) {
               {sections.map((section) => (
                 <div
                   key={section.id}
+                  onClick={() => scrollToSection(section.id)}
                   className="p-2 rounded-md hover:bg-gray-100 cursor-pointer text-sm text-gray-700 transition-colors"
                 >
                   {language === 'fr' ? section.titleFr : section.titleEn}

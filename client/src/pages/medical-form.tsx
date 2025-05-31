@@ -1098,7 +1098,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
               <div className="space-y-4">
 
                 {/* 1. Mandat de l'évaluation */}
-                <CollapsibleSection title="1. Mandat de l'évaluation" defaultOpen={false}>
+                <CollapsibleSection title="1. Mandat de l'évaluation" defaultOpen={false} id="section1">
                   <div className="space-y-3 text-sm">
                     <p>Le but de l'évaluation est de répondre aux points suivants de l'article de la LATMP :</p>
                     <div className="space-y-3 pl-4">
@@ -1208,7 +1208,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 2. Diagnostics acceptés par la CNESST */}
-                <CollapsibleSection title="2. Diagnostics acceptés par la CNESST" defaultOpen={false}>
+                <CollapsibleSection title="2. Diagnostics acceptés par la CNESST" defaultOpen={false} id="section2">
                   <FormField
                     control={form.control}
                     name="diagnosticsCnesst"
@@ -1240,7 +1240,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 3. Modalité de l'entrevue */}
-                <CollapsibleSection title="3. Modalité de l'entrevue" defaultOpen={false}>
+                <CollapsibleSection title="3. Modalité de l'entrevue" defaultOpen={false} id="section3">
                   <FormField
                     control={form.control}
                     name="modaliteEntrevue"
@@ -1272,7 +1272,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 4. Identification */}
-                <CollapsibleSection title="4. Identification" defaultOpen={false}>
+                <CollapsibleSection title="4. Identification" defaultOpen={false} id="section4">
                   <div className="space-y-6">
                     {/* Âge */}
                     <FormField
@@ -1367,7 +1367,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 </CollapsibleSection>
 
                 {/* 5. Antécédents */}
-                <CollapsibleSection title="5. Antécédents" defaultOpen={false}>
+                <CollapsibleSection title="5. Antécédents" defaultOpen={false} id="section5">
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
