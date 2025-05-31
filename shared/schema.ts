@@ -15,6 +15,9 @@ export const medicalForms = pgTable("medical_forms", {
   // Section 2: Diagnostics acceptés par la CNESST
   diagnosticsCnesst: text("diagnostics_cnesst"),
   
+  // Section 3: Modalité de l'entrevue
+  modaliteEntrevue: text("modalite_entrevue"),
+  
   // Section 5: Antécédents
   antecedentsMedicaux: text("antecedents_medicaux"),
   antecedentsChirurgicaux: text("antecedents_chirurgicaux"),

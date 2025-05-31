@@ -30,6 +30,7 @@ const translations = {
     
     sections: {
       diagnosticsCnesst: "2. Diagnostics acceptés par la CNESST",
+      modaliteEntrevue: "3. Modalité de l'entrevue",
       antecedentsMedicaux: "5. Antécédents - Médicaux",
       antecedentsChirurgicaux: "5. Antécédents - Chirurgicaux",
       antecedentsLesion: "5. Antécédents - Au site et au pourtour de la lésion",
@@ -75,6 +76,7 @@ const translations = {
     
     sections: {
       diagnosticsCnesst: "2. Diagnoses Accepted by CNESST",
+      modaliteEntrevue: "3. Interview Modality",
       antecedentsMedicaux: "5. Medical History - Medical",
       antecedentsChirurgicaux: "5. Medical History - Surgical",
       antecedentsLesion: "5. Medical History - At and around lesion site",
