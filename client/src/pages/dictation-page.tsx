@@ -263,8 +263,9 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     formData[selectedSection] = textToSave;
     localStorage.setItem('medical-form-draft', JSON.stringify(formData));
     
-    // Also save to sessionStorage for immediate field update
-    sessionStorage.setItem(`dictation_${selectedSection}`, textToSave);
+    // Store dictation result and field for the medical form to pick up
+    sessionStorage.setItem('dictationResult', textToSave);
+    sessionStorage.setItem('dictationField', selectedSection);
     
     toast({
       title: t.textSaved,
@@ -273,6 +274,9 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
 
     // Clear the activeField from sessionStorage
     sessionStorage.removeItem('activeField');
+    
+    // Navigate back to the form
+    setLocation('/');
     
     // Reset editing state
     setIsEditing(false);

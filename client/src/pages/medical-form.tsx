@@ -796,6 +796,30 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
     return () => subscription.unsubscribe();
   }, [form, debouncedSave]);
 
+  // Handle dictation results when returning from dictation page
+  useEffect(() => {
+    const dictationResult = sessionStorage.getItem('dictationResult');
+    const dictationField = sessionStorage.getItem('dictationField');
+    
+    if (dictationResult && dictationField) {
+      // Get current value of the field
+      const currentValue = form.getValues(dictationField as any) || '';
+      
+      // Append the dictation result to the existing content
+      const newValue = currentValue ? `${currentValue}\n\n${dictationResult}` : dictationResult;
+      
+      // Update the form field
+      form.setValue(dictationField as any, newValue);
+      
+      // Clear the session storage
+      sessionStorage.removeItem('dictationResult');
+      sessionStorage.removeItem('dictationField');
+      
+      // Show success message
+      console.log(`Dictation result added to field: ${dictationField}`);
+    }
+  }, []); // Run only on mount
+
   const handleDictation = (fieldName: string) => {
     // Store the field name and language in sessionStorage for the dictation page
     sessionStorage.setItem('activeField', fieldName);
