@@ -185,14 +185,14 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
       setEditableText(formattedText);
       setIsEditing(true);
       toast({
-        title: language === 'fr' ? "Texte formaté" : "Text formatted",
-        description: language === 'fr' ? "Le texte a été formaté avec l'IA" : "Text has been formatted with AI",
+        title: currentLanguage === 'fr' ? "Texte formaté" : "Text formatted",
+        description: currentLanguage === 'fr' ? "Le texte a été formaté avec l'IA" : "Text has been formatted with AI",
       });
     },
     onError: () => {
       toast({
         title: "Erreur",
-        description: language === 'fr' ? "Erreur lors du formatage" : "Error during formatting",
+        description: currentLanguage === 'fr' ? "Erreur lors du formatage" : "Error during formatting",
         variant: "destructive",
       });
     },
@@ -315,7 +315,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <p className="text-red-600">
-              {language === 'fr' 
+              {currentLanguage === 'fr' 
                 ? "La reconnaissance vocale n'est pas supportée par votre navigateur."
                 : "Speech recognition is not supported by your browser."
               }
@@ -375,7 +375,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
             <CardContent className="flex-1 p-6">
               <div className="h-full bg-gray-50 rounded-lg p-4 overflow-y-auto">
                 <div className="text-gray-800 whitespace-pre-wrap">
-                  {interimText || (language === 'fr' 
+                  {interimText || (currentLanguage === 'fr' 
                     ? "En attente de la dictée..." 
                     : "Waiting for dictation..."
                   )}
@@ -383,7 +383,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                 {isListening && (
                   <div className="mt-4 flex items-center text-red-600">
                     <div className="animate-pulse w-3 h-3 bg-red-600 rounded-full mr-2"></div>
-                    {language === 'fr' ? "En écoute..." : "Listening..."}
+                    {currentLanguage === 'fr' ? "En écoute..." : "Listening..."}
                   </div>
                 )}
               </div>
@@ -402,7 +402,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                   <div className="h-full flex flex-col">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">
-                        {language === 'fr' ? 'Modifier le texte :' : 'Edit text:'}
+                        {currentLanguage === 'fr' ? 'Modifier le texte :' : 'Edit text:'}
                       </span>
                       <div className="flex gap-2">
                         <Button
@@ -411,14 +411,14 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                           className="bg-green-600 hover:bg-green-700"
                         >
                           <Save className="w-3 h-3 mr-1" />
-                          {language === 'fr' ? 'Confirmer' : 'Confirm'}
+                          {currentLanguage === 'fr' ? 'Confirmer' : 'Confirm'}
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={handleCancelEditing}
                         >
-                          {language === 'fr' ? 'Annuler' : 'Cancel'}
+                          {currentLanguage === 'fr' ? 'Annuler' : 'Cancel'}
                         </Button>
                       </div>
                     </div>
@@ -426,7 +426,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                       value={editableText}
                       onChange={(e) => setEditableText(e.target.value)}
                       className="flex-1 min-h-[300px] resize-none"
-                      placeholder={language === 'fr' 
+                      placeholder={currentLanguage === 'fr' 
                         ? "Modifiez le texte ici..." 
                         : "Edit text here..."
                       }
@@ -435,7 +435,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                 ) : (
                   <div className="h-full bg-gray-50 rounded-lg p-4 overflow-y-auto relative">
                     <div className="text-gray-800 whitespace-pre-wrap">
-                      {finalText || (language === 'fr' 
+                      {finalText || (currentLanguage === 'fr' 
                         ? "Le texte final apparaîtra ici..." 
                         : "Final text will appear here..."
                       )}
@@ -448,7 +448,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                         className="absolute top-2 right-2"
                       >
                         <Edit className="w-3 h-3 mr-1" />
-                        {language === 'fr' ? 'Modifier' : 'Edit'}
+                        {currentLanguage === 'fr' ? 'Modifier' : 'Edit'}
                       </Button>
                     )}
                   </div>
@@ -487,8 +487,8 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
                     {formatTextMutation.isPending 
-                      ? (language === 'fr' ? 'Formatage en cours...' : 'Formatting...') 
-                      : (language === 'fr' ? 'Formater avec IA' : 'Format with AI')
+                      ? (currentLanguage === 'fr' ? 'Formatage en cours...' : 'Formatting...') 
+                      : (currentLanguage === 'fr' ? 'Formater avec IA' : 'Format with AI')
                     }
                   </Button>
                 )}
@@ -530,7 +530,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                     onClick={handleCancel}
                     className="flex-1"
                   >
-                    {language === 'fr' ? 'Annuler' : 'Cancel'}
+                    {currentLanguage === 'fr' ? 'Annuler' : 'Cancel'}
                   </Button>
                 </div>
               </div>
