@@ -36,7 +36,8 @@ export function AIGenerateSection11({ formData, language, onGenerated }: AIGener
         credentials: 'include',
         body: JSON.stringify({
           formData,
-          language
+          language,
+          selectedGender: (formData as any).selectedGender || null
         }),
       });
 

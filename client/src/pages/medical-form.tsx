@@ -522,6 +522,8 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSavedForms, setShowSavedForms] = useState(false);
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
+  const [showGenderWarning, setShowGenderWarning] = useState(false);
+  const [genderInconsistencies, setGenderInconsistencies] = useState<string[]>([]);
   const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>({
     section1: false,
     section2: false,
@@ -539,6 +541,36 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const t = translations[language];
 
   // Gender-aware text adaptation
+  // Check for gender inconsistencies in the form
+  const checkGenderConsistency = () => {
+    if (!selectedGender) return;
+    
+    const inconsistencies: string[] = [];
+    const oppositeGenderTerms = selectedGender === 'male' 
+      ? ['la patiente', 'la travailleuse', 'Elle', 'elle', 'femme', 'droitière', 'gauchère', 'Madame']
+      : ['le patient', 'le travailleur', 'Il', 'il', 'homme', 'droitier', 'gaucher', 'Monsieur'];
+    
+    // Check key fields for inconsistencies
+    const fieldsToCheck = [
+      { field: 'modaliteEntrevue', name: 'Modalité de l\'entrevue' },
+      { field: 'age', name: 'Âge' },
+      { field: 'emploi', name: 'Emploi' },
+      { field: 'appreciationEvolution', name: 'Appréciation de l\'évolution' },
+      { field: 'plaintesproblemes', name: 'Plaintes et problèmes' },
+      { field: 'observationGenerale', name: 'Observation générale' }
+    ];
+    
+    fieldsToCheck.forEach(({ field, name }) => {
+      const value = form.getValues(field as any) || '';
+      if (oppositeGenderTerms.some(term => value.includes(term))) {
+        inconsistencies.push(name);
+      }
+    });
+    
+    setGenderInconsistencies(inconsistencies);
+    setShowGenderWarning(inconsistencies.length > 0);
+  };
+
   const adaptTextForGender = (text: string, gender: 'male' | 'female' | null): string => {
     if (!gender || !text) return text;
     
@@ -621,10 +653,27 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
 
   const handleGenderChange = (gender: 'male' | 'female') => {
     setSelectedGender(gender);
+    
+    // Check for inconsistencies before updating
+    setTimeout(() => checkGenderConsistency(), 100);
+    
     updateFormFieldsForGender(gender);
     
     // Update dominance field with gender-appropriate options
     form.setValue('examenDominance', ''); // Reset dominance field
+  };
+
+  const handleUpdateAllForGender = () => {
+    if (!selectedGender) return;
+    
+    updateFormFieldsForGender(selectedGender);
+    setShowGenderWarning(false);
+    setGenderInconsistencies([]);
+    
+    toast({
+      title: "Textes mis à jour",
+      description: "Tous les textes ont été adaptés au genre sélectionné.",
+    });
   };
 
   const toggleSection = (sectionKey: string) => {
@@ -1477,6 +1526,46 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                           Tous les textes du formulaire s'adaptent automatiquement.
                         </p>
                       )}
+                      
+                      {/* Gender Inconsistency Warning */}
+                      {showGenderWarning && genderInconsistencies.length > 0 && (
+                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                              <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-sm font-medium text-yellow-800">
+                                Incohérences de genre détectées
+                              </h4>
+                              <p className="text-sm text-yellow-700 mt-1">
+                                Des textes avec le genre opposé ont été trouvés dans: {genderInconsistencies.join(', ')}
+                              </p>
+                              <div className="mt-3 flex gap-2">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={handleUpdateAllForGender}
+                                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                                >
+                                  Corriger automatiquement
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setShowGenderWarning(false)}
+                                  className="border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                                >
+                                  Ignorer
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Âge */}
@@ -2050,70 +2139,85 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                               <FormLabel className="block">Observation générale et attitude :</FormLabel>
                             </div>
                             <div className="grid grid-cols-2 gap-2 mb-3 no-print">
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  const normalRightText = `Le travailleur s'est présenté à l'heure pour l'évaluation. À l'accueil, il se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur droit. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et le travailleur n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, le travailleur présente des gestes fluides sans surprotection.
+                              {!selectedGender && (
+                                <p className="col-span-2 text-sm text-gray-500 italic text-center py-2">
+                                  Veuillez d'abord sélectionner le genre du patient pour voir les modèles appropriés.
+                                </p>
+                              )}
+                              
+                              {selectedGender === 'male' && (
+                                <>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      const normalRightText = `Le travailleur s'est présenté à l'heure pour l'évaluation. À l'accueil, il se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur droit. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et le travailleur n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, le travailleur présente des gestes fluides sans surprotection.
 
 Le travailleur est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
 
 La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu de façon à bien exposer les zones anatomiques à évaluer.`;
-                                  field.onChange(normalRightText);
-                                }}
-                                className="text-xs px-3 py-2 h-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200 whitespace-nowrap"
-                              >
-                                Normal Right Lower Limb Male
-                              </Button>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  const normalLeftText = `Le travailleur s'est présenté à l'heure pour l'évaluation. À l'accueil, il se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur gauche. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et le travailleur n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, le travailleur présente des gestes fluides sans surprotection.
+                                      field.onChange(normalRightText);
+                                    }}
+                                    className="text-xs px-3 py-2 h-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200 whitespace-nowrap"
+                                  >
+                                    Normal Membre Inf. Droit
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      const normalLeftText = `Le travailleur s'est présenté à l'heure pour l'évaluation. À l'accueil, il se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur gauche. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et le travailleur n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, le travailleur présente des gestes fluides sans surprotection.
 
 Le travailleur est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
 
 La collaboration offerte est optimale, pour les fins d'examen Monsieur est vêtu de façon à bien exposer les zones anatomiques à évaluer.`;
-                                  field.onChange(normalLeftText);
-                                }}
-                                className="text-xs px-3 py-2 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 whitespace-nowrap"
-                              >
-                                Normal Left Lower Limb Male
-                              </Button>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  const normalRightFemaleText = `La travailleuse s'est présentée à l'heure pour l'évaluation. À l'accueil, elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur droit. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et la travailleuse n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, la travailleuse présente des gestes fluides sans surprotection.
+                                      field.onChange(normalLeftText);
+                                    }}
+                                    className="text-xs px-3 py-2 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 whitespace-nowrap"
+                                  >
+                                    Normal Membre Inf. Gauche
+                                  </Button>
+                                </>
+                              )}
+                              
+                              {selectedGender === 'female' && (
+                                <>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      const normalRightFemaleText = `La travailleuse s'est présentée à l'heure pour l'évaluation. À l'accueil, elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur droit. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et la travailleuse n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, la travailleuse présente des gestes fluides sans surprotection.
 
 La travailleuse est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
 
 La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue de façon à bien exposer les zones anatomiques à évaluer.`;
-                                  field.onChange(normalRightFemaleText);
-                                }}
-                                className="text-xs px-3 py-2 h-auto bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200 whitespace-nowrap"
-                              >
-                                Normal Right Lower Limb Female
-                              </Button>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  const normalLeftFemaleText = `La travailleuse s'est présentée à l'heure pour l'évaluation. À l'accueil, elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur gauche. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et la travailleuse n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, la travailleuse présente des gestes fluides sans surprotection.
+                                      field.onChange(normalRightFemaleText);
+                                    }}
+                                    className="text-xs px-3 py-2 h-auto bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200 whitespace-nowrap"
+                                  >
+                                    Normal Membre Inf. Droit
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      const normalLeftFemaleText = `La travailleuse s'est présentée à l'heure pour l'évaluation. À l'accueil, elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique ou de précaution en regard du membre inférieur gauche. On observe aucune boiterie, la vitesse de marche est adéquate, la base de support n'est pas élargie et la travailleuse n'utilise pas d'aide technique. Tout au long de l'entrevue et de l'examen, la travailleuse présente des gestes fluides sans surprotection.
 
 La travailleuse est en mesure de marcher sur la pointe des pieds, sur les talons et d'exécuter une démarche en tandem sans trop de difficulté.
 
 La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue de façon à bien exposer les zones anatomiques à évaluer.`;
-                                  field.onChange(normalLeftFemaleText);
-                                }}
-                                className="text-xs px-3 py-2 h-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 whitespace-nowrap"
-                              >
-                                Normal Left Lower Limb Female
-                              </Button>
+                                      field.onChange(normalLeftFemaleText);
+                                    }}
+                                    className="text-xs px-3 py-2 h-auto bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 whitespace-nowrap"
+                                  >
+                                    Normal Membre Inf. Gauche
+                                  </Button>
+                                </>
+                              )}
                             </div>
                           </div>
                           <FormControl>
