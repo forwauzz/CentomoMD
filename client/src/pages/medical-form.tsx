@@ -1882,11 +1882,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                               <FormLabel className="field-label">Dominance :</FormLabel>
                               <div className="space-y-2">
                                 {/* Gender Selection */}
-                                <div className="flex gap-4 mb-2">
+                                <div className="flex gap-2 mb-2">
                                   <Button
                                     type="button"
                                     size="sm"
-                                    variant={field.value?.includes('il est') || field.value?.includes('droitier') || field.value?.includes('gaucher') ? "default" : "outline"}
+                                    variant={field.value?.includes('droitier') || field.value?.includes('gaucher') || field.value?.includes('ambidextre') ? "default" : "outline"}
                                     onClick={() => {
                                       // Show male options
                                       const maleDropdown = document.getElementById('male-dominance-dropdown');
@@ -1894,14 +1894,14 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                                       if (maleDropdown) maleDropdown.style.display = 'block';
                                       if (femaleDropdown) femaleDropdown.style.display = 'none';
                                     }}
-                                    className="text-xs px-3 py-1 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 no-print"
+                                    className="text-xs px-2 py-1 h-7 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 no-print"
                                   >
                                     Homme
                                   </Button>
                                   <Button
                                     type="button"
                                     size="sm"
-                                    variant={field.value?.includes('elle est') || field.value?.includes('droitière') || field.value?.includes('gauchère') ? "default" : "outline"}
+                                    variant={field.value?.includes('droitière') || field.value?.includes('gauchère') || field.value?.includes('ambidextre') ? "default" : "outline"}
                                     onClick={() => {
                                       // Show female options
                                       const maleDropdown = document.getElementById('male-dominance-dropdown');
@@ -1909,7 +1909,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                                       if (maleDropdown) maleDropdown.style.display = 'none';
                                       if (femaleDropdown) femaleDropdown.style.display = 'block';
                                     }}
-                                    className="text-xs px-3 py-1 h-auto bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200 no-print"
+                                    className="text-xs px-2 py-1 h-7 bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200 no-print"
                                   >
                                     Femme
                                   </Button>
@@ -1918,13 +1918,13 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                                 {/* Male Dominance Dropdown */}
                                 <div id="male-dominance-dropdown" style={{ display: 'none' }} className="no-print">
                                   <Select onValueChange={(value) => field.onChange(value)}>
-                                    <SelectTrigger className="w-full">
-                                      <SelectValue placeholder="Sélectionner la dominance (Homme)" />
+                                    <SelectTrigger className="w-full h-8 text-sm">
+                                      <SelectValue placeholder="Sélectionner..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="Il est droitier">Il est droitier</SelectItem>
-                                      <SelectItem value="Il est gaucher">Il est gaucher</SelectItem>
-                                      <SelectItem value="Il est ambidextre">Il est ambidextre</SelectItem>
+                                      <SelectItem value="droitier">droitier</SelectItem>
+                                      <SelectItem value="gaucher">gaucher</SelectItem>
+                                      <SelectItem value="ambidextre">ambidextre</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -1932,20 +1932,20 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                                 {/* Female Dominance Dropdown */}
                                 <div id="female-dominance-dropdown" style={{ display: 'none' }} className="no-print">
                                   <Select onValueChange={(value) => field.onChange(value)}>
-                                    <SelectTrigger className="w-full">
-                                      <SelectValue placeholder="Sélectionner la dominance (Femme)" />
+                                    <SelectTrigger className="w-full h-8 text-sm">
+                                      <SelectValue placeholder="Sélectionner..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="Elle est droitière">Elle est droitière</SelectItem>
-                                      <SelectItem value="Elle est gauchère">Elle est gauchère</SelectItem>
-                                      <SelectItem value="Elle est ambidextre">Elle est ambidextre</SelectItem>
+                                      <SelectItem value="droitière">droitière</SelectItem>
+                                      <SelectItem value="gauchère">gauchère</SelectItem>
+                                      <SelectItem value="ambidextre">ambidextre</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
 
                                 {/* Text Input for Final Value */}
                                 <FormControl>
-                                  <Input {...field} className="field-input" placeholder="Dominance sera remplie automatiquement" />
+                                  <Input {...field} className="field-input h-8 text-sm" placeholder="Sélectionner d'abord le genre" />
                                 </FormControl>
                               </div>
                             </div>
