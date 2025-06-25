@@ -521,6 +521,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSavedForms, setShowSavedForms] = useState(false);
+  const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>({
     section1: false,
     section2: false,
@@ -536,6 +537,95 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const { user, logout } = useAuth();
   
   const t = translations[language];
+
+  // Gender-aware text adaptation
+  const adaptTextForGender = (text: string, gender: 'male' | 'female' | null): string => {
+    if (!gender || !text) return text;
+    
+    const replacements = {
+      // Patient references
+      'la patiente': gender === 'male' ? 'le patient' : 'la patiente',
+      'La patiente': gender === 'male' ? 'Le patient' : 'La patiente',
+      'la travailleuse': gender === 'male' ? 'le travailleur' : 'la travailleuse',
+      'La travailleuse': gender === 'male' ? 'Le travailleur' : 'La travailleuse',
+      
+      // Pronouns
+      'Elle': gender === 'male' ? 'Il' : 'Elle',
+      'elle': gender === 'male' ? 'il' : 'elle',
+      
+      // Descriptors
+      'Madame': gender === 'male' ? 'Monsieur' : 'Madame',
+      'femme': gender === 'male' ? 'homme' : 'femme',
+      'Une femme': gender === 'male' ? 'Un homme' : 'Une femme',
+      'une femme': gender === 'male' ? 'un homme' : 'une femme',
+      
+      // Past participles and adjectives
+      'présentée': gender === 'male' ? 'présenté' : 'présentée',
+      'vêtue': gender === 'male' ? 'vêtu' : 'vêtue',
+      
+      // Dominance
+      'droitière': gender === 'male' ? 'droitier' : 'droitière',
+      'gauchère': gender === 'male' ? 'gaucher' : 'gauchère',
+    };
+    
+    let adaptedText = text;
+    Object.entries(replacements).forEach(([from, to]) => {
+      adaptedText = adaptedText.replace(new RegExp(from, 'g'), to);
+    });
+    
+    return adaptedText;
+  };
+
+  const updateFormFieldsForGender = (gender: 'male' | 'female') => {
+    // Update age field
+    const currentAge = form.getValues('age') || '';
+    const adaptedAge = adaptTextForGender(currentAge, gender);
+    if (adaptedAge !== currentAge) {
+      form.setValue('age', adaptedAge);
+    }
+
+    // Update modalite field
+    const currentModalite = form.getValues('modaliteEntrevue') || '';
+    const adaptedModalite = adaptTextForGender(currentModalite, gender);
+    if (adaptedModalite !== currentModalite) {
+      form.setValue('modaliteEntrevue', adaptedModalite);
+    }
+
+    // Update emploi field
+    const currentEmploi = form.getValues('emploi') || '';
+    const adaptedEmploi = adaptTextForGender(currentEmploi, gender);
+    if (adaptedEmploi !== currentEmploi) {
+      form.setValue('emploi', adaptedEmploi);
+    }
+
+    // Update section 8 fields
+    const currentAppreciation = form.getValues('appreciationEvolution') || '';
+    const adaptedAppreciation = adaptTextForGender(currentAppreciation, gender);
+    if (adaptedAppreciation !== currentAppreciation) {
+      form.setValue('appreciationEvolution', adaptedAppreciation);
+    }
+
+    const currentPlaintes = form.getValues('plaintesproblemes') || '';
+    const adaptedPlaintes = adaptTextForGender(currentPlaintes, gender);
+    if (adaptedPlaintes !== currentPlaintes) {
+      form.setValue('plaintesproblemes', adaptedPlaintes);
+    }
+
+    // Update observation generale if it contains gender-specific text
+    const currentObservation = form.getValues('observationGenerale') || '';
+    const adaptedObservation = adaptTextForGender(currentObservation, gender);
+    if (adaptedObservation !== currentObservation) {
+      form.setValue('observationGenerale', adaptedObservation);
+    }
+  };
+
+  const handleGenderChange = (gender: 'male' | 'female') => {
+    setSelectedGender(gender);
+    updateFormFieldsForGender(gender);
+    
+    // Update dominance field with gender-appropriate options
+    form.setValue('examenDominance', ''); // Reset dominance field
+  };
 
   const toggleSection = (sectionKey: string) => {
     setCollapsedSections(prev => ({
@@ -1356,6 +1446,39 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                 {/* 4. Identification */}
                 <CollapsibleSection title="4. Identification" defaultOpen={false} id="section4">
                   <div className="space-y-6">
+                    {/* Gender Selection */}
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <FormLabel className="text-sm font-semibold text-blue-800 mb-3 block">
+                        Sélection du genre (adapte automatiquement tous les textes) :
+                      </FormLabel>
+                      <div className="flex gap-4">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={selectedGender === 'male' ? "default" : "outline"}
+                          onClick={() => handleGenderChange('male')}
+                          className="px-4 py-2"
+                        >
+                          Homme
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={selectedGender === 'female' ? "default" : "outline"}
+                          onClick={() => handleGenderChange('female')}
+                          className="px-4 py-2"
+                        >
+                          Femme
+                        </Button>
+                      </div>
+                      {selectedGender && (
+                        <p className="text-xs text-blue-600 mt-2">
+                          ✓ Genre sélectionné: {selectedGender === 'male' ? 'Homme' : 'Femme'}. 
+                          Tous les textes du formulaire s'adaptent automatiquement.
+                        </p>
+                      )}
+                    </div>
+
                     {/* Âge */}
                     <FormField
                       control={form.control}
@@ -1881,72 +2004,34 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                             <div className="field-group">
                               <FormLabel className="field-label">Dominance :</FormLabel>
                               <div className="space-y-2">
-                                {/* Gender Selection */}
-                                <div className="flex gap-2 mb-2">
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant={field.value?.includes('droitier') || field.value?.includes('gaucher') || field.value?.includes('ambidextre') ? "default" : "outline"}
-                                    onClick={() => {
-                                      // Show male options
-                                      const maleDropdown = document.getElementById('male-dominance-dropdown');
-                                      const femaleDropdown = document.getElementById('female-dominance-dropdown');
-                                      if (maleDropdown) maleDropdown.style.display = 'block';
-                                      if (femaleDropdown) femaleDropdown.style.display = 'none';
-                                    }}
-                                    className="text-xs px-2 py-1 h-7 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 no-print"
-                                  >
-                                    Homme
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant={field.value?.includes('droitière') || field.value?.includes('gauchère') || field.value?.includes('ambidextre') ? "default" : "outline"}
-                                    onClick={() => {
-                                      // Show female options
-                                      const maleDropdown = document.getElementById('male-dominance-dropdown');
-                                      const femaleDropdown = document.getElementById('female-dominance-dropdown');
-                                      if (maleDropdown) maleDropdown.style.display = 'none';
-                                      if (femaleDropdown) femaleDropdown.style.display = 'block';
-                                    }}
-                                    className="text-xs px-2 py-1 h-7 bg-pink-50 hover:bg-pink-100 text-pink-700 border-pink-200 no-print"
-                                  >
-                                    Femme
-                                  </Button>
-                                </div>
-
-                                {/* Male Dominance Dropdown */}
-                                <div id="male-dominance-dropdown" style={{ display: 'none' }} className="no-print">
-                                  <Select onValueChange={(value) => field.onChange(value)}>
-                                    <SelectTrigger className="w-full h-8 text-sm">
-                                      <SelectValue placeholder="Sélectionner..." />
-                                    </SelectTrigger>
+                                {selectedGender ? (
+                                  <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger className="field-input">
+                                        <SelectValue placeholder="Sélectionner la dominance..." />
+                                      </SelectTrigger>
+                                    </FormControl>
                                     <SelectContent>
-                                      <SelectItem value="droitier">droitier</SelectItem>
-                                      <SelectItem value="gaucher">gaucher</SelectItem>
-                                      <SelectItem value="ambidextre">ambidextre</SelectItem>
+                                      {selectedGender === 'male' ? (
+                                        <>
+                                          <SelectItem value="droitier">droitier</SelectItem>
+                                          <SelectItem value="gaucher">gaucher</SelectItem>
+                                          <SelectItem value="ambidextre">ambidextre</SelectItem>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <SelectItem value="droitière">droitière</SelectItem>
+                                          <SelectItem value="gauchère">gauchère</SelectItem>
+                                          <SelectItem value="ambidextre">ambidextre</SelectItem>
+                                        </>
+                                      )}
                                     </SelectContent>
                                   </Select>
-                                </div>
-
-                                {/* Female Dominance Dropdown */}
-                                <div id="female-dominance-dropdown" style={{ display: 'none' }} className="no-print">
-                                  <Select onValueChange={(value) => field.onChange(value)}>
-                                    <SelectTrigger className="w-full h-8 text-sm">
-                                      <SelectValue placeholder="Sélectionner..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="droitière">droitière</SelectItem>
-                                      <SelectItem value="gauchère">gauchère</SelectItem>
-                                      <SelectItem value="ambidextre">ambidextre</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                {/* Text Input for Final Value */}
-                                <FormControl>
-                                  <Input {...field} className="field-input h-8 text-sm" placeholder="Sélectionner d'abord le genre" />
-                                </FormControl>
+                                ) : (
+                                  <p className="text-sm text-gray-500 italic">
+                                    Veuillez d'abord sélectionner le genre du patient ci-dessus.
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </FormItem>
