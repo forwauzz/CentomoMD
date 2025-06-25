@@ -702,9 +702,9 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       modaliteEntrevue: "L'évaluation suivante s'est tenue dans les locaux de la clinique du Complexe Médical Nord-de-Île (CMNDI). Nous avons clairement expliqué à notre mandat d'évaluateur indépendant désigné par la CNESST dans le cadre de l'application de l'article 204 de la LATMP. Nous lui avons précisé que nous n'agirons pas en tant que médecins traitants. Notre rapport d'évaluation sera d'abord envoyé́ à la CNESST.\n\nNous avons procédé́ au questionnaire subjectif ainsi qu'à un examen physique détaillé́ en relation avec les lésions à évaluer, nous nous sommes assurés à la fin de l'entrevue d'avoir couvert l'ensemble de la problématique.\n\nNous avons revu le dossier CNESST de même que le dossier médical. Nous avons pu consulter l'ensemble des rapports et des bilans radiologiques réalisés dans le cadre de l'évaluation de la lésion.\n\nL'entrevue s'est effectuée cordialement, la patiente participait pleinement à son entrevue. L'entrevue s'est déroulée entre.\n\nÀ la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.",
       
       // Section 4: Identification
-      age: "Il s'agit d'une femme de 49 ans.",
-      dominance: "Elle est droitière",
-      emploi: "Elle travaillait comme chauffeuse de taxi / transport adapté à l'emploi de Taxi Ormstown inc. depuis janvier 2016.\n\nElle travaille à temps complet soit 40 heures par semaine.\n\nElle est en arrêt de travail depuis l'accident\n\nComme activité de loisir elle pratique le baseball.",
+      age: "",
+      dominance: "",
+      emploi: "",
       
       antecedentsMedicaux: "Diabète type 2, syndrome tunnel carpien",
       antecedentsChirurgicaux: "décompression tunnel carpien bilatéral (2014), hystérectomie (2016)",
@@ -1590,7 +1590,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                               <Textarea 
                                 {...field} 
                                 className="w-full min-h-[60px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                placeholder="Indiquez l'âge du patient..."
+                                placeholder="Ex: Il s'agit d'une femme de [âge] ans."
                               />
                             </FormControl>
                           </div>
@@ -1620,7 +1620,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                               <Textarea 
                                 {...field} 
                                 className="w-full min-h-[60px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                placeholder="Indiquez la dominance du patient..."
+                                placeholder="Ex: Elle est droitière/Il est droitier"
                               />
                             </FormControl>
                           </div>
@@ -1650,7 +1650,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                               <Textarea 
                                 {...field} 
                                 className="w-full min-h-[120px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                placeholder="Décrivez l'emploi et les activités du patient..."
+                                placeholder="Ex: Elle travaillait comme [métier] à l'emploi de [employeur] depuis [date].\n\nElle travaille à temps [complet/partiel] soit [X] heures par semaine.\n\nElle est en arrêt de travail depuis l'accident.\n\nComme activité de loisir elle pratique [activités]."
                               />
                             </FormControl>
                           </div>
