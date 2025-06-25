@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MedicalSelect } from "@/components/ui/medical-select";
 import { DictationModal } from "@/components/dictation-modal";
 import { FloatingRecordButton } from "@/components/floating-record-button";
 import { FloatingNavigation } from "@/components/floating-navigation";
@@ -736,14 +737,14 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       rachisFlexionLateraleD: "30",
       rachisRotationG: "30",
       rachisRotationD: "30",
-      rachisSlrDroit: "Neg",
-      rachisSlrGauche: "Neg",
-      rachisTripodeDroit: "Neg",
-      rachisTripodesGauche: "Neg",
-      rachisLasegueDroit: "Neg",
-      rachisLasegueGauche: "Neg",
-      rachisLasegueInverseDroit: "Neg",
-      rachisLasegueInverseGauche: "Neg",
+      rachisSlrDroit: "Négatif",
+      rachisSlrGauche: "Négatif",
+      rachisTripodeDroit: "Négatif",
+      rachisTripodesGauche: "Négatif",
+      rachisLasegueDroit: "Négatif",
+      rachisLasegueGauche: "Négatif",
+      rachisLasegueInverseDroit: "Négatif",
+      rachisLasegueInverseGauche: "Négatif",
       hanchesPalpation: "grands trochanters sans douleur",
       hanchesInspection: "pas d'atrophie fessiers ou cuisse. Aucune cicatrice",
       hanchesFlexionDroitActif: "120",
@@ -784,36 +785,36 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       genouxExtensionGauchePassif: "",
       
       // Manœuvres ligamentaires defaults
-      genouxLci0Droit: "Sec",
-      genouxLci0Gauche: "Sec",
-      genouxLci20Droit: "Sec",
-      genouxLci20Gauche: "Sec",
-      genouxLce0Droit: "Sec",
-      genouxLce0Gauche: "Sec",
-      genouxLce20Droit: "Sec",
-      genouxLce20Gauche: "Sec",
-      genouxLachmanDroit: "Sec",
-      genouxLachmanGauche: "Sec",
-      genouxPivotDroit: "Neg",
-      genouxPivotGauche: "Neg",
-      genouxTiroirAnterieurDroit: "Sec",
-      genouxTiroirAnterieurGauche: "Sec",
-      genouxTiroirPosterieurDroit: "Sec",
-      genouxTiroirPosterieurGauche: "Sec",
-      genouxSagPosterieurDroit: "Neg",
-      genouxSagPosterieurGauche: "Neg",
-      genouxDial30Droit: "Neg",
-      genouxDial30Gauche: "Neg",
-      genouxDial90Droit: "Neg",
-      genouxDial90Gauche: "Neg",
+      genouxLci0Droit: "Négatif",
+      genouxLci0Gauche: "Négatif",
+      genouxLci20Droit: "Négatif",
+      genouxLci20Gauche: "Négatif",
+      genouxLce0Droit: "Négatif",
+      genouxLce0Gauche: "Négatif",
+      genouxLce20Droit: "Négatif",
+      genouxLce20Gauche: "Négatif",
+      genouxLachmanDroit: "Négatif",
+      genouxLachmanGauche: "Négatif",
+      genouxPivotDroit: "Négatif",
+      genouxPivotGauche: "Négatif",
+      genouxTiroirAnterieurDroit: "Négatif",
+      genouxTiroirAnterieurGauche: "Négatif",
+      genouxTiroirPosterieurDroit: "Négatif",
+      genouxTiroirPosterieurGauche: "Négatif",
+      genouxSagPosterieurDroit: "Négatif",
+      genouxSagPosterieurGauche: "Négatif",
+      genouxDial30Droit: "Négatif",
+      genouxDial30Gauche: "Négatif",
+      genouxDial90Droit: "Négatif",
+      genouxDial90Gauche: "Négatif",
       
       // Manœuvres méniscales defaults
-      genouxApleyDroit: "Neg",
-      genouxApleyGauche: "Neg",
-      genouxMcMurrayDroit: "Neg",
-      genouxMcMurrayGauche: "Neg",
-      genouxThessalyDroit: "Neg",
-      genouxThessalyGauche: "Neg",
+      genouxApleyDroit: "Négatif",
+      genouxApleyGauche: "Négatif",
+      genouxMcMurrayDroit: "Négatif",
+      genouxMcMurrayGauche: "Négatif",
+      genouxThessalyDroit: "Négatif",
+      genouxThessalyGauche: "Négatif",
       
       // Circonférence defaults (empty for measurements)
       genouxCirconferenceCuisseDroit: "",
@@ -837,24 +838,24 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       piedsMvtsMidTarsienGauche: "Présent",
       
       // Manœuvres ligamentaires pieds/chevilles defaults
-      piedsTiroir0Droit: "Neg",
-      piedsTiroir0Gauche: "Neg",
-      piedsTiroir20Droit: "Neg",
-      piedsTiroir20Gauche: "Neg",
-      piedsVarusStressDroit: "Neg",
-      piedsVarusStressGauche: "Neg",
-      piedsLaxiteCalcaneoFibulaireDroit: "Neg",
-      piedsLaxiteCalcaneoFibulaireGauche: "Neg",
-      piedsSqueezeTestDroit: "Neg",
-      piedsSqueezeTestGauche: "Neg",
+      piedsTiroir0Droit: "Négatif",
+      piedsTiroir0Gauche: "Négatif",
+      piedsTiroir20Droit: "Négatif",
+      piedsTiroir20Gauche: "Négatif",
+      piedsVarusStressDroit: "Négatif",
+      piedsVarusStressGauche: "Négatif",
+      piedsLaxiteCalcaneoFibulaireDroit: "Négatif",
+      piedsLaxiteCalcaneoFibulaireGauche: "Négatif",
+      piedsSqueezeTestDroit: "Négatif",
+      piedsSqueezeTestGauche: "Négatif",
       
       // Manœuvres spécifiques tendons pieds/chevilles defaults
-      piedsSingleHeelRaiseDroit: "Neg",
-      piedsSingleHeelRaiseGauche: "Neg",
-      piedsThompsonDroit: "Neg",
-      piedsThompsonGauche: "Neg",
-      piedsTestApprehensionDroit: "Neg",
-      piedsTestApprehensionGauche: "Neg",
+      piedsSingleHeelRaiseDroit: "Négatif",
+      piedsSingleHeelRaiseGauche: "Négatif",
+      piedsThompsonDroit: "Négatif",
+      piedsThompsonGauche: "Négatif",
+      piedsTestApprehensionDroit: "Négatif",
+      piedsTestApprehensionGauche: "Négatif",
       
       // Neuro-vasculaire pieds/chevilles default
       piedsNeuroVasculaire: "",
@@ -888,8 +889,8 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       piedsReflexeRotulienGauche: "2+",
       piedsReflexeAchilleenDroit: "2+",
       piedsReflexeAchilleenGauche: "2+",
-      piedsReflexeBabinskiDroit: "Neg",
-      piedsReflexeBabinskiGauche: "Neg",
+      piedsReflexeBabinskiDroit: "Négatif",
+      piedsReflexeBabinskiGauche: "Négatif",
       
       // Pouls neuro pieds/chevilles defaults
       piedsPoulsTibialPosterieurDroit: "2",
@@ -2414,7 +2415,11 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="rachisSlrDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
@@ -2423,70 +2428,98 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="rachisSlrGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
-                                  <td className="border p-2">Tripode</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Tripode</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisTripodeDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisTripodesGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
-                                  <td className="border p-2">Lasègue</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Lasègue</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisLasegueDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisLasegueGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
-                                  <td className="border p-2">Lasègue inversé (Ely)</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Lasègue inversé (Ely)</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisLasegueInverseDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisLasegueInverseGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
@@ -2985,231 +3018,319 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                               <tbody>
                                 <tr>
                                   <td className="border p-2">LCI 0°</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLci0Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLci0Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">LCI 20°</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLci20Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLci20Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">LCE 0°</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLce0Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLce0Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">LCE 20°</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLce20Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLce20Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Lachman</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLachmanDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxLachmanGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Pivot</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxPivotDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxPivotGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Tiroir antérieur</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxTiroirAnterieurDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxTiroirAnterieurGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Tiroir postérieur</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxTiroirPosterieurDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxTiroirPosterieurGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Sag postérieur</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxSagPosterieurDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxSagPosterieurGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Dial à 30°</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxDial30Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxDial30Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Dial à 90°</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxDial90Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxDial90Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
@@ -3234,63 +3355,87 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                               <tbody>
                                 <tr>
                                   <td className="border p-2">Apley</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxApleyDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxApleyGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">McMurray</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxMcMurrayDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxMcMurrayGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Thessaly</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxThessalyDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="genouxThessalyGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
@@ -3597,105 +3742,145 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                               <tbody>
                                 <tr>
                                   <td className="border p-2">Tiroir 0°</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsTiroir0Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsTiroir0Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Tiroir 20°</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsTiroir20Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsTiroir20Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Varus stress</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsVarusStressDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsVarusStressGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Laxité calcanéo-fibulaire</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsLaxiteCalcaneoFibulaireDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsLaxiteCalcaneoFibulaireGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Squeeze test</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsSqueezeTestDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsSqueezeTestGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
@@ -3720,63 +3905,87 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                               <tbody>
                                 <tr>
                                   <td className="border p-2">Single heel raise (Tib post)</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsSingleHeelRaiseDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsSingleHeelRaiseGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Thompson (Tendon d'Achille)</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsThompsonDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsThompsonGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Test d'appréhension (Fibulaires)</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsTestApprehensionDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsTestApprehensionGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
@@ -4080,63 +4289,71 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                               <tbody>
                                 <tr>
                                   <td className="border p-2">Rotulien</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsReflexeRotulienDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center" placeholder="2+" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsReflexeRotulienGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center" placeholder="2+" />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Achilléen</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsReflexeAchilleenDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center" placeholder="2+" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsReflexeAchilleenGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center" placeholder="2+" />
                                       )}
                                     />
                                   </td>
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Babinski</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsReflexeBabinskiDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
                                       name="piedsReflexeBabinskiGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                        />
                                       )}
                                     />
                                   </td>
