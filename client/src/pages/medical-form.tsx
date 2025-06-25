@@ -76,6 +76,7 @@ const formSchema = z.object({
   // Section 9: Examen Physique
   examenPoids: z.string().optional(),
   examenTaille: z.string().optional(),
+  examenImc: z.string().optional(),
   examenDominance: z.string().optional(),
   observationGenerale: z.string().optional(),
   rachisPalpation: z.string().optional(),
@@ -724,6 +725,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       impactAvq: "cf feuille en annexe.",
       examenPoids: "60kg",
       examenTaille: "1.60m",
+      examenImc: "",
       examenDominance: "Droitière",
       observationGenerale: "La travailleuse s'est présentée avec 10 minutes de retard pour son évaluation. À l'accueil elle se lève spontanément et l'attitude générale est exempt de positionnement antalgique...",
       rachisPalpation: "apophyses épineuses et para spinal sans douleur",
@@ -2054,7 +2056,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                   <div className="pl-4 space-y-6">
                     
                     {/* Informations générales */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-4 gap-4">
                       <FormField
                         control={form.control}
                         name="examenPoids"
@@ -2079,6 +2081,21 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                               <FormLabel className="field-label">Taille :</FormLabel>
                               <FormControl>
                                 <Input {...field} className="field-input" placeholder="1.60m" />
+                              </FormControl>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="examenImc"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="field-group">
+                              <FormLabel className="field-label">IMC :</FormLabel>
+                              <FormControl>
+                                <Input {...field} className="field-input" placeholder="23.4" />
                               </FormControl>
                             </div>
                           </FormItem>
