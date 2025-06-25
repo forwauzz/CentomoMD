@@ -2056,18 +2056,20 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                   <div className="pl-4 space-y-6">
                     
                     {/* Informations générales */}
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <FormField
                         control={form.control}
                         name="examenPoids"
                         render={({ field }) => (
                           <FormItem>
-                            <div className="field-group">
-                              <FormLabel className="field-label">Poids :</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="field-input" placeholder="60kg" />
-                              </FormControl>
-                            </div>
+                            <FormLabel className="text-sm font-medium">Poids :</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="w-full border border-gray-300 rounded-md px-3 py-2" 
+                                placeholder="60kg" 
+                              />
+                            </FormControl>
                           </FormItem>
                         )}
                       />
@@ -2077,12 +2079,14 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                         name="examenTaille"
                         render={({ field }) => (
                           <FormItem>
-                            <div className="field-group">
-                              <FormLabel className="field-label">Taille :</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="field-input" placeholder="1.60m" />
-                              </FormControl>
-                            </div>
+                            <FormLabel className="text-sm font-medium">Taille :</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="w-full border border-gray-300 rounded-md px-3 py-2" 
+                                placeholder="1.60m" 
+                              />
+                            </FormControl>
                           </FormItem>
                         )}
                       />
@@ -2092,12 +2096,14 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                         name="examenImc"
                         render={({ field }) => (
                           <FormItem>
-                            <div className="field-group">
-                              <FormLabel className="field-label">IMC :</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="field-input" placeholder="23.4" />
-                              </FormControl>
-                            </div>
+                            <FormLabel className="text-sm font-medium">IMC :</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                className="w-full border border-gray-300 rounded-md px-3 py-2" 
+                                placeholder="23.4" 
+                              />
+                            </FormControl>
                           </FormItem>
                         )}
                       />
@@ -2107,39 +2113,35 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                         name="examenDominance"
                         render={({ field }) => (
                           <FormItem>
-                            <div className="field-group">
-                              <FormLabel className="field-label">Dominance :</FormLabel>
-                              <div className="space-y-2">
-                                {selectedGender ? (
-                                  <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger className="field-input">
-                                        <SelectValue placeholder="Sélectionner la dominance..." />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {selectedGender === 'male' ? (
-                                        <>
-                                          <SelectItem value="droitier">droitier</SelectItem>
-                                          <SelectItem value="gaucher">gaucher</SelectItem>
-                                          <SelectItem value="ambidextre">ambidextre</SelectItem>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <SelectItem value="droitière">droitière</SelectItem>
-                                          <SelectItem value="gauchère">gauchère</SelectItem>
-                                          <SelectItem value="ambidextre">ambidextre</SelectItem>
-                                        </>
-                                      )}
-                                    </SelectContent>
-                                  </Select>
-                                ) : (
-                                  <p className="text-sm text-gray-500 italic">
-                                    Veuillez d'abord sélectionner le genre du patient ci-dessus.
-                                  </p>
-                                )}
-                              </div>
-                            </div>
+                            <FormLabel className="text-sm font-medium">Dominance :</FormLabel>
+                            <FormControl>
+                              {selectedGender ? (
+                                <Select onValueChange={(value) => field.onChange(value)} value={field.value}>
+                                  <SelectTrigger className="w-full border border-gray-300 rounded-md px-3 py-2">
+                                    <SelectValue placeholder="Sélectionner..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {selectedGender === 'male' ? (
+                                      <>
+                                        <SelectItem value="droitier">droitier</SelectItem>
+                                        <SelectItem value="gaucher">gaucher</SelectItem>
+                                        <SelectItem value="ambidextre">ambidextre</SelectItem>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <SelectItem value="droitière">droitière</SelectItem>
+                                        <SelectItem value="gauchère">gauchère</SelectItem>
+                                        <SelectItem value="ambidextre">ambidextre</SelectItem>
+                                      </>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <div className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-500 italic bg-gray-50">
+                                  Sélectionnez d'abord le genre
+                                </div>
+                              )}
+                            </FormControl>
                           </FormItem>
                         )}
                       />
@@ -2300,92 +2302,92 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                         <div>
                           <FormLabel className="mb-2 block">Amplitude articulaire :</FormLabel>
                           <div className="overflow-x-auto">
-                            <table className="w-full border-collapse border">
+                            <table className="w-full border-collapse border border-gray-300">
                               <thead>
                                 <tr className="bg-gray-50">
-                                  <th className="border p-2 text-left">Mouvement</th>
-                                  <th className="border p-2 text-left">Patient(e)</th>
-                                  <th className="border p-2 text-left">Normale</th>
+                                  <th className="border border-gray-300 p-2 text-left text-sm font-medium">Mouvement</th>
+                                  <th className="border border-gray-300 p-2 text-center text-sm font-medium">Patient(e)</th>
+                                  <th className="border border-gray-300 p-2 text-center text-sm font-medium">Normale</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr>
-                                  <td className="border p-2">Flexion</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Flexion</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisFlexion"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">90°</td>
+                                  <td className="border border-gray-300 p-2 text-center text-sm">90°</td>
                                 </tr>
                                 <tr>
-                                  <td className="border p-2">Extension</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Extension</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisExtension"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">30°</td>
+                                  <td className="border border-gray-300 p-2 text-center text-sm">30°</td>
                                 </tr>
                                 <tr>
-                                  <td className="border p-2">Flexion Latérale G.</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Flexion Latérale G.</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisFlexionLateraleG"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">30°</td>
+                                  <td className="border border-gray-300 p-2 text-center text-sm">30°</td>
                                 </tr>
                                 <tr>
-                                  <td className="border p-2">Flexion Latérale D.</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Flexion Latérale D.</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisFlexionLateraleD"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">30°</td>
+                                  <td className="border border-gray-300 p-2 text-center text-sm">30°</td>
                                 </tr>
                                 <tr>
-                                  <td className="border p-2">Rotation G.</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Rotation G.</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisRotationG"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">30°</td>
+                                  <td className="border border-gray-300 p-2 text-center text-sm">30°</td>
                                 </tr>
                                 <tr>
-                                  <td className="border p-2">Rotation D.</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">Rotation D.</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisRotationD"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">30°</td>
+                                  <td className="border border-gray-300 p-2 text-center text-sm">30°</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -2396,32 +2398,32 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                         <div>
                           <FormLabel className="mb-2 block">Manœuvres radiculaires :</FormLabel>
                           <div className="overflow-x-auto">
-                            <table className="w-full border-collapse border">
+                            <table className="w-full border-collapse border border-gray-300">
                               <thead>
                                 <tr className="bg-gray-50">
-                                  <th className="border p-2 text-left">Test</th>
-                                  <th className="border p-2 text-left">Droit</th>
-                                  <th className="border p-2 text-left">Gauche</th>
+                                  <th className="border border-gray-300 p-2 text-left text-sm font-medium">Test</th>
+                                  <th className="border border-gray-300 p-2 text-center text-sm font-medium">Droit</th>
+                                  <th className="border border-gray-300 p-2 text-center text-sm font-medium">Gauche</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr>
-                                  <td className="border p-2">S.L.R.</td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-2 text-sm">S.L.R.</td>
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisSlrDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border border-gray-300 p-1">
                                     <FormField
                                       control={form.control}
                                       name="rachisSlrGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1" />
+                                        <Input {...field} className="w-full border-0 p-1 text-center bg-transparent" />
                                       )}
                                     />
                                   </td>
