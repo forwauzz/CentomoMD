@@ -34,7 +34,9 @@ const formSchema = z.object({
   mandatConsolidation: z.boolean().optional(),
   mandatSoins: z.boolean().optional(),
   mandatAtteinte: z.boolean().optional(),
+  mandatAtteintePourcentage: z.boolean().optional(),
   mandatLimitations: z.boolean().optional(),
+  mandatLimitationsEvaluation: z.boolean().optional(),
   
   // Section 2: Diagnostics acceptés par la CNESST
   diagnosticsCnesst: z.string().optional(),
@@ -550,7 +552,9 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       mandatConsolidation: false,
       mandatSoins: false,
       mandatAtteinte: false,
+      mandatAtteintePourcentage: false,
       mandatLimitations: false,
+      mandatLimitationsEvaluation: false,
       
       // Section 2: Diagnostics acceptés par la CNESST
       diagnosticsCnesst: "Déchirure mollet droit.",
@@ -1156,53 +1160,87 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                         )}
                       />
                       
-                      <FormField
-                        control={form.control}
-                        name="mandatAtteinte"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="mt-0.5"
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel className="text-sm font-normal">
-                                4) a) Existence de l'atteinte permanente à l'intégrité́ physique ou psychique.
-                              </FormLabel>
-                              <p className="text-sm text-gray-600 pl-4">
-                                b) Pourcentage de l'atteinte permanente à l'intégrité́ physique ou psychique.
-                              </p>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
+                      <div className="space-y-2">
+                        <p className="text-sm font-normal">4)</p>
+                        <div className="pl-4 space-y-3">
+                          <FormField
+                            control={form.control}
+                            name="mandatAtteinte"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-normal">
+                                  a) Existence de l'atteinte permanente à l'intégrité́ physique ou psychique.
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="mandatAtteintePourcentage"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-normal">
+                                  b) Pourcentage de l'atteinte permanente à l'intégrité́ physique ou psychique.
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
                       
-                      <FormField
-                        control={form.control}
-                        name="mandatLimitations"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="mt-0.5"
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel className="text-sm font-normal">
-                                5) a) Existence de limitations fonctionnelles résultant de la lésion professionnelle.
-                              </FormLabel>
-                              <p className="text-sm text-gray-600 pl-4">
-                                b) Évaluation des limitations fonctionnelles résultant de la lésion professionnelle.
-                              </p>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
+                      <div className="space-y-2">
+                        <p className="text-sm font-normal">5)</p>
+                        <div className="pl-4 space-y-3">
+                          <FormField
+                            control={form.control}
+                            name="mandatLimitations"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-normal">
+                                  a) Existence de limitations fonctionnelles résultant de la lésion professionnelle.
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="mandatLimitationsEvaluation"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-normal">
+                                  b) Évaluation des limitations fonctionnelles résultant de la lésion professionnelle.
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CollapsibleSection>

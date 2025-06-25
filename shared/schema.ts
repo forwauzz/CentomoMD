@@ -10,7 +10,9 @@ export const medicalForms = pgTable("medical_forms", {
   mandatConsolidation: boolean("mandat_consolidation").default(false),
   mandatSoins: boolean("mandat_soins").default(false),
   mandatAtteinte: boolean("mandat_atteinte").default(false),
+  mandatAtteintePourcentage: boolean("mandat_atteinte_pourcentage").default(false),
   mandatLimitations: boolean("mandat_limitations").default(false),
+  mandatLimitationsEvaluation: boolean("mandat_limitations_evaluation").default(false),
   
   // Section 2: Diagnostics acceptés par la CNESST
   diagnosticsCnesst: text("diagnostics_cnesst"),
