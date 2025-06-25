@@ -1287,14 +1287,58 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <FormLabel className="text-sm font-semibold text-gray-700">Modalité de l'entrevue :</FormLabel>
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={() => handleDictation('modaliteEntrevue')}
-                              className="no-print bg-blue-600 hover:bg-blue-700"
-                            >
-                              <Mic className="w-4 h-4" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const currentText = field.value || '';
+                                  const newText = currentText.replace(
+                                    /L'évaluation suivante s'est tenue dans les locaux de la [^.]+\./,
+                                    "L'évaluation suivante s'est tenue dans les locaux de la clinique d'orthopédie du Complexe Médical Nord-de-Île (CMNDI), Montréal."
+                                  );
+                                  if (newText === currentText) {
+                                    // If no replacement was made, prepend the sentence
+                                    field.onChange("L'évaluation suivante s'est tenue dans les locaux de la clinique d'orthopédie du Complexe Médical Nord-de-Île (CMNDI), Montréal. " + currentText);
+                                  } else {
+                                    field.onChange(newText);
+                                  }
+                                }}
+                                className="text-xs px-3 py-1 h-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200 no-print"
+                              >
+                                Site A (CMNDI)
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const currentText = field.value || '';
+                                  const newText = currentText.replace(
+                                    /L'évaluation suivante s'est tenue dans les locaux de la [^.]+\./,
+                                    "L'évaluation suivante s'est tenue dans les locaux de la Clinique Médicale de l'Or et des Bois, Val-d'Or."
+                                  );
+                                  if (newText === currentText) {
+                                    // If no replacement was made, prepend the sentence
+                                    field.onChange("L'évaluation suivante s'est tenue dans les locaux de la Clinique Médicale de l'Or et des Bois, Val-d'Or. " + currentText);
+                                  } else {
+                                    field.onChange(newText);
+                                  }
+                                }}
+                                className="text-xs px-3 py-1 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 no-print"
+                              >
+                                Site B (Val-d'Or)
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleDictation('modaliteEntrevue')}
+                                className="no-print bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Mic className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
                           <FormControl>
                             <Textarea 
