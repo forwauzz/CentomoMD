@@ -62,7 +62,7 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
       console.log('Floating button captured transcript:', transcript);
       onDirectDictation(transcript, activeField);
       // Clear transcript after processing to prevent duplication
-      resetTranscript();
+      setTimeout(() => resetTranscript(), 100);
     }
   }, [transcript, activeField, onDirectDictation, resetTranscript]);
 

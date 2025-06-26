@@ -120,12 +120,26 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
 
   const stopListening = useCallback(() => {
     isListeningRef.current = false;
+    
+    // Before stopping, capture any remaining interim transcript as final
     if (recognitionRef.current) {
+      // Process any remaining interim transcript as final text
+      const currentInterim = interimTranscript;
+      if (currentInterim.trim()) {
+        console.log('Converting remaining interim to final transcript:', currentInterim);
+        setTranscript(prev => {
+          const updated = prev + (prev ? ' ' : '') + currentInterim.trim();
+          console.log('Final transcript from interim:', updated);
+          return updated;
+        });
+        setInterimTranscript(''); // Clear interim after converting to final
+      }
+      
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
     setIsListening(false);
-  }, []);
+  }, [interimTranscript]);
 
   const resetTranscript = useCallback(() => {
     setTranscript('');
