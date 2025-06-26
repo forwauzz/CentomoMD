@@ -121,7 +121,7 @@ export function SimpleFormContainer({
           {/* Render the specific form component */}
           <config.component 
             language={language} 
-            onLanguageChange={onLanguageChange}
+            onLanguageChange={onLanguageChange || (() => {})}
           />
         </div>
       </div>

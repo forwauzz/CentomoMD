@@ -10,6 +10,8 @@ import DictationPage from "@/pages/dictation-page";
 import SimpleAITest from "@/pages/simple-ai-test";
 import LoginPage from "@/pages/login-page";
 import LandingPage from "@/pages/landing-page";
+import FormSelector from "@/pages/form-selector";
+import { SimpleFormContainer } from "@/components/simple-form-container";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -41,6 +43,16 @@ function Router() {
     <Switch>
       <Route path="/" component={() => <MedicalForm language={language} onLanguageChange={setLanguage} />} />
       <Route path="/dictation" component={() => <DictationPage language={language} />} />
+      <Route path="/forms" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
+      <Route path="/forms/:formType">
+        {(params) => (
+          <SimpleFormContainer 
+            formType={params.formType} 
+            language={language} 
+            onLanguageChange={setLanguage}
+          />
+        )}
+      </Route>
       <Route path="/ai-test" component={SimpleAITest} />
       <Route component={NotFound} />
     </Switch>
