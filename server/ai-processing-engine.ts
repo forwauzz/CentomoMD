@@ -43,7 +43,8 @@ export class AIProcessingEngine {
       const language = rule.language || config.globalContext?.language || 'fr';
       const fieldValue = context.formData[rule.fieldId];
 
-      if (!fieldValue || fieldValue.trim() === '') {
+      // For generation, input text is optional - we use context instead
+      if (rule.processingType !== 'generate' && (!fieldValue || fieldValue.trim() === '')) {
         return { success: false, error: 'No input text provided for processing' };
       }
 
