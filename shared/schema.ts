@@ -289,3 +289,42 @@ export const insertSavedFormSchema = createInsertSchema(savedForms).omit({
 
 export type InsertSavedForm = z.infer<typeof insertSavedFormSchema>;
 export type SavedForm = typeof savedForms.$inferSelect;
+
+// Generic Forms Schema - Phase 1.2: Generic Database Schema
+export const genericForms = pgTable("generic_forms", {
+  id: serial("id").primaryKey(),
+  formType: varchar("form_type", { length: 50 }).notNull(),
+  formVersion: varchar("form_version", { length: 20 }).notNull(),
+  formData: jsonb("form_data").notNull(),
+  metadata: jsonb("metadata"),
+  userId: varchar("user_id", { length: 50 }).notNull(),
+  
+  // Form state tracking
+  status: varchar("status", { length: 20 }).default("draft"), // draft, completed, archived
+  completionPercentage: integer("completion_percentage").default(0),
+  
+  // AI processing tracking
+  aiProcessingHistory: jsonb("ai_processing_history"),
+  
+  // Validation state
+  validationErrors: jsonb("validation_errors"),
+  validationWarnings: jsonb("validation_warnings"),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  
+  // Data retention
+  retentionDays: integer("retention_days").default(365),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const insertGenericFormSchema = createInsertSchema(genericForms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertGenericForm = z.infer<typeof insertGenericFormSchema>;
+export type GenericForm = typeof genericForms.$inferSelect;
