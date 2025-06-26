@@ -105,6 +105,23 @@ The application follows a full-stack TypeScript architecture with a modular form
 3. **Database Migration**: Drizzle migrations applied via `db:push`
 4. **Static Assets**: Served from Express with Vite middleware in development
 
+## Recent Changes
+- **January 26, 2025**: **Phase 2 AI Processing Abstraction Complete** - Built universal AI processing engine
+  - Created flexible AI processing configuration system supporting format/enhance/distribute/generate operations
+  - Implemented modular AI processing engine with rule-based processing logic
+  - Added CNESST-specific AI configuration mapping existing functionality to new system
+  - Built universal API endpoints for any form type AI processing
+  - Enhanced Section 8 distribution with improved contextual processing
+  - Maintained backward compatibility with existing AI formatter functions
+- **January 26, 2025**: **Phase 1 Modular Architecture Implementation** - Created foundation for form-agnostic system
+  - Implemented dynamic form configuration types and validation system
+  - Added generic database schema alongside existing medical forms schema
+  - Created form registry system for managing multiple form types
+  - Built dynamic field renderer supporting all existing field types
+  - Enhanced storage layer with generic form management capabilities
+- **Previous Updates**: Enhanced dictation workflow integration and language persistence
+- **Previous Updates**: Implemented TypeScript declarations for Web Speech API
+
 ## Changelog
 
 - June 26, 2025. Initial setup

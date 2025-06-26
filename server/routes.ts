@@ -4,6 +4,7 @@ import { z } from "zod";
 import { storage } from "./storage";
 import { insertMedicalFormSchema } from "@shared/schema";
 import { formatSection7Text, enhanceSection7Dictation, formatSection8Text, enhanceSection8Dictation, generateSection11Conclusion } from "./ai-formatter";
+import { aiProcessingEngine } from "./ai-processing-engine";
 import { hashPassword, verifyPassword, generateUserId, getSessionConfig, requireAuth, requireAdmin } from "./auth";
 import { setupInitialUsers } from "./setup-users";
 import "./types";
@@ -439,6 +440,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(500).json({ 
         message: "Failed to generate conclusion", 
+        error: error.message || "Unknown error"
+      });
+    }
+  });
+
+  // New modular AI processing endpoint
+  app.post("/api/ai/process-field", async (req, res) => {
+    try {
+      const { fieldId, processingType, formType, formData, language = 'fr', contextFields, targetFields, prompt } = req.body;
+      
+      if (!fieldId || !processingType || !formType || !formData) {
+        return res.status(400).json({ message: "Missing required parameters" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING"
+        });
+      }
+
+      const rule = {
+        fieldId,
+        processingType,
+        language,
+        contextFields,
+        targetFields,
+        prompt
+      };
+
+      const context = {
+        formData,
+        formType,
+        language
+      };
+
+      const result = await aiProcessingEngine.processField(rule, context);
+      
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          processedData: result.processedData 
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          error: result.error || "Processing failed" 
+        });
+      }
+    } catch (error) {
+      console.error('AI processing error:', error);
+      
+      if (error.message && error.message.includes('API')) {
+        return res.status(500).json({ 
+          message: "OpenAI API error - please check your API key",
+          error: "API_ERROR"
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to process field with AI", 
+        error: error.message || "Unknown error"
+      });
+    }
+  });
+
+  // Enhanced Section 8 distribution endpoint
+  app.post("/api/ai/distribute-section8", async (req, res) => {
+    try {
+      const { text, language = 'fr', contextData = {} } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING"
+        });
+      }
+
+      const rule = {
+        fieldId: 'examen_physique_input',
+        processingType: 'distribute' as const,
+        language: language as 'fr' | 'en',
+        targetFields: [
+          'examen_attitude_marche',
+          'examen_inspection_palpation',
+          'examen_amplitudes_articulaires',
+          'examen_force_musculaire',
+          'examen_reflexes',
+          'examen_tests_speciaux',
+          'examen_membre_sain'
+        ],
+        contextFields: ['diagnostic_principal', 'histoire_evolution'],
+        prompt: 'Distribute this physical examination description into the appropriate subsections. Analyze the text and place relevant content in each category.'
+      };
+
+      const context = {
+        formData: { 
+          'examen_physique_input': text,
+          ...contextData
+        },
+        formType: 'cnesst-medical',
+        language: language as 'fr' | 'en'
+      };
+
+      const result = await aiProcessingEngine.processField(rule, context);
+      
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          distributions: result.processedData || {}
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          error: result.error || "Distribution failed"
+        });
+      }
+    } catch (error) {
+      console.error('Section 8 distribution error:', error);
+      
+      if (error.message && error.message.includes('API')) {
+        return res.status(500).json({ 
+          message: "OpenAI API error - please check your API key",
+          error: "API_ERROR"
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to distribute Section 8 content", 
         error: error.message || "Unknown error"
       });
     }
