@@ -1,6 +1,19 @@
-import { medicalForms, users, savedForms, type MedicalForm, type InsertMedicalForm, type User, type InsertUser, type SavedForm, type InsertSavedForm } from "@shared/schema";
+import { 
+  medicalForms, 
+  users, 
+  savedForms, 
+  genericForms,
+  type MedicalForm, 
+  type InsertMedicalForm, 
+  type User, 
+  type InsertUser, 
+  type SavedForm, 
+  type InsertSavedForm,
+  type GenericForm,
+  type InsertGenericForm
+} from "@shared/schema";
 import { db } from "./db";
-import { eq, lt } from "drizzle-orm";
+import { eq, lt, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Medical forms
@@ -26,6 +39,15 @@ export interface IStorage {
   updateSavedForm(id: number, title: string, formData: any, retentionDays: number): Promise<SavedForm | undefined>;
   deleteSavedForm(id: number): Promise<boolean>;
   deleteExpiredForms(): Promise<number>;
+
+  // Generic forms management - Phase 1.2
+  getGenericForm(id: number): Promise<GenericForm | undefined>;
+  getGenericFormsByType(formType: string, userId?: string): Promise<GenericForm[]>;
+  getGenericFormsByUserId(userId: string): Promise<GenericForm[]>;
+  createGenericForm(form: InsertGenericForm): Promise<GenericForm>;
+  updateGenericForm(id: number, form: Partial<InsertGenericForm>): Promise<GenericForm | undefined>;
+  deleteGenericForm(id: number): Promise<boolean>;
+  deleteExpiredGenericForms(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {

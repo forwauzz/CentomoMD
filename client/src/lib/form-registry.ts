@@ -148,7 +148,7 @@ export class FormRegistry {
     
     if (hook && typeof hook === 'function') {
       try {
-        return await hook(...args);
+        return await (hook as any)(...args);
       } catch (error) {
         console.error(`Error executing ${hookName} hook for form ${formId}:`, error);
         throw error;

@@ -101,7 +101,7 @@ export interface CrossFieldRule {
 
 // AI Processing Configuration
 export interface AIFieldConfig {
-  type: 'format' | 'enhance' | 'translate';
+  type: 'format' | 'enhance' | 'translate' | 'distribute';
   prompt?: string;
   model?: string;
   temperature?: number;
@@ -110,7 +110,7 @@ export interface AIFieldConfig {
 }
 
 export interface AISectionConfig {
-  type: 'generate' | 'format' | 'distribute';
+  type: 'generate' | 'format' | 'distribute' | 'enhance';
   prompt?: string;
   model?: string;
   temperature?: number;
