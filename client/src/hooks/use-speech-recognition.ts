@@ -18,6 +18,7 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
+  const isListeningRef = useRef(false);
 
   const isSupported = typeof window !== 'undefined' && 'webkitSpeechRecognition' in window;
 
@@ -44,9 +45,13 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
     recognition.interimResults = options.interimResults ?? true;
     recognition.lang = options.language ?? 'fr-FR';
     recognition.maxAlternatives = 1;
+    
+    // Enhanced settings for better continuous speech recognition
+    // Note: grammars setting removed due to browser compatibility
 
     recognition.onstart = () => {
       setIsListening(true);
+      isListeningRef.current = true;
       console.log('Speech recognition started with language:', options.language);
     };
 
@@ -54,8 +59,8 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
       let finalTranscript = '';
       let interim = '';
       
-      // Process all results
-      for (let i = 0; i < event.results.length; i++) {
+      // Process all results from the current recognition session
+      for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         const transcript = result[0].transcript;
         
@@ -66,14 +71,22 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
         }
       }
       
-      // Update interim transcript for live display
-      setInterimTranscript(interim);
+      // Always show interim results for live feedback
+      if (interim.trim()) {
+        setInterimTranscript(interim);
+        console.log('Live transcript received:', interim);
+      }
       
-      // Update final transcript and trigger callback when we have final results
+      // Accumulate final results immediately
       if (finalTranscript.trim()) {
-        setTranscript(prev => prev + finalTranscript);
-        onResult?.(finalTranscript);
-        console.log('Final transcript captured:', finalTranscript);
+        const newTranscript = finalTranscript.trim();
+        setTranscript(prev => {
+          const updated = prev + (prev ? ' ' : '') + newTranscript;
+          console.log('Final transcript captured:', newTranscript);
+          console.log('Total accumulated transcript:', updated);
+          return updated;
+        });
+        onResult?.(finalTranscript.trim());
       }
     };
 
@@ -87,13 +100,26 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
     };
 
     recognition.onend = () => {
-      setIsListening(false);
+      console.log('Speech recognition ended, should restart:', isListeningRef.current);
+      // Only restart if we're still supposed to be listening (not manually stopped)
+      if (isListeningRef.current && recognitionRef.current) {
+        console.log('Auto-restarting speech recognition for continuous listening');
+        try {
+          recognition.start();
+        } catch (error) {
+          console.error('Failed to restart recognition:', error);
+          setIsListening(false);
+        }
+      } else {
+        setIsListening(false);
+      }
     };
 
     recognition.start();
   }, [isSupported, options]);
 
   const stopListening = useCallback(() => {
+    isListeningRef.current = false;
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
