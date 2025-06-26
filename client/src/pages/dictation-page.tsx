@@ -210,21 +210,37 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   // Handle transcript updates - capture both interim and final transcripts
   useEffect(() => {
     if (transcript) {
+      console.log('Dictation page received transcript:', transcript);
       // Append new final transcript to existing text
       setFinalText(prev => {
         const newText = prev ? `${prev} ${transcript}` : transcript;
+        console.log('Updated final text:', newText);
         setEditableText(newText); // Keep editable text in sync
         return newText;
       });
-      // Clear the captured transcript after processing
-      resetTranscript();
+      // Only clear transcript after a short delay to allow display
+      setTimeout(() => {
+        resetTranscript();
+      }, 100);
     }
   }, [transcript, resetTranscript]);
 
   // Update interim display for live transcription
   useEffect(() => {
+    console.log('Interim transcript updated:', interimTranscript);
     setInterimText(interimTranscript);
   }, [interimTranscript]);
+
+  // Debug logging for speech recognition state
+  useEffect(() => {
+    console.log('Speech recognition state:', {
+      isListening,
+      isSupported,
+      transcript,
+      interimTranscript,
+      error
+    });
+  }, [isListening, isSupported, transcript, interimTranscript, error]);
 
   const handleStartRecording = () => {
     if (!selectedSection) {
@@ -417,9 +433,24 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
             <CardContent className="flex-1 p-6">
               <div className="h-full bg-gray-50 rounded-lg p-4 overflow-y-auto">
                 <div className="text-gray-800 whitespace-pre-wrap">
-                  {interimText || (currentLanguage === 'fr' 
-                    ? "En attente de la dictée..." 
-                    : "Waiting for dictation..."
+                  {/* Show interim transcript first, then final text while building */}
+                  {interimText && (
+                    <div className="text-blue-600 italic">
+                      {interimText}
+                    </div>
+                  )}
+                  {finalText && (
+                    <div className="text-gray-800">
+                      {finalText}
+                    </div>
+                  )}
+                  {!interimText && !finalText && (
+                    <div className="text-gray-500">
+                      {currentLanguage === 'fr' 
+                        ? "En attente de la dictée..." 
+                        : "Waiting for dictation..."
+                      }
+                    </div>
                   )}
                 </div>
                 {isListening && (

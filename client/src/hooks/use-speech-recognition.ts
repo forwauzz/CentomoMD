@@ -71,9 +71,9 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
         }
       }
       
-      // Always show interim results for live feedback
+      // Always update interim results for live feedback (even if empty to clear previous)
+      setInterimTranscript(interim);
       if (interim.trim()) {
-        setInterimTranscript(interim);
         console.log('Live transcript received:', interim);
       }
       
