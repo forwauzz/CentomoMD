@@ -185,6 +185,78 @@ export class DatabaseStorage implements IStorage {
     );
     return result.rowCount || 0;
   }
+
+  // Generic forms management implementation - Phase 1.2
+  async getGenericForm(id: number): Promise<GenericForm | undefined> {
+    const [form] = await db.select().from(genericForms).where(eq(genericForms.id, id));
+    return form;
+  }
+
+  async getGenericFormsByType(formType: string, userId?: string): Promise<GenericForm[]> {
+    const conditions = [eq(genericForms.formType, formType)];
+    if (userId) {
+      conditions.push(eq(genericForms.userId, userId));
+    }
+    
+    return await db
+      .select()
+      .from(genericForms)
+      .where(and(...conditions))
+      .orderBy(desc(genericForms.updatedAt));
+  }
+
+  async getGenericFormsByUserId(userId: string): Promise<GenericForm[]> {
+    return await db
+      .select()
+      .from(genericForms)
+      .where(eq(genericForms.userId, userId))
+      .orderBy(desc(genericForms.updatedAt));
+  }
+
+  async createGenericForm(insertForm: InsertGenericForm): Promise<GenericForm> {
+    const [form] = await db
+      .insert(genericForms)
+      .values({
+        ...insertForm,
+        expiresAt: insertForm.retentionDays ? 
+          new Date(Date.now() + insertForm.retentionDays * 24 * 60 * 60 * 1000) : 
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // Default 1 year
+      })
+      .returning();
+    return form;
+  }
+
+  async updateGenericForm(id: number, updateData: Partial<InsertGenericForm>): Promise<GenericForm | undefined> {
+    const [updatedForm] = await db
+      .update(genericForms)
+      .set({ 
+        ...updateData, 
+        updatedAt: new Date(),
+        expiresAt: updateData.retentionDays ? 
+          new Date(Date.now() + updateData.retentionDays * 24 * 60 * 60 * 1000) : 
+          undefined
+      })
+      .where(eq(genericForms.id, id))
+      .returning();
+    return updatedForm;
+  }
+
+  async deleteGenericForm(id: number): Promise<boolean> {
+    const deletedForm = await db
+      .delete(genericForms)
+      .where(eq(genericForms.id, id))
+      .returning();
+    return deletedForm.length > 0;
+  }
+
+  async deleteExpiredGenericForms(): Promise<number> {
+    const now = new Date();
+    const deletedForms = await db
+      .delete(genericForms)
+      .where(lt(genericForms.expiresAt, now))
+      .returning();
+    return deletedForms.length;
+  }
 }
 
 export const storage = new DatabaseStorage();

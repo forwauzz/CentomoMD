@@ -16,11 +16,20 @@ CentomoMD is a comprehensive digital medical evaluation platform designed to str
 - **Voice Recognition**: Web Speech API with medical terminology support
 
 ### Architecture Pattern
-The application follows a full-stack TypeScript architecture with a shared schema approach:
+The application follows a full-stack TypeScript architecture with a modular form system:
 - **Client-Server Separation**: Frontend React app served by Express backend
-- **Shared Types**: Common TypeScript definitions in `/shared/schema.ts`
+- **Modular Form System**: Configuration-driven forms with dynamic rendering (Phase 1 Complete)
+- **Dual Schema Approach**: Legacy medical forms + generic form system for future scalability
+- **Shared Types**: Common TypeScript definitions in `/shared/schema.ts` and `/shared/form-configs/`
 - **API-First Design**: RESTful API endpoints for all data operations
 - **Real-time Features**: Voice dictation with live transcript processing
+
+### Modular Architecture (Phase 1 - Foundation Complete)
+- **Form Configuration System**: Type-safe form definitions with validation rules
+- **Dynamic Field Rendering**: Universal field components supporting all form types
+- **Form Registry**: Centralized management of multiple form configurations
+- **Generic Database Layer**: Flexible storage supporting any form structure
+- **Backward Compatibility**: Existing CNESST form fully preserved during migration
 
 ## Key Components
 
