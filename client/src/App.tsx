@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import MedicalForm from "@/pages/medical-form";
 import DictationPage from "@/pages/dictation-page";
+import AITestPage from "@/pages/ai-test";
 import LoginPage from "@/pages/login-page";
 import LandingPage from "@/pages/landing-page";
 import NotFound from "@/pages/not-found";
@@ -40,6 +41,7 @@ function Router() {
     <Switch>
       <Route path="/" component={() => <MedicalForm language={language} onLanguageChange={setLanguage} />} />
       <Route path="/dictation" component={() => <DictationPage language={language} />} />
+      <Route path="/ai-test" component={AITestPage} />
       <Route component={NotFound} />
     </Switch>
   );
