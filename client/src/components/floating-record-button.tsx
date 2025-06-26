@@ -56,12 +56,15 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
     };
   }, []);
 
-  // Handle transcript updates during listening
+  // Handle transcript updates during listening - improved to capture all transcripts
   useEffect(() => {
-    if (isListening && transcript && activeField && onDirectDictation) {
+    if (transcript && activeField && onDirectDictation) {
+      console.log('Floating button captured transcript:', transcript);
       onDirectDictation(transcript, activeField);
+      // Clear transcript after processing to prevent duplication
+      resetTranscript();
     }
-  }, [transcript, isListening, activeField, onDirectDictation]);
+  }, [transcript, activeField, onDirectDictation, resetTranscript]);
 
   // Hide button when scrolling (optional UX improvement)
   useEffect(() => {
@@ -101,7 +104,13 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
         startListening();
       }
     } else {
-      // Navigate to dedicated dictation page
+      // Navigate to dedicated dictation page with proper language persistence
+      if (activeField) {
+        sessionStorage.setItem('activeField', activeField);
+      }
+      // Always store current language for persistence
+      sessionStorage.setItem('dictationLanguage', language);
+      console.log('Navigating to dictation page with language:', language);
       setLocation('/dictation');
     }
   };
