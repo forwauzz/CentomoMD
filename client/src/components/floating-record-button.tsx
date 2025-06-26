@@ -19,12 +19,13 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
   const {
     isListening,
     transcript,
+    interimTranscript,
     startListening,
     stopListening,
     resetTranscript,
     isSupported,
   } = useSpeechRecognition({
-    language: language === 'fr' ? 'fr-FR' : 'en-US',
+    language: language === 'fr' ? 'fr-CA' : 'en-US',
     continuous: true,
     interimResults: true,
   });

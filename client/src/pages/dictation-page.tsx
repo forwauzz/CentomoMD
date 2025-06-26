@@ -167,6 +167,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const {
     isListening,
     transcript,
+    interimTranscript,
     error,
     isSupported,
     startListening,
@@ -206,12 +207,24 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     },
   });
 
-  // Handle transcript updates
+  // Handle transcript updates - capture both interim and final transcripts
   useEffect(() => {
     if (transcript) {
-      setInterimText(transcript);
+      // Append new final transcript to existing text
+      setFinalText(prev => {
+        const newText = prev ? `${prev} ${transcript}` : transcript;
+        setEditableText(newText); // Keep editable text in sync
+        return newText;
+      });
+      // Clear the captured transcript after processing
+      resetTranscript();
     }
-  }, [transcript]);
+  }, [transcript, resetTranscript]);
+
+  // Update interim display for live transcription
+  useEffect(() => {
+    setInterimText(interimTranscript);
+  }, [interimTranscript]);
 
   const handleStartRecording = () => {
     if (!selectedSection) {
@@ -223,17 +236,17 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
       return;
     }
     
+    console.log('Starting recording with language:', currentLanguage);
     resetTranscript();
     setInterimText("");
-    startListening();
+    startListening((newTranscript) => {
+      console.log('Live transcript received:', newTranscript);
+    });
   };
 
   const handleStopRecording = () => {
+    console.log('Stopping recording');
     stopListening();
-    if (interimText.trim()) {
-      setFinalText(prev => prev ? `${prev} ${interimText}` : interimText);
-      setInterimText("");
-    }
   };
 
   const handleCopyText = async () => {

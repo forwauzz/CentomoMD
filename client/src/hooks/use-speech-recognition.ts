@@ -15,6 +15,7 @@ interface SpeechRecognitionOptions {
 export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
 
@@ -34,6 +35,7 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
 
     setError(null);
     setTranscript('');
+    setInterimTranscript('');
 
     const recognition = new window.webkitSpeechRecognition();
     recognitionRef.current = recognition;
@@ -41,22 +43,37 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
     recognition.continuous = options.continuous ?? true;
     recognition.interimResults = options.interimResults ?? true;
     recognition.lang = options.language ?? 'fr-FR';
+    recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
       setIsListening(true);
+      console.log('Speech recognition started with language:', options.language);
     };
 
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
+      let interim = '';
+      
+      // Process all results
       for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+        const result = event.results[i];
+        const transcript = result[0].transcript;
+        
+        if (result.isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interim += transcript;
         }
       }
       
+      // Update interim transcript for live display
+      setInterimTranscript(interim);
+      
+      // Update final transcript and trigger callback when we have final results
       if (finalTranscript.trim()) {
-        setTranscript(finalTranscript);
+        setTranscript(prev => prev + finalTranscript);
         onResult?.(finalTranscript);
+        console.log('Final transcript captured:', finalTranscript);
       }
     };
 
@@ -86,12 +103,14 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
 
   const resetTranscript = useCallback(() => {
     setTranscript('');
+    setInterimTranscript('');
     setError(null);
   }, []);
 
   return {
     isListening,
     transcript,
+    interimTranscript,
     error,
     isSupported,
     startListening,
