@@ -46,12 +46,13 @@ export function FormContainer({
     );
   }
 
+  // Get validation schema from form registry
+  const validationSchema = formRegistry.getFormSchema(formType);
+  const defaultValues = { ...initialData };
+
   const form = useForm({
-    resolver: zodResolver(config.validationSchema),
-    defaultValues: {
-      ...config.defaultValues,
-      ...initialData
-    }
+    resolver: validationSchema ? zodResolver(validationSchema) : undefined,
+    defaultValues,
   });
 
   const onSubmit = (data: Record<string, any>) => {
@@ -79,18 +80,14 @@ export function FormContainer({
       <FieldRenderer
         key={field.id}
         field={field}
-        form={form}
-        language={language}
-        formType={formType}
+        control={form.control}
       />
     );
   };
 
   const renderSection = (section: SectionConfig) => {
-    const title = language === 'fr' ? section.title.fr : section.title.en;
-    const description = section.description 
-      ? (language === 'fr' ? section.description.fr : section.description.en)
-      : undefined;
+    const title = section.title;
+    const description = section.description;
 
     return (
       <Card key={section.id} className="mb-6">
