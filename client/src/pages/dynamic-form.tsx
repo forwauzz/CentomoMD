@@ -76,7 +76,7 @@ export default function DynamicFormPage({
   };
 
   // Show form selector if no form type is selected or if form type is invalid
-  const config = formRegistry.getConfig(selectedFormType);
+  const config = formRegistry.getForm(selectedFormType);
   if (!config) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -107,7 +107,7 @@ export default function DynamicFormPage({
                   </SelectTrigger>
                   <SelectContent>
                     {availableFormTypes.map((type) => {
-                      const typeConfig = formRegistry.getConfig(type);
+                      const typeConfig = formRegistry.getForm(type);
                       const title = typeConfig 
                         ? (formLanguage === 'fr' ? typeConfig.title.fr : typeConfig.title.en)
                         : type;

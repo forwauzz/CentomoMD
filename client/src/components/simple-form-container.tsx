@@ -21,7 +21,7 @@ export function SimpleFormContainer({
     return (
       <MedicalForm 
         language={language} 
-        onLanguageChange={onLanguageChange}
+        onLanguageChange={onLanguageChange || (() => {})}
       />
     );
   }

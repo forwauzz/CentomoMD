@@ -33,7 +33,7 @@ export class FormRegistry {
    */
   getForm(formId: string): FormConfig | null {
     const entry = this.forms.get(formId);
-    return entry?.config || null;
+    return entry ? entry.config : null;
   }
 
   /**
