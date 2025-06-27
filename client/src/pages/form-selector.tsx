@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FormInput, FileText, Stethoscope, ArrowRight } from 'lucide-react';
+import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 interface FormSelectorProps {
   language?: 'fr' | 'en';
@@ -14,6 +16,8 @@ export default function FormSelector({
   onLanguageChange 
 }: FormSelectorProps) {
   const [location, setLocation] = useLocation();
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
   
   // Available form types with metadata
   const availableForms = [
@@ -48,6 +52,22 @@ export default function FormSelector({
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: language === 'fr' ? "Déconnexion réussie" : "Logout successful",
+        description: language === 'fr' ? "Vous avez été déconnecté avec succès." : "You have been logged out successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: language === 'fr' ? "Erreur lors de la déconnexion." : "Error during logout.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto p-6">
@@ -66,25 +86,47 @@ export default function FormSelector({
               </p>
             </div>
             
-            {/* Language Toggle */}
-            {onLanguageChange && (
-              <div className="flex space-x-2">
-                <Button
-                  variant={language === 'fr' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleLanguageChange('fr')}
-                >
-                  Français
-                </Button>
-                <Button
-                  variant={language === 'en' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handleLanguageChange('en')}
-                >
-                  English
-                </Button>
-              </div>
-            )}
+            {/* Header Actions */}
+            <div className="flex items-center space-x-4">
+              {/* User Info & Logout */}
+              {user && (
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <User className="w-4 h-4" />
+                    <span>{user.username || user.email}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="flex items-center space-x-1"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>{language === 'fr' ? 'Déconnexion' : 'Logout'}</span>
+                  </Button>
+                </div>
+              )}
+              
+              {/* Language Toggle */}
+              {onLanguageChange && (
+                <div className="flex space-x-2">
+                  <Button
+                    variant={language === 'fr' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleLanguageChange('fr')}
+                  >
+                    Français
+                  </Button>
+                  <Button
+                    variant={language === 'en' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleLanguageChange('en')}
+                  >
+                    English
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
