@@ -18,14 +18,19 @@ export type SectionType =
   | 'medical-exam'     // Medical examination fields
   | 'ai-enhanced';     // AI-powered sections
 
+export interface MultilingualString {
+  fr: string;
+  en: string;
+}
+
 export interface FieldConfig {
   id: string;
-  label: string;
+  label: string | MultilingualString;
   type: FieldType;
   required?: boolean;
-  placeholder?: string;
-  description?: string;
-  options?: { value: string; label: string }[];
+  placeholder?: string | MultilingualString;
+  description?: string | MultilingualString;
+  options?: { value: string; label: string | MultilingualString }[];
   validation?: ValidationRule[];
   aiProcessing?: AIFieldConfig;
   defaultValue?: any;
@@ -38,12 +43,12 @@ export interface FieldConfig {
 
 export interface SectionConfig {
   id: string;
-  title: string;
+  title: string | MultilingualString;
   type: SectionType;
-  description?: string;
+  description?: string | MultilingualString;
   defaultOpen?: boolean;
   fields?: FieldConfig[];
-  staticContent?: string;
+  staticContent?: string | MultilingualString;
   aiProcessing?: AISectionConfig;
   layout?: {
     columns?: number;
@@ -54,8 +59,8 @@ export interface SectionConfig {
 
 export interface FormConfig {
   id: string;
-  title: string;
-  description?: string;
+  title: string | MultilingualString;
+  description?: string | MultilingualString;
   version: string;
   sections: SectionConfig[];
   metadata?: {
@@ -221,4 +226,10 @@ export interface NavigationItem {
   hasErrors?: boolean;
   hasWarnings?: boolean;
   isActive?: boolean;
+}
+
+export interface SelectOption {
+  value: string;
+  label: string | MultilingualString;
+  disabled?: boolean;
 }

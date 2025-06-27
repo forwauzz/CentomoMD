@@ -165,3 +165,35 @@ export default function DynamicFormPage({
     />
   );
 }
+```
+
+```python
+import React from 'react';
+import { FormConfig } from '@/lib/form-registry';
+
+interface DynamicFormProps {
+  formConfig: FormConfig;
+  language?: 'fr' | 'en';
+}
+
+export default function DynamicForm({ formConfig, language = 'fr' }: DynamicFormProps) {
+  return (
+    <div>
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-blue-600 mb-2">
+          {typeof formConfig.title === 'string' ? formConfig.title : formConfig.title[language]}
+        </h1>
+        {formConfig.description && (
+          <p className="text-gray-600">
+            {typeof formConfig.description === 'string' ? formConfig.description : formConfig.description[language]}
+          </p>
+        )}
+      </div>
+      {/* Render form fields here */}
+    </div>
+  );
+}
+```
+
+```
+</replit_final_file>

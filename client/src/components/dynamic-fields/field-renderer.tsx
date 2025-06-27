@@ -19,6 +19,15 @@ interface FieldRendererProps<TFieldValues extends FieldValues = FieldValues> {
   onVoiceRecord?: (fieldId: string) => void;
   className?: string;
   disabled?: boolean;
+  language?: 'fr' | 'en';
+}
+
+// Utility function to get localized text
+function getLocalizedText(text: string | { fr: string; en: string }, language: 'fr' | 'en' = 'fr'): string {
+  if (typeof text === 'string') {
+    return text;
+  }
+  return text[language] || text.fr;
 }
 
 export function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
@@ -27,6 +36,7 @@ export function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
   onVoiceRecord,
   className = '',
   disabled = false,
+  language = 'fr',
 }: FieldRendererProps<TFieldValues>) {
   const renderFieldInput = (onChange: (value: any) => void, value: any) => {
     switch (field.type) {
@@ -34,7 +44,7 @@ export function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
         return (
           <div className="relative">
             <Input
-              placeholder={field.placeholder}
+              placeholder={getLocalizedText(field.placeholder || '', language)}
               value={value || ''}
               onChange={(e) => onChange(e.target.value)}
               disabled={disabled}
@@ -59,7 +69,7 @@ export function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
         return (
           <div className="relative">
             <Textarea
-              placeholder={field.placeholder}
+              placeholder={getLocalizedText(field.placeholder || '', language)}
               value={value || ''}
               onChange={(e) => onChange(e.target.value)}
               disabled={disabled}
@@ -121,7 +131,7 @@ export function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
               htmlFor={field.id}
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              {field.label}
+              {getLocalizedText(field.label, language)}
             </label>
           </div>
         );
@@ -139,7 +149,7 @@ export function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
             <SelectContent>
               {field.options?.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                  {getLocalizedText(option.label, language)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -218,14 +228,14 @@ export function FieldRenderer<TFieldValues extends FieldValues = FieldValues>({
       render={({ field: formField }) => (
         <FormItem className={className}>
           <FormLabel>
-            {field.label}
+            {getLocalizedText(field.label, language)}
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </FormLabel>
           <FormControl>
             {renderFieldInput(formField.onChange, formField.value)}
           </FormControl>
           {field.description && (
-            <p className="text-sm text-muted-foreground">{field.description}</p>
+            <p className="text-sm text-muted-foreground">{getLocalizedText(field.description, language)}</p>
           )}
           <FormMessage />
         </FormItem>

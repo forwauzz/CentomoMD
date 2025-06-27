@@ -6,8 +6,14 @@ import { CommonValidationRules } from './form-validator';
 
 export const cnesstFormConfig: FormConfig = {
   id: 'cnesst-medical-evaluation',
-  title: 'MI Template',
-  description: 'Medical Evaluation Template for comprehensive medical assessments',
+  title: {
+    fr: 'MI Template',
+    en: 'MI Template'
+  },
+  description: {
+    fr: 'Modèle d\'évaluation médicale pour les évaluations médicales complètes',
+    en: 'Medical Evaluation Template for comprehensive medical assessments'
+  },
   version: '1.0.0',
   
   metadata: {
@@ -33,50 +39,77 @@ export const cnesstFormConfig: FormConfig = {
     // Section 1: Mandat de l'évaluation
     {
       id: 'section1',
-      title: '1. Mandat de l\'évaluation',
+      title: {
+        fr: '1. Mandat de l\'évaluation',
+        en: '1. Evaluation Mandate'
+      },
       type: 'checkbox-group',
       defaultOpen: true,
-      description: 'Sélectionnez les éléments du mandat d\'évaluation',
+      description: {
+        fr: 'Sélectionnez les éléments du mandat d\'évaluation',
+        en: 'Select the elements of the evaluation mandate'
+      },
       fields: [
         {
           id: 'mandatDiagnostic',
-          label: 'Diagnostic',
+          label: {
+            fr: 'Diagnostic',
+            en: 'Diagnosis'
+          },
           type: 'checkbox',
           required: false,
         },
         {
           id: 'mandatConsolidation',
-          label: 'Date de consolidation',
+          label: {
+            fr: 'Date de consolidation',
+            en: 'Consolidation Date'
+          },
           type: 'checkbox',
           required: false,
         },
         {
           id: 'mandatSoins',
-          label: 'Soins et traitements',
+          label: {
+            fr: 'Soins et traitements',
+            en: 'Care and Treatments'
+          },
           type: 'checkbox',
           required: false,
         },
         {
           id: 'mandatAtteinte',
-          label: 'Atteinte permanente',
+          label: {
+            fr: 'Atteinte permanente',
+            en: 'Permanent Impairment'
+          },
           type: 'checkbox',
           required: false,
         },
         {
           id: 'mandatAtteintePourcentage',
-          label: 'Pourcentage d\'atteinte permanente',
+          label: {
+            fr: 'Pourcentage d\'atteinte permanente',
+            en: 'Permanent Impairment Percentage'
+          },
           type: 'checkbox',
           required: false,
         },
         {
           id: 'mandatLimitations',
-          label: 'Limitations fonctionnelles',
+          label: {
+            fr: 'Limitations fonctionnelles',
+            en: 'Functional Limitations'
+          },
           type: 'checkbox',
           required: false,
         },
         {
           id: 'mandatLimitationsEvaluation',
-          label: 'Évaluation des limitations fonctionnelles',
+          label: {
+            fr: 'Évaluation des limitations fonctionnelles',
+            en: 'Functional Limitations Assessment'
+          },
           type: 'checkbox',
           required: false,
         },

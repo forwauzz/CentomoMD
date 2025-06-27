@@ -26,7 +26,7 @@ export class FormRegistry {
     };
 
     this.forms.set(config.id, registryEntry);
-    
+
     // Create and cache validator
     this.validators.set(config.id, createFormValidator(config));
 
@@ -102,11 +102,11 @@ export class FormRegistry {
   getFormWithVersion(formId: string, version?: string): FormConfig | null {
     const config = this.getForm(formId);
     if (!config) return null;
-    
+
     if (version && config.version !== version) {
       console.warn(`Form ${formId} version mismatch. Expected: ${version}, Found: ${config.version}`);
     }
-    
+
     return config;
   }
 
@@ -136,7 +136,7 @@ export class FormRegistry {
   getCompletionPercentage(formId: string, data: Record<string, any>): number {
     const validator = this.getValidator(formId);
     if (!validator) return 0;
-    
+
     return validator.getCompletionPercentage(data);
   }
 
@@ -150,7 +150,7 @@ export class FormRegistry {
   ): Promise<any> {
     const entry = this.getFormEntry(formId);
     const hook = entry?.hooks?.[hookName];
-    
+
     if (hook && typeof hook === 'function') {
       try {
         return await (hook as any)(...args);
@@ -159,7 +159,7 @@ export class FormRegistry {
         throw error;
       }
     }
-    
+
     return args[0]; // Return first argument by default (usually the data)
   }
 
@@ -209,7 +209,7 @@ export class FormRegistry {
    */
   searchForms(query: string): FormConfig[] {
     const searchTerm = query.toLowerCase();
-    
+
     return this.listForms().filter(config => 
       config.title.toLowerCase().includes(searchTerm) ||
       config.description?.toLowerCase().includes(searchTerm) ||
@@ -257,11 +257,11 @@ export class FormRegistry {
    */
   exportRegistry(): Record<string, FormConfig> {
     const exported: Record<string, FormConfig> = {};
-    
+
     this.forms.forEach((entry, formId) => {
       exported[formId] = entry.config;
     });
-    
+
     return exported;
   }
 
@@ -298,9 +298,15 @@ export const FormRegistryUtils = {
   /**
    * Get form title for display
    */
-  getFormTitle(formId: string): string {
+  getFormTitle(formId: string, language: 'fr' | 'en' = 'fr'): string {
     const config = formRegistry.getForm(formId);
-    return config?.title || formId;
+    if (!config?.title) return 'Unknown Form';
+
+    if (typeof config.title === 'string') {
+      return config.title;
+    }
+
+    return config.title[language] || config.title.fr;
   },
 
   /**
