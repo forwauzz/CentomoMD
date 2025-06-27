@@ -30,7 +30,7 @@ const translations = {
     textCopied: "Texte copié dans le presse-papiers",
     textCleared: "Texte effacé",
     textSaved: "Texte sauvegardé dans la section",
-    
+
     sections: {
       diagnosticsCnesst: "2. Diagnostics acceptés par la CNESST",
       modaliteEntrevue: "3. Modalité de l'entrevue",
@@ -80,7 +80,7 @@ const translations = {
     textCopied: "Text copied to clipboard",
     textCleared: "Text cleared",
     textSaved: "Text saved to section",
-    
+
     sections: {
       diagnosticsCnesst: "2. Diagnoses Accepted by CNESST",
       modaliteEntrevue: "3. Interview Modality",
@@ -127,18 +127,18 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const [currentLanguage, setCurrentLanguage] = useState<'fr' | 'en'>(propLanguage);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const { toast } = useToast();
-  
+
   const t = translations[currentLanguage];
 
   // Initialize with activeField and language from sessionStorage
   useEffect(() => {
     const activeField = sessionStorage.getItem('activeField');
     const storedLanguage = sessionStorage.getItem('dictationLanguage') as 'fr' | 'en';
-    
+
     if (storedLanguage) {
       setCurrentLanguage(storedLanguage);
     }
-    
+
     if (activeField) {
       setSelectedSection(activeField);
       // Load existing text for this field if available
@@ -155,12 +155,12 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
         }
       }
     }
-    
+
     // Simulate initialization delay for speech recognition setup
     const timer = setTimeout(() => {
       setIsInitializing(false);
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -183,7 +183,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const formatTextMutation = useMutation({
     mutationFn: async (text: string) => {
       if (!selectedSection) return text;
-      
+
       const endpoint = selectedSection === 'historiqueEvolution' ? '/api/format-section7' : '/api/format-section8';
       const response = await apiRequest('POST', endpoint, { text, language: currentLanguage });
       const data = await response.json();
@@ -251,7 +251,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
       });
       return;
     }
-    
+
     console.log('Starting recording with language:', currentLanguage);
     resetTranscript();
     setInterimText("");
@@ -292,18 +292,18 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const handleSaveToSection = () => {
     const textToSave = isEditing ? editableText : finalText;
     if (!selectedSection || !textToSave) return;
-    
+
     // Save to localStorage for form to pick up
     const savedData = localStorage.getItem('medical-form-draft');
     const formData = savedData ? JSON.parse(savedData) : {};
-    
+
     formData[selectedSection] = textToSave;
     localStorage.setItem('medical-form-draft', JSON.stringify(formData));
-    
+
     // Store dictation result and field for the medical form to pick up
     sessionStorage.setItem('dictationResult', textToSave);
     sessionStorage.setItem('dictationField', selectedSection);
-    
+
     toast({
       title: t.textSaved,
       description: t.sections[selectedSection as keyof typeof t.sections],
@@ -311,14 +311,14 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
 
     // Clear the activeField from sessionStorage
     sessionStorage.removeItem('activeField');
-    
+
     // Navigate back to the form
     setLocation('/');
-    
+
     // Reset editing state
     setIsEditing(false);
     setEditableText("");
-    
+
     // Navigate back to form
     setLocation('/');
   };
@@ -344,10 +344,16 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   };
 
   const handleCancel = () => {
-    // Clear the activeField from sessionStorage
+    const returnPath = sessionStorage.getItem('dictationReturnPath') || '/';
+
+    // Clear any stored data
     sessionStorage.removeItem('activeField');
-    // Navigate back to form without saving
-    setLocation('/');
+    sessionStorage.removeItem('dictationResult');
+    sessionStorage.removeItem('dictationField');
+    sessionStorage.removeItem('dictationReturnPath');
+
+    // Navigate back to the original location
+    setLocation(returnPath);
   };
 
   // Show loading spinner while initializing
@@ -401,7 +407,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
               </Button>
               <h1 className="text-2xl font-bold text-blue-600">{t.title}</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <Select value={selectedSection} onValueChange={setSelectedSection}>
                 <SelectTrigger className="w-80">
@@ -421,7 +427,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
-          
+
           {/* Left Panel - Live Transcript */}
           <Card className="flex flex-col">
             <CardHeader className="bg-blue-50 border-b">
@@ -527,7 +533,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                   </div>
                 )}
               </div>
-              
+
               {/* Controls */}
               <div className="space-y-4">
                 <div className="flex gap-3">
@@ -550,7 +556,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                     </Button>
                   )}
                 </div>
-                
+
                 {/* AI Formatting Button */}
                 {finalText && (selectedSection === 'historiqueEvolution' || selectedSection === 'appreciationEvolution') && (
                   <Button
@@ -576,7 +582,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                     <Copy className="w-4 h-4 mr-2" />
                     {t.copyText}
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     onClick={handleClearText}
@@ -587,7 +593,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                     {t.clearText}
                   </Button>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <Button
                     onClick={handleSaveToSection}
@@ -597,7 +603,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                     <Save className="w-4 h-4 mr-2" />
                     {t.saveToSection}
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     onClick={handleCancel}
@@ -607,7 +613,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                   </Button>
                 </div>
               </div>
-              
+
               {error && (
                 <div className="mt-4 text-red-600 text-sm">
                   {error}

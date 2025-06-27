@@ -902,7 +902,10 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
 
   const { saveData, loadData, clearData, debouncedSave } = useAutoSave({
     key: 'centMD_formData',
-    onSave: () => setLastSaved(new Date().toLocaleString('fr-FR')),
+    onSave: () => {
+      const timeString = new Date().toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US');
+      setLastSaved(language === 'fr' ? `Sauvegardé à ${timeString}` : `Saved at ${timeString}`);
+    },
   });
 
   const {
@@ -962,7 +965,14 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       sessionStorage.removeItem('dictationResult');
       sessionStorage.removeItem('dictationField');
       
-      // Show success message
+      // Show success message with toast
+      toast({
+        title: language === 'fr' ? "Dictée ajoutée" : "Dictation added",
+        description: language === 'fr' 
+          ? `Contenu ajouté au champ: ${dictationField}` 
+          : `Content added to field: ${dictationField}`,
+      });
+      
       console.log(`Dictation result added to field: ${dictationField}`);
     }
   }, []); // Run only on mount

@@ -69,7 +69,7 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
   // Hide button when scrolling (optional UX improvement)
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    
+
     const handleScroll = () => {
       setIsVisible(false);
       clearTimeout(timeoutId);
@@ -110,6 +110,8 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
       }
       // Always store current language for persistence
       sessionStorage.setItem('dictationLanguage', language);
+      // Store current location for seamless return
+      sessionStorage.setItem('dictationReturnPath', window.location.pathname);
       console.log('Navigating to dictation page with language:', language);
       setLocation('/dictation');
     }
@@ -142,7 +144,7 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
           <Mic className="w-6 h-6 text-white" />
         )}
       </Button>
-      
+
       {/* Tooltip */}
       <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block">
         <div className="bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap">
