@@ -86,8 +86,14 @@ export function FormContainer({
   };
 
   const renderSection = (section: SectionConfig) => {
-    const title = section.title;
-    const description = section.description;
+    const title = typeof section.title === 'string' 
+      ? section.title 
+      : (language === 'fr' ? (section.title as any).fr : (section.title as any).en);
+    const description = section.description 
+      ? (typeof section.description === 'string' 
+          ? section.description 
+          : (language === 'fr' ? (section.description as any).fr : (section.description as any).en))
+      : undefined;
 
     return (
       <Card key={section.id} className="mb-6">
@@ -100,15 +106,19 @@ export function FormContainer({
           )}
         </CardHeader>
         <CardContent className="space-y-4">
-          {section.fields.map(renderField)}
+          {section.fields?.map(renderField)}
         </CardContent>
       </Card>
     );
   };
 
-  const formTitle = language === 'fr' ? config.title.fr : config.title.en;
+  const formTitle = typeof config.title === 'string' 
+    ? config.title 
+    : (language === 'fr' ? (config.title as any).fr : (config.title as any).en);
   const formDescription = config.description 
-    ? (language === 'fr' ? config.description.fr : config.description.en)
+    ? (typeof config.description === 'string' 
+        ? config.description 
+        : (language === 'fr' ? (config.description as any).fr : (config.description as any).en))
     : undefined;
 
   return (
@@ -177,7 +187,7 @@ export function FormContainer({
 
               {/* Form Stats */}
               <div className="text-sm text-gray-500">
-                {language === 'fr' ? 'Type de formulaire' : 'Form Type'}: {config.type}
+                {language === 'fr' ? 'Type de formulaire' : 'Form Type'}: {config.id}
               </div>
             </div>
           </form>
