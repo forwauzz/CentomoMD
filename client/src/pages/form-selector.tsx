@@ -34,7 +34,12 @@ export default function FormSelector({
   ];
 
   const handleFormSelect = (formId: string) => {
-    setLocation(`/forms/${formId}`);
+    // Route CNESST form to the dedicated medical form page
+    if (formId === 'cnesst') {
+      setLocation('/medical-form');
+    } else {
+      setLocation(`/forms/${formId}`);
+    }
   };
 
   const handleLanguageChange = (newLanguage: 'fr' | 'en') => {

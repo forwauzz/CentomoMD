@@ -41,7 +41,8 @@ function Router() {
   // User is authenticated, show the main app
   return (
     <Switch>
-      <Route path="/" component={() => <MedicalForm language={language} onLanguageChange={setLanguage} />} />
+      <Route path="/" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
+      <Route path="/medical-form" component={() => <MedicalForm language={language} onLanguageChange={setLanguage} />} />
       <Route path="/dictation" component={() => <DictationPage language={language} />} />
       <Route path="/forms" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
       <Route path="/forms/:formType">
