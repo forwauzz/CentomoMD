@@ -1,199 +1,123 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'wouter';
-import { FormContainer } from '@/components/form-container';
+import { useQuery } from '@tanstack/react-query';
+import { FormConfig } from '@shared/form-configs/form-config.types';
 import { formRegistry } from '@/lib/form-registry';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, FormInput } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Globe } from 'lucide-react';
 
 interface DynamicFormPageProps {
-  formType?: string;
-  language?: 'fr' | 'en';
-  onLanguageChange?: (language: 'fr' | 'en') => void;
+  params: {
+    formType: string;
+  };
 }
 
-export default function DynamicFormPage({ 
-  formType: initialFormType, 
-  language = 'fr',
-  onLanguageChange 
-}: DynamicFormPageProps) {
-  const [location, setLocation] = useLocation();
-  const [selectedFormType, setSelectedFormType] = useState<string>(initialFormType || 'cnesst-medical');
-  const [formLanguage, setFormLanguage] = useState<'fr' | 'en'>(language);
+export default function DynamicFormPage({ params }: DynamicFormPageProps) {
+  const [, setLocation] = useLocation();
+  const [language, setLanguage] = useState<'fr' | 'en'>('fr');
+  const { formType } = params;
 
-  // Get available form types
-  const availableFormTypes = formRegistry.listForms().map(f => f.id);
+  // Get form configuration
+  const formConfig = formRegistry.getFormConfig(formType);
 
-  // Handle language change
-  const handleLanguageChange = (newLanguage: 'fr' | 'en') => {
-    setFormLanguage(newLanguage);
-    if (onLanguageChange) {
-      onLanguageChange(newLanguage);
-    }
-  };
-
-  // Handle form type change
-  const handleFormTypeChange = (formType: string) => {
-    setSelectedFormType(formType);
-    // Update URL to reflect the selected form type
-    setLocation(`/forms/${formType}`);
-  };
-
-  // Handle form save
-  const handleFormSave = async (formData: Record<string, any>) => {
-    try {
-      // Save form data to backend
-      const response = await fetch('/api/generic-forms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          formType: selectedFormType,
-          title: `${selectedFormType} - ${new Date().toLocaleDateString()}`,
-          formData,
-          retentionDays: 30
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save form');
-      }
-
-      const savedForm = await response.json();
-      console.log('Form saved successfully:', savedForm);
-    } catch (error) {
-      console.error('Error saving form:', error);
-    }
-  };
-
-  // Handle form export
-  const handleFormExport = (formData: Record<string, any>) => {
-    // For now, use browser print
-    // In the future, this could generate a proper PDF
-    window.print();
-  };
-
-  // Show form selector if no form type is selected or if form type is invalid
-  const config = formRegistry.getForm(selectedFormType);
-  if (!config) {
+  if (!formConfig) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto p-6">
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FormInput className="w-6 h-6" />
-                <span>{formLanguage === 'fr' ? 'Sélectionner un formulaire' : 'Select a Form'}</span>
-              </CardTitle>
-              <CardDescription>
-                {formLanguage === 'fr' 
-                  ? 'Choisissez le type de formulaire que vous souhaitez utiliser.'
-                  : 'Choose the type of form you want to use.'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  {formLanguage === 'fr' ? 'Type de formulaire' : 'Form Type'}
-                </label>
-                <Select value={selectedFormType} onValueChange={handleFormTypeChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      formLanguage === 'fr' ? 'Sélectionnez un formulaire' : 'Select a form'
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableFormTypes.map((type) => {
-                      const typeConfig = formRegistry.getForm(type);
-                      const title = typeConfig 
-                        ? (formLanguage === 'fr' ? typeConfig.title.fr : typeConfig.title.en)
-                        : type;
-                      return (
-                        <SelectItem key={type} value={type}>
-                          {title}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex justify-between items-center pt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setLocation('/')}
-                  className="flex items-center space-x-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>{formLanguage === 'fr' ? 'Retour' : 'Back'}</span>
-                </Button>
-
-                <div className="flex space-x-2">
-                  <Button
-                    variant={formLanguage === 'fr' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleLanguageChange('fr')}
-                  >
-                    Français
-                  </Button>
-                  <Button
-                    variant={formLanguage === 'en' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleLanguageChange('en')}
-                  >
-                    English
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-red-600">Form Not Found</CardTitle>
+            <CardDescription>
+              The form type "{formType}" is not registered in the system.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setLocation('/forms')}
+              className="w-full"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Forms
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  const toggleLanguage = () => {
+    setLanguage(language === 'fr' ? 'en' : 'fr');
+  };
+
+  const formTitle = typeof formConfig.title === 'string' 
+    ? formConfig.title 
+    : (language === 'fr' ? formConfig.title.fr : formConfig.title.en);
+
+  const formDescription = formConfig.description 
+    ? (typeof formConfig.description === 'string' 
+        ? formConfig.description 
+        : (language === 'fr' ? formConfig.description.fr : formConfig.description.en))
+    : undefined;
+
   return (
-    <FormContainer
-      formType={selectedFormType}
-      language={formLanguage}
-      onLanguageChange={handleLanguageChange}
-      onSave={handleFormSave}
-      onExport={handleFormExport}
-    />
-  );
-}
-```
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <Button
+              variant="outline"
+              onClick={() => setLocation('/forms')}
+              className="flex items-center space-x-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{language === 'fr' ? 'Retour' : 'Back'}</span>
+            </Button>
 
-```python
-import React from 'react';
-import { FormConfig } from '@/lib/form-registry';
+            <Button
+              variant="outline"
+              onClick={toggleLanguage}
+              className="flex items-center space-x-2"
+            >
+              <Globe className="w-4 h-4" />
+              <span>{language === 'fr' ? 'EN' : 'FR'}</span>
+            </Button>
+          </div>
 
-interface DynamicFormProps {
-  formConfig: FormConfig;
-  language?: 'fr' | 'en';
-}
+          {/* Form Title */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-blue-800 mb-2">
+              {formTitle}
+            </h1>
+            {formDescription && (
+              <p className="text-gray-600">
+                {formDescription}
+              </p>
+            )}
+          </div>
 
-export default function DynamicForm({ formConfig, language = 'fr' }: DynamicFormProps) {
-  return (
-    <div>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-600 mb-2">
-          {typeof formConfig.title === 'string' ? formConfig.title : formConfig.title[language]}
-        </h1>
-        {formConfig.description && (
-          <p className="text-gray-600">
-            {typeof formConfig.description === 'string' ? formConfig.description : formConfig.description[language]}
-          </p>
-        )}
+          {/* Dynamic Form Content */}
+          <Card className="bg-white shadow-lg">
+            <CardContent className="p-8 text-center">
+              <p className="text-gray-600 mb-4">
+                {language === 'fr' 
+                  ? 'Configuration de formulaire dynamique pour:' 
+                  : 'Dynamic form configuration for:'
+                }
+              </p>
+              <p className="font-mono text-blue-600 mb-6">
+                {formConfig.id}
+              </p>
+              <p className="text-sm text-gray-500">
+                {language === 'fr' 
+                  ? 'Cette page sera développée avec le rendu dynamique des champs de formulaire.'
+                  : 'This page will be developed with dynamic form field rendering.'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-      {/* Render form fields here */}
     </div>
   );
 }
-```
-
-```
-</replit_final_file>
