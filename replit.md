@@ -2,7 +2,7 @@
 
 ## Overview
 
-CentomoMD is a comprehensive digital medical evaluation platform designed to streamline CNESST (Quebec Workers' Compensation Board) medical assessments. The platform provides an exact digital replica of CNESST medical assessment forms with AI-enhanced documentation capabilities, voice dictation, and intelligent content distribution.
+CentomoMD is a comprehensive digital medical evaluation platform designed to streamline medical assessments. The platform provides an exact digital replica of medical assessment forms (MI Template) with AI-enhanced documentation capabilities, voice dictation, and intelligent content distribution.
 
 ## System Architecture
 
@@ -34,7 +34,7 @@ The application follows a full-stack TypeScript architecture with a modular form
 ## Key Components
 
 ### 1. Medical Form System
-- **Digital Form Replication**: Exact replica of CNESST medical assessment documents
+- **Digital Form Replication**: Exact replica of medical assessment documents (MI Template)
 - **Section-Based Structure**: 11 distinct sections with specific data requirements
 - **Form Validation**: Zod schema validation for data integrity
 - **Auto-Save Functionality**: Automatic form data persistence to localStorage
@@ -112,6 +112,7 @@ The application follows a full-stack TypeScript architecture with a modular form
   - Fixed form registry method names and eliminated duplicate function issues
   - Ensured database has all required tables (generic_forms table added)
   - Completed comprehensive code audit confirming 100% system readiness
+  - Renamed medical form from "CNESST Medical Evaluation" to "MI Template" throughout system
   - Identified specific TypeScript issues in complex Form Container for future enhancement
 - **January 26, 2025**: **Voice Dictation System Enhanced** - Fixed live transcript capture and language persistence
   - Enhanced speech recognition hook to capture both interim and final transcripts properly

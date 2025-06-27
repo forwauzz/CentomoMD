@@ -6,8 +6,8 @@ import { CommonValidationRules } from './form-validator';
 
 export const cnesstFormConfig: FormConfig = {
   id: 'cnesst-medical-evaluation',
-  title: 'Évaluation médicale CNESST',
-  description: 'Formulaire d\'évaluation médicale pour la Commission des normes, de l\'équité, de la santé et de la sécurité du travail',
+  title: 'MI Template',
+  description: 'Medical Evaluation Template for comprehensive medical assessments',
   version: '1.0.0',
   
   metadata: {

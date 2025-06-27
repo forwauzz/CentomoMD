@@ -24,12 +24,12 @@ export default function FormSelector({
     {
       id: 'cnesst-medical',
       title: {
-        fr: 'Évaluation médicale CNESST',
-        en: 'CNESST Medical Evaluation'
+        fr: 'MI Template',
+        en: 'MI Template'
       },
       description: {
-        fr: 'Formulaire complet d\'évaluation médicale pour la CNESST avec IA intégrée',
-        en: 'Complete medical evaluation form for CNESST with integrated AI'
+        fr: 'Modèle d\'évaluation médicale complet avec IA intégrée',
+        en: 'Complete medical evaluation template with integrated AI'
       },
       icon: Stethoscope,
       category: 'medical',

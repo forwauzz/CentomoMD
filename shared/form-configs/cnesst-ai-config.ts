@@ -5,7 +5,7 @@ export const cnsstAIConfig: AIProcessingConfig = {
   formType: 'cnesst-medical',
   globalContext: {
     medicalTerminology: true,
-    documentType: 'CNESST Medical Assessment',
+    documentType: 'MI Template Medical Assessment',
     language: 'fr'
   },
   rules: [
