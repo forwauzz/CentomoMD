@@ -35,6 +35,22 @@ export const cnesstFormConfig: FormConfig = {
     defaultLanguage: 'fr',
   },
 
+  // Static sections metadata for translation
+  staticSections: {
+    sectionA: {
+      fr: "A. RENSEIGNEMENTS SUR LE TRAVAILLEUR",
+      en: "A. WORKER INFORMATION"
+    },
+    sectionB: {
+      fr: "B. RENSEIGNEMENTS SUR LE MÉDECIN", 
+      en: "B. PHYSICIAN INFORMATION"
+    },
+    sectionC: {
+      fr: "C. RAPPORT",
+      en: "C. REPORT"
+    }
+  },
+
   sections: [
     // Section 1: Mandat de l'évaluation
     {

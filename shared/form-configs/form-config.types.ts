@@ -62,6 +62,7 @@ export interface FormConfig {
   title: string | MultilingualString;
   description?: string | MultilingualString;
   version: string;
+  staticSections?: Record<string, MultilingualString>;
   sections: SectionConfig[];
   metadata?: {
     author?: string;

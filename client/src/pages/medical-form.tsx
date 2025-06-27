@@ -1210,37 +1210,37 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
             </CollapsibleSection>
 
             {/* Section B: Renseignements sur le médecin (Static) */}
-            <CollapsibleSection title="B. RENSEIGNEMENTS SUR LE MÉDECIN">
+            <CollapsibleSection title={t.sectionB}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="field-group">
-                    <label className="field-label">Nom :</label>
+                    <label className="field-label">{t.doctorName}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">CENTOMO</div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">Prénom :</label>
+                    <label className="field-label">{t.doctorFirstName}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">Hugo</div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">No permis :</label>
+                    <label className="field-label">{t.licenseNo}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">1-18154</div>
                   </div>
                   <div className="field-group">
-                    <label className="field-label">Téléphone :</label>
+                    <label className="field-label">{t.doctorPhone}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">514-331-1400</div>
                   </div>
                   <div className="field-group col-span-2">
-                    <label className="field-label">Adresse :</label>
+                    <label className="field-label">{t.doctorAddress}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">5777 Boul. Gouin Ouest, Suite 370, Montréal, Qc, H4J 1E3</div>
                   </div>
                   <div className="field-group col-span-2">
-                    <label className="field-label">Courriel :</label>
+                    <label className="field-label">{t.email}</label>
                     <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]">adjointe.orthopedie@gmail.com</div>
                   </div>
                 </div>
             </CollapsibleSection>
 
             {/* Section C: Rapport */}
-            <CollapsibleSection title="C. RAPPORT">
+            <CollapsibleSection title={t.sectionC}>
               <div className="space-y-4">
 
                 {/* 1. Mandat de l'évaluation */}
