@@ -25,7 +25,7 @@ import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useAuth } from "@/hooks/useAuth";
 import { exportToPDF } from "@/lib/pdf-export";
-import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive, FolderOpen } from "lucide-react";
+import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive, FolderOpen, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
@@ -1101,9 +1101,20 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
           {/* Top Row */}
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-8">
-              <div>
-                <h1 className="text-xl font-bold text-blue-600 leading-tight">{t.title}</h1>
-                <p className="text-xs text-gray-600">{t.subtitle}</p>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation('/forms')}
+                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-xs">{language === 'fr' ? 'Retour' : 'Back'}</span>
+                </Button>
+                <div>
+                  <h1 className="text-xl font-bold text-blue-600 leading-tight">{t.title}</h1>
+                  <p className="text-xs text-gray-600">{t.subtitle}</p>
+                </div>
               </div>
               
               <div className="text-center">
