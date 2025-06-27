@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const medicalForms = pgTable("medical_forms", {
   id: serial("id").primaryKey(),
-  
+
   // Section 1: Mandat de l'évaluation (checkboxes)
   mandatDiagnostic: boolean("mandat_diagnostic").default(false),
   mandatConsolidation: boolean("mandat_consolidation").default(false),
@@ -13,18 +13,18 @@ export const medicalForms = pgTable("medical_forms", {
   mandatAtteintePourcentage: boolean("mandat_atteinte_pourcentage").default(false),
   mandatLimitations: boolean("mandat_limitations").default(false),
   mandatLimitationsEvaluation: boolean("mandat_limitations_evaluation").default(false),
-  
+
   // Section 2: Diagnostics acceptés par la CNESST
   diagnosticsCnesst: text("diagnostics_cnesst"),
-  
+
   // Section 3: Modalité de l'entrevue
   modaliteEntrevue: text("modalite_entrevue"),
-  
+
   // Section 4: Identification
   age: text("age"),
   dominance: text("dominance"),
   emploi: text("emploi"),
-  
+
   // Section 5: Antécédents
   antecedentsMedicaux: text("antecedents_medicaux"),
   antecedentsChirurgicaux: text("antecedents_chirurgicaux"),
@@ -36,19 +36,19 @@ export const medicalForms = pgTable("medical_forms", {
   antecedentsTabac: text("antecedents_tabac"),
   antecedentsCannabis: text("antecedents_cannabis"),
   antecedentsAlcool: text("antecedents_alcool"),
-  
+
   // Section 6: Médication actuelle
   medicationActuelle: text("medication_actuelle"),
-  
+
   // Section 7: Historique de faits et évolution
   historiqueEvolution: text("historique_evolution"),
-  
+
   // Section 8: Questionnaire subjectif et état actuel
   section8Input: text("section8_input"),
   appreciationEvolution: text("appreciation_evolution"),
   plaintesproblemes: text("plaintes_problemes"),
   impactAvq: text("impact_avq"),
-  
+
   // Section 9: Examen Physique
   examenPoids: text("examen_poids"),
   examenTaille: text("examen_taille"),
@@ -96,7 +96,7 @@ export const medicalForms = pgTable("medical_forms", {
   hanchesAdductionDroitPassif: text("hanches_adduction_droit_passif"),
   hanchesAdductionGaucheActif: text("hanches_adduction_gauche_actif"),
   hanchesAdductionGauchePassif: text("hanches_adduction_gauche_passif"),
-  
+
   // Genoux
   genouxPalpation: text("genoux_palpation"),
   genouxInspection: text("genoux_inspection"),
@@ -108,7 +108,7 @@ export const medicalForms = pgTable("medical_forms", {
   genouxExtensionDroitPassif: text("genoux_extension_droit_passif"),
   genouxExtensionGaucheActif: text("genoux_extension_gauche_actif"),
   genouxExtensionGauchePassif: text("genoux_extension_gauche_passif"),
-  
+
   // Manœuvres ligamentaires genoux
   genouxLci0Droit: text("genoux_lci_0_droit"),
   genouxLci0Gauche: text("genoux_lci_0_gauche"),
@@ -132,7 +132,7 @@ export const medicalForms = pgTable("medical_forms", {
   genouxDial30Gauche: text("genoux_dial_30_gauche"),
   genouxDial90Droit: text("genoux_dial_90_droit"),
   genouxDial90Gauche: text("genoux_dial_90_gauche"),
-  
+
   // Manœuvres méniscales genoux
   genouxApleyDroit: text("genoux_apley_droit"),
   genouxApleyGauche: text("genoux_apley_gauche"),
@@ -140,19 +140,19 @@ export const medicalForms = pgTable("medical_forms", {
   genouxMcMurrayGauche: text("genoux_mcmurray_gauche"),
   genouxThessalyDroit: text("genoux_thessaly_droit"),
   genouxThessalyGauche: text("genoux_thessaly_gauche"),
-  
+
   // Circonférence genoux
   genouxCirconferenceCuisseDroit: text("genoux_circonference_cuisse_droit"),
   genouxCirconferenceCuisseGauche: text("genoux_circonference_cuisse_gauche"),
   genouxCirconferenceMolletDroit: text("genoux_circonference_mollet_droit"),
   genouxCirconferenceMolletGauche: text("genoux_circonference_mollet_gauche"),
-  
+
   atrophieMusculaire: text("atrophie_musculaire"),
-  
+
   // Pieds / Chevilles
   piedsCheillesPalpation: text("pieds_chevilles_palpation"),
   piedsChevillesInspection: text("pieds_chevilles_inspection"),
-  
+
   // Amplitude articulaire pieds/chevilles
   piedsDorsiflexionCheville: text("pieds_dorsiflexion_cheville"),
   piedsPlantifexionCheville: text("pieds_plantiflexion_cheville"),
@@ -160,7 +160,7 @@ export const medicalForms = pgTable("medical_forms", {
   piedsMvtsSousAstragaliensGauche: text("pieds_mvts_sous_astragaliens_gauche"),
   piedsMvtsMidTarsienDroit: text("pieds_mvts_mid_tarsien_droit"),
   piedsMvtsMidTarsienGauche: text("pieds_mvts_mid_tarsien_gauche"),
-  
+
   // Manœuvres ligamentaires pieds/chevilles
   piedsTiroir0Droit: text("pieds_tiroir_0_droit"),
   piedsTiroir0Gauche: text("pieds_tiroir_0_gauche"),
@@ -172,7 +172,7 @@ export const medicalForms = pgTable("medical_forms", {
   piedsLaxiteCalcaneoFibulaireGauche: text("pieds_laxite_calcaneo_fibulaire_gauche"),
   piedsSqueezeTestDroit: text("pieds_squeeze_test_droit"),
   piedsSqueezeTestGauche: text("pieds_squeeze_test_gauche"),
-  
+
   // Manœuvres spécifiques tendons pieds/chevilles
   piedsSingleHeelRaiseDroit: text("pieds_single_heel_raise_droit"),
   piedsSingleHeelRaiseGauche: text("pieds_single_heel_raise_gauche"),
@@ -180,10 +180,10 @@ export const medicalForms = pgTable("medical_forms", {
   piedsThompsonGauche: text("pieds_thompson_gauche"),
   piedsTestApprehensionDroit: text("pieds_test_apprehension_droit"),
   piedsTestApprehensionGauche: text("pieds_test_apprehension_gauche"),
-  
+
   // Neuro-vasculaire pieds/chevilles
   piedsNeuroVasculaire: text("pieds_neuro_vasculaire"),
-  
+
   // Forces neuro pieds/chevilles
   piedsForceL2Droit: text("pieds_force_l2_droit"),
   piedsForceL2Gauche: text("pieds_force_l2_gauche"),
@@ -195,7 +195,7 @@ export const medicalForms = pgTable("medical_forms", {
   piedsForceL5Gauche: text("pieds_force_l5_gauche"),
   piedsForceS1Droit: text("pieds_force_s1_droit"),
   piedsForceS1Gauche: text("pieds_force_s1_gauche"),
-  
+
   // Sensibilités neuro pieds/chevilles
   piedsSensibiliteL2Droit: text("pieds_sensibilite_l2_droit"),
   piedsSensibiliteL2Gauche: text("pieds_sensibilite_l2_gauche"),
@@ -207,7 +207,7 @@ export const medicalForms = pgTable("medical_forms", {
   piedsSensibiliteL5Gauche: text("pieds_sensibilite_l5_gauche"),
   piedsSensibiliteS1Droit: text("pieds_sensibilite_s1_droit"),
   piedsSensibiliteS1Gauche: text("pieds_sensibilite_s1_gauche"),
-  
+
   // Réflexes neuro pieds/chevilles
   piedsReflexeRotulienDroit: text("pieds_reflexe_rotulien_droit"),
   piedsReflexeRotulienGauche: text("pieds_reflexe_rotulien_gauche"),
@@ -215,15 +215,15 @@ export const medicalForms = pgTable("medical_forms", {
   piedsReflexeAchilleenGauche: text("pieds_reflexe_achilleen_gauche"),
   piedsReflexeBabinskiDroit: text("pieds_reflexe_babinski_droit"),
   piedsReflexeBabinskiGauche: text("pieds_reflexe_babinski_gauche"),
-  
+
   // Pouls neuro pieds/chevilles
   piedsPoulsTibialPosterieurDroit: text("pieds_pouls_tibial_posterieur_droit"),
   piedsPoulsTibialPosterieurGauche: text("pieds_pouls_tibial_posterieur_gauche"),
   piedsPoulsPedieuxDroit: text("pieds_pouls_pedieux_droit"),
   piedsPoulsPedieuxGauche: text("pieds_pouls_pedieux_gauche"),
-  
+
   examensAdditionnels: text("examens_additionnels"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -298,23 +298,23 @@ export const genericForms = pgTable("generic_forms", {
   formData: jsonb("form_data").notNull(),
   metadata: jsonb("metadata"),
   userId: varchar("user_id", { length: 50 }).notNull(),
-  
+
   // Form state tracking
   status: varchar("status", { length: 20 }).default("draft"), // draft, completed, archived
   completionPercentage: integer("completion_percentage").default(0),
-  
+
   // AI processing tracking
   aiProcessingHistory: jsonb("ai_processing_history"),
-  
+
   // Validation state
   validationErrors: jsonb("validation_errors"),
   validationWarnings: jsonb("validation_warnings"),
-  
+
   // Timestamps
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   completedAt: timestamp("completed_at"),
-  
+
   // Data retention
   retentionDays: integer("retention_days").default(365),
   expiresAt: timestamp("expires_at"),

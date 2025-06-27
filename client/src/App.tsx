@@ -18,7 +18,7 @@ function Router() {
   const [language, setLanguage] = useState<'fr' | 'en'>('fr');
   const [showLogin, setShowLogin] = useState(false);
   const { isAuthenticated, isLoading, user } = useAuth();
-  
+
   // Show loading while checking authentication
   if (isLoading) {
     return (
@@ -27,22 +27,21 @@ function Router() {
       </div>
     );
   }
-  
+
   // Show login page if explicitly requested
   if (showLogin && !isAuthenticated) {
     return <LoginPage />;
   }
-  
+
   // Show landing page if not authenticated
   if (!isAuthenticated) {
     return <LandingPage onShowLogin={() => setShowLogin(true)} />;
   }
-  
+
   // User is authenticated, show the main app
   return (
     <Switch>
       <Route path="/" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
-      <Route path="/medical-form" component={() => <MedicalForm language={language} onLanguageChange={setLanguage} />} />
       <Route path="/dictation" component={() => <DictationPage language={language} />} />
       <Route path="/forms" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
       <Route path="/forms/:formType">

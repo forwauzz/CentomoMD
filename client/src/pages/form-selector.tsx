@@ -18,7 +18,7 @@ export default function FormSelector({
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
-  
+
   // Available form types with metadata
   const availableForms = [
     {
@@ -85,7 +85,7 @@ export default function FormSelector({
                 }
               </p>
             </div>
-            
+
             {/* Header Actions */}
             <div className="flex items-center space-x-4">
               {/* User Info & Logout */}
@@ -106,7 +106,7 @@ export default function FormSelector({
                   </Button>
                 </div>
               )}
-              
+
               {/* Language Toggle */}
               {onLanguageChange && (
                 <div className="flex space-x-2">
@@ -136,7 +136,7 @@ export default function FormSelector({
             const Icon = form.icon;
             const title = language === 'fr' ? form.title.fr : form.title.en;
             const description = language === 'fr' ? form.description.fr : form.description.en;
-            
+
             return (
               <Card 
                 key={form.id} 
@@ -158,7 +158,7 @@ export default function FormSelector({
                     {description}
                   </CardDescription>
                 </CardHeader>
-                
+
                 <CardContent>
                   {/* Features */}
                   <div className="space-y-2 mb-4">
@@ -176,7 +176,7 @@ export default function FormSelector({
                       ))}
                     </div>
                   </div>
-                  
+
                   {/* Action Button */}
                   <Button 
                     className="w-full flex items-center justify-center space-x-2"

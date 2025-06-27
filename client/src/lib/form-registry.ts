@@ -12,6 +12,11 @@ export class FormRegistry {
    * Register a new form configuration
    */
   register(config: FormConfig, entry?: Partial<FormRegistryEntry>): void {
+    // Check if form already exists to prevent duplicate registration
+    if (this.forms.has(config.id)) {
+      console.warn(`Form ${config.id} already registered, updating...`);
+    }
+
     const registryEntry: FormRegistryEntry = {
       config,
       component: entry?.component,
