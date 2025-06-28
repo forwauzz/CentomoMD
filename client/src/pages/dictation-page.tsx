@@ -289,6 +289,49 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     });
   };
 
+  // Mapping of dictation fields to their corresponding form sections for navigation
+  const getFormSectionFromField = (fieldKey: string): string => {
+    const fieldToSectionMap: { [key: string]: string } = {
+      // Section 2
+      'diagnosticsCnesst': 'section2',
+      // Section 3
+      'modaliteEntrevue': 'section3',
+      // Section 4
+      'age': 'section4',
+      'dominance': 'section4',
+      'emploi': 'section4',
+      // Section 5
+      'antecedentsMedicaux': 'section5',
+      'antecedentsChirurgicaux': 'section5',
+      'antecedentsLesion': 'section5',
+      'antecedentsCnesst': 'section5',
+      'antecedentsSaaq': 'section5',
+      'antecedentsAutres': 'section5',
+      'antecedentsAllergie': 'section5',
+      // Section 6
+      'medicationActuelle': 'section6',
+      // Section 7
+      'historiqueEvolution': 'section7',
+      // Section 8
+      'section8Input': 'section8',
+      'appreciationEvolution': 'section8',
+      'plaintesproblemes': 'section8',
+      'impactAvq': 'section8',
+      // Section 9
+      'observationGenerale': 'section9',
+      'rachisPalpation': 'section9',
+      'rachisInspection': 'section9',
+      'hanchesPalpation': 'section9',
+      'hanchesInspection': 'section9',
+      'examensAdditionnels': 'section9',
+      // Section 11
+      'conclusionResume': 'section11',
+      'conclusionDiagnostic': 'section11',
+      'conclusionDateConsolidation': 'section11',
+    };
+    return fieldToSectionMap[fieldKey] || 'section1';
+  };
+
   const handleSaveToSection = () => {
     const textToSave = isEditing ? editableText : finalText;
     if (!selectedSection || !textToSave) return;
@@ -304,6 +347,11 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     sessionStorage.setItem('dictationResult', textToSave);
     sessionStorage.setItem('dictationField', selectedSection);
 
+    // Store the target section for navigation and auto-scroll
+    const targetSection = getFormSectionFromField(selectedSection);
+    sessionStorage.setItem('scrollToSection', targetSection);
+    sessionStorage.setItem('highlightField', selectedSection);
+
     toast({
       title: t.textSaved,
       description: t.sections[selectedSection as keyof typeof t.sections],
@@ -312,15 +360,12 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     // Clear the activeField from sessionStorage
     sessionStorage.removeItem('activeField');
 
-    // Navigate back to the form
-    setLocation('/');
-
     // Reset editing state
     setIsEditing(false);
     setEditableText("");
 
-    // Navigate back to form
-    setLocation('/');
+    // Navigate back to the medical form with section anchor for immediate navigation
+    setLocation('/medical-form#' + targetSection);
   };
 
   const handleFormatText = () => {

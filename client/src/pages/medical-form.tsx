@@ -950,6 +950,8 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   useEffect(() => {
     const dictationResult = sessionStorage.getItem('dictationResult');
     const dictationField = sessionStorage.getItem('dictationField');
+    const scrollToSection = sessionStorage.getItem('scrollToSection');
+    const highlightField = sessionStorage.getItem('highlightField');
     
     if (dictationResult && dictationField) {
       // Get current value of the field
@@ -961,7 +963,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       // Update the form field
       form.setValue(dictationField as any, newValue);
       
-      // Clear the session storage
+      // Clear the dictation session storage
       sessionStorage.removeItem('dictationResult');
       sessionStorage.removeItem('dictationField');
       
@@ -974,6 +976,39 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       });
       
       console.log(`Dictation result added to field: ${dictationField}`);
+    }
+
+    // Handle section navigation after dictation
+    if (scrollToSection) {
+      setTimeout(() => {
+        const sectionElement = document.getElementById(scrollToSection);
+        if (sectionElement) {
+          sectionElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+          
+          // Highlight the specific field if specified
+          if (highlightField) {
+            const fieldElement = document.querySelector(`[name="${highlightField}"]`) as HTMLElement;
+            if (fieldElement) {
+              fieldElement.focus();
+              fieldElement.style.outline = '3px solid #3b82f6';
+              fieldElement.style.outlineOffset = '2px';
+              
+              // Remove highlight after 2 seconds
+              setTimeout(() => {
+                fieldElement.style.outline = '';
+                fieldElement.style.outlineOffset = '';
+              }, 2000);
+            }
+          }
+        }
+        
+        // Clear navigation session storage
+        sessionStorage.removeItem('scrollToSection');
+        sessionStorage.removeItem('highlightField');
+      }, 100); // Small delay to ensure DOM is ready
     }
   }, []); // Run only on mount
 
