@@ -141,19 +141,9 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
 
     if (activeField) {
       setSelectedSection(activeField);
-      // Load existing text for this field if available
-      const savedData = localStorage.getItem('medical-form-draft');
-      if (savedData) {
-        try {
-          const formData = JSON.parse(savedData);
-          if (formData[activeField]) {
-            setFinalText(formData[activeField]);
-            setEditableText(formData[activeField]);
-          }
-        } catch (error) {
-          console.error('Error loading saved form data:', error);
-        }
-      }
+      // Start with empty text for new dictation session
+      setFinalText("");
+      setEditableText("");
     }
 
     // Simulate initialization delay for speech recognition setup
