@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@shared/translations';
 
 interface FormSelectorProps {
   language?: 'fr' | 'en';
@@ -18,19 +19,14 @@ export default function FormSelector({
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation(language);
 
   // Available form types with metadata
   const availableForms = [
     {
       id: 'cnesst-medical',
-      title: {
-        fr: 'MI Template',
-        en: 'MI Template'
-      },
-      description: {
-        fr: 'Modèle d\'évaluation médicale complet avec IA intégrée',
-        en: 'Complete medical evaluation template with integrated AI'
-      },
+      title: t('formSelector.miTemplate'),
+      description: t('formSelector.miTemplateDescription'),
       icon: Stethoscope,
       category: 'medical',
       features: ['AI Enhancement', 'Voice Dictation', 'PDF Export']
@@ -56,13 +52,13 @@ export default function FormSelector({
     try {
       await logout();
       toast({
-        title: language === 'fr' ? "Déconnexion réussie" : "Logout successful",
-        description: language === 'fr' ? "Vous avez été déconnecté avec succès." : "You have been logged out successfully.",
+        title: t('auth.logoutSuccess'),
+        description: t('auth.logoutSuccess'),
       });
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: language === 'fr' ? "Erreur lors de la déconnexion." : "Error during logout.",
+        title: t('common.error'),
+        description: t('auth.logoutError'),
         variant: "destructive",
       });
     }
@@ -76,13 +72,10 @@ export default function FormSelector({
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-3xl font-bold text-blue-900 mb-2">
-                {language === 'fr' ? 'Sélection de formulaire' : 'Form Selection'}
+                {t('formSelector.title')}
               </h1>
               <p className="text-gray-600">
-                {language === 'fr' 
-                  ? 'Choisissez le type de formulaire que vous souhaitez utiliser'
-                  : 'Choose the type of form you want to use'
-                }
+                {t('formSelector.description')}
               </p>
             </div>
 
@@ -134,8 +127,8 @@ export default function FormSelector({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {availableForms.map((form) => {
             const Icon = form.icon;
-            const title = language === 'fr' ? form.title.fr : form.title.en;
-            const description = language === 'fr' ? form.description.fr : form.description.en;
+            const title = form.title;
+            const description = form.description;
 
             return (
               <Card 
