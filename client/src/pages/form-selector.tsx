@@ -95,7 +95,7 @@ export default function FormSelector({
                     className="flex items-center space-x-1"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>{language === 'fr' ? 'Déconnexion' : 'Logout'}</span>
+                    <span>{t('auth.logout')}</span>
                   </Button>
                 </div>
               )}
@@ -108,14 +108,14 @@ export default function FormSelector({
                     size="sm"
                     onClick={() => handleLanguageChange('fr')}
                   >
-                    Français
+                    {t('common.français')}
                   </Button>
                   <Button
                     variant={language === 'en' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleLanguageChange('en')}
                   >
-                    English
+                    {t('common.english')}
                   </Button>
                 </div>
               )}
@@ -156,7 +156,7 @@ export default function FormSelector({
                   {/* Features */}
                   <div className="space-y-2 mb-4">
                     <p className="text-sm font-medium text-gray-700">
-                      {language === 'fr' ? 'Fonctionnalités:' : 'Features:'}
+                      {t('formSelector.features')}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {form.features.map((feature, index) => (
@@ -176,7 +176,7 @@ export default function FormSelector({
                     onClick={() => handleFormSelect(form.id)}
                   >
                     <span>
-                      {language === 'fr' ? 'Ouvrir le formulaire' : 'Open Form'}
+                      {t('formSelector.openForm')}
                     </span>
                     <ArrowRight className="w-4 h-4" />
                   </Button>
@@ -192,19 +192,19 @@ export default function FormSelector({
             <div className="bg-white/50 rounded-lg p-4">
               <div className="text-2xl font-bold text-blue-900">{availableForms.length}</div>
               <div className="text-sm text-gray-600">
-                {language === 'fr' ? 'Formulaires disponibles' : 'Available Forms'}
+                {t('formSelector.availableForms')}
               </div>
             </div>
             <div className="bg-white/50 rounded-lg p-4">
               <div className="text-2xl font-bold text-green-700">100%</div>
               <div className="text-sm text-gray-600">
-                {language === 'fr' ? 'Compatibilité IA' : 'AI Compatible'}
+                {t('formSelector.aiCompatible')}
               </div>
             </div>
             <div className="bg-white/50 rounded-lg p-4">
               <div className="text-2xl font-bold text-purple-700">2</div>
               <div className="text-sm text-gray-600">
-                {language === 'fr' ? 'Langues supportées' : 'Supported Languages'}
+                {t('formSelector.supportedLanguages')}
               </div>
             </div>
           </div>
