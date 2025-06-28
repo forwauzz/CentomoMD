@@ -9,6 +9,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useTranslation } from "@shared/translations";
 
 interface DictationPageProps {
   language: 'fr' | 'en';
@@ -118,6 +119,7 @@ const translations = {
 };
 
 export default function DictationPage({ language: propLanguage }: DictationPageProps) {
+  const { t } = useTranslation(propLanguage);
   const [, setLocation] = useLocation();
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [finalText, setFinalText] = useState<string>("");
@@ -128,7 +130,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const { toast } = useToast();
 
-  const t = translations[currentLanguage];
+  // Translation handled by the centralized t function from useTranslation hook
 
   // Initialize with activeField and language from sessionStorage
   useEffect(() => {
@@ -235,8 +237,8 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const handleStartRecording = () => {
     if (!selectedSection) {
       toast({
-        title: "Erreur",
-        description: t.selectSectionFirst,
+        title: t('common.error'),
+        description: t('dictation.selectSectionFirst'),
         variant: "destructive",
       });
       return;
