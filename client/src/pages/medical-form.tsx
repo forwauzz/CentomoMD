@@ -1224,7 +1224,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
           <form className="space-y-6">
             
             {/* Section A: Renseignements sur le travailleur (Static) */}
-            <CollapsibleSection title={t.sectionA}>
+            <CollapsibleSection id="section1" title={t.sectionA}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="field-group">
                   <label className="field-label">{t.workerName}</label>
@@ -1266,7 +1266,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
             </CollapsibleSection>
 
             {/* Section B: Renseignements sur le médecin (Static) */}
-            <CollapsibleSection title={t.sectionB}>
+            <CollapsibleSection id="sectionB" title={t.sectionB}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="field-group">
                     <label className="field-label">{t.doctorName}</label>
@@ -1296,11 +1296,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
             </CollapsibleSection>
 
             {/* Section C: Rapport */}
-            <CollapsibleSection title={t.sectionC}>
+            <CollapsibleSection id="sectionC" title={t.sectionC}>
               <div className="space-y-4">
 
                 {/* 1. Mandat de l'évaluation */}
-                <CollapsibleSection title="1. Mandat de l'évaluation" defaultOpen={false} id="section1">
+                <CollapsibleSection title="1. Mandat de l'évaluation" defaultOpen={false} id="mandat-evaluation">
                   <div className="space-y-3 text-sm">
                     <p>Le but de l'évaluation est de répondre aux points suivants de l'article de la LATMP :</p>
                     <div className="space-y-3 pl-4">
@@ -2026,7 +2026,8 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                                   className="min-h-[120px] resize-none"
                                 />
                                 <AIFormatSection8
-                                  value={field.value}
+                                  value={field.value ?? ''}
+                                  language={language}
                                   onValueChange={(formattedText) => {
                                     // Parse the AI-formatted text and distribute to appropriate fields
                                     const sections = parseSection8Content(formattedText);
