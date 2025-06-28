@@ -365,7 +365,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     setEditableText("");
 
     // Navigate back to the medical form with section anchor for immediate navigation
-    setLocation('/medical-form#' + targetSection);
+    setLocation('/#' + targetSection);
   };
 
   const handleFormatText = () => {

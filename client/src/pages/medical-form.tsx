@@ -2035,7 +2035,6 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                                     if (sections.plaintes) form.setValue('plaintesproblemes', sections.plaintes);
                                     if (sections.impact) form.setValue('impactAvq', sections.impact);
                                   }}
-                                  language={language}
                                 />
                               </div>
                             </FormControl>
