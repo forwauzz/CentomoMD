@@ -364,8 +364,9 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     setIsEditing(false);
     setEditableText("");
 
-    // Navigate back to the medical form with section anchor for immediate navigation
-    setLocation('/#' + targetSection);
+    // Navigate back to the original form with section anchor for immediate navigation
+    const returnPath = sessionStorage.getItem('dictationReturnPath') || '/forms/cnesst-medical-evaluation';
+    setLocation(returnPath + '#' + targetSection);
   };
 
   const handleFormatText = () => {
