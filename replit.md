@@ -106,6 +106,13 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **June 29, 2025**: **Translation System Implementation Complete** - Configurable UI text with preserved medical expertise
+  - Created centralized translation system in shared/translations with French/English support
+  - Migrated dictation page and form selector to use configurable translation keys
+  - Preserved all medical AI prompts and form structures (contain Dr. Centomo's expertise)
+  - Fixed navigation routing from legacy /medical-form to modular /forms/cnesst system
+  - Updated dictation page layout with side-by-side transcription and final text boxes
+  - Maintained 100% functionality while enabling easy UI text customization
 - **January 27, 2025**: **Phase 4 Technical Infrastructure Enhancement** - Systematic engineering approach to code quality
   - Added logout functionality to form selector page with user info display
   - Created working Simple Form Container with proper TypeScript support

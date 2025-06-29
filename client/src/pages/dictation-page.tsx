@@ -233,7 +233,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     setIsEditing(false);
 
     // Navigate back to medical form
-    setLocation('/medical-form');
+    setLocation('/forms/cnesst');
   };
 
   const handleEditText = () => {
@@ -253,7 +253,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
 
   const handleBackToForm = () => {
     sessionStorage.removeItem('activeField');
-    setLocation('/medical-form');
+    setLocation('/forms/cnesst');
   };
 
   if (isInitializing) {
