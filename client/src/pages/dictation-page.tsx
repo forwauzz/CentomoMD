@@ -324,82 +324,85 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
             </CardContent>
           </Card>
 
-          {/* Live Transcript */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Mic className="w-5 h-5" />
-                <span>{t('dictation.liveTranscript')}</span>
-                {isListening && (
-                  <div className="flex items-center space-x-1 text-red-500">
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm">{t('dictation.recording')}</span>
-                  </div>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="min-h-[100px] p-4 bg-gray-50 rounded-md border">
-                {isListening ? (
-                  <div className="text-gray-700">
-                    {interimText || t('voiceRecognition.speakNow')}
+          {/* Live Transcript and Final Text - Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Live Transcript */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Mic className="w-5 h-5" />
+                  <span>{t('dictation.liveTranscript')}</span>
+                  {isListening && (
+                    <div className="flex items-center space-x-1 text-red-500">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm">{t('dictation.recording')}</span>
+                    </div>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="min-h-[200px] p-4 bg-gray-50 rounded-md border">
+                  {isListening ? (
+                    <div className="text-gray-700">
+                      {interimText || t('voiceRecognition.speakNow')}
+                    </div>
+                  ) : (
+                    <div className="text-gray-500 italic">
+                      {t('voiceRecognition.notListening')}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Final Text */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>{t('dictation.finalText')}</span>
+                  {finalText && !isEditing && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleEditText}
+                      className="flex items-center space-x-1"
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span>{t('common.edit')}</span>
+                    </Button>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <Textarea
+                      value={editableText}
+                      onChange={(e) => setEditableText(e.target.value)}
+                      className="min-h-[200px]"
+                      placeholder={t('dictation.finalText')}
+                    />
+                    <div className="flex space-x-2">
+                      <Button onClick={handleSaveEdit} size="sm">
+                        <Save className="w-4 h-4 mr-2" />
+                        {t('common.save')}
+                      </Button>
+                      <Button onClick={handleCancelEdit} variant="outline" size="sm">
+                        {t('common.cancel')}
+                      </Button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-gray-500 italic">
-                    {t('voiceRecognition.notListening')}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Final Text */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>{t('dictation.finalText')}</span>
-                {finalText && !isEditing && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleEditText}
-                    className="flex items-center space-x-1"
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>{t('common.edit')}</span>
-                  </Button>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <div className="space-y-4">
                   <Textarea
-                    value={editableText}
-                    onChange={(e) => setEditableText(e.target.value)}
-                    className="min-h-[200px]"
+                    value={finalText}
+                    readOnly
+                    className="min-h-[200px] bg-gray-50"
                     placeholder={t('dictation.finalText')}
                   />
-                  <div className="flex space-x-2">
-                    <Button onClick={handleSaveEdit} size="sm">
-                      <Save className="w-4 h-4 mr-2" />
-                      {t('common.save')}
-                    </Button>
-                    <Button onClick={handleCancelEdit} variant="outline" size="sm">
-                      {t('common.cancel')}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <Textarea
-                  value={finalText}
-                  readOnly
-                  className="min-h-[200px] bg-gray-50"
-                  placeholder={t('dictation.finalText')}
-                />
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Controls */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
