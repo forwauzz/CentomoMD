@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from '@shared/translations';
 
 interface FormSelectorProps {
   language?: 'fr' | 'en';
@@ -19,14 +18,19 @@ export default function FormSelector({
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
-  const { t } = useTranslation(language);
 
   // Available form types with metadata
   const availableForms = [
     {
       id: 'cnesst-medical',
-      title: t('formSelector.miTemplate'),
-      description: t('formSelector.miTemplateDescription'),
+      title: {
+        fr: 'MI Template',
+        en: 'MI Template'
+      },
+      description: {
+        fr: 'Modèle d\'évaluation médicale complet avec IA intégrée',
+        en: 'Complete medical evaluation template with integrated AI'
+      },
       icon: Stethoscope,
       category: 'medical',
       features: ['AI Enhancement', 'Voice Dictation', 'PDF Export']
@@ -34,8 +38,12 @@ export default function FormSelector({
   ];
 
   const handleFormSelect = (formId: string) => {
-    // Route all forms through the new modular system
-    setLocation(`/forms/${formId}`);
+    // Route CNESST form to the dedicated medical form page
+    if (formId === 'cnesst') {
+      setLocation('/medical-form');
+    } else {
+      setLocation(`/forms/${formId}`);
+    }
   };
 
   const handleLanguageChange = (newLanguage: 'fr' | 'en') => {
@@ -48,13 +56,13 @@ export default function FormSelector({
     try {
       await logout();
       toast({
-        title: t('auth.logoutSuccess'),
-        description: t('auth.logoutSuccess'),
+        title: language === 'fr' ? "Déconnexion réussie" : "Logout successful",
+        description: language === 'fr' ? "Vous avez été déconnecté avec succès." : "You have been logged out successfully.",
       });
     } catch (error) {
       toast({
-        title: t('common.error'),
-        description: t('auth.logoutError'),
+        title: "Erreur",
+        description: language === 'fr' ? "Erreur lors de la déconnexion." : "Error during logout.",
         variant: "destructive",
       });
     }
@@ -68,10 +76,13 @@ export default function FormSelector({
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-3xl font-bold text-blue-900 mb-2">
-                {t('formSelector.title')}
+                {language === 'fr' ? 'Sélection de formulaire' : 'Form Selection'}
               </h1>
               <p className="text-gray-600">
-                {t('formSelector.description')}
+                {language === 'fr' 
+                  ? 'Choisissez le type de formulaire que vous souhaitez utiliser'
+                  : 'Choose the type of form you want to use'
+                }
               </p>
             </div>
 
@@ -91,7 +102,7 @@ export default function FormSelector({
                     className="flex items-center space-x-1"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>{t('auth.logout')}</span>
+                    <span>{language === 'fr' ? 'Déconnexion' : 'Logout'}</span>
                   </Button>
                 </div>
               )}
@@ -104,14 +115,14 @@ export default function FormSelector({
                     size="sm"
                     onClick={() => handleLanguageChange('fr')}
                   >
-                    {t('common.français')}
+                    Français
                   </Button>
                   <Button
                     variant={language === 'en' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleLanguageChange('en')}
                   >
-                    {t('common.english')}
+                    English
                   </Button>
                 </div>
               )}
@@ -123,8 +134,8 @@ export default function FormSelector({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {availableForms.map((form) => {
             const Icon = form.icon;
-            const title = form.title;
-            const description = form.description;
+            const title = language === 'fr' ? form.title.fr : form.title.en;
+            const description = language === 'fr' ? form.description.fr : form.description.en;
 
             return (
               <Card 
@@ -152,7 +163,7 @@ export default function FormSelector({
                   {/* Features */}
                   <div className="space-y-2 mb-4">
                     <p className="text-sm font-medium text-gray-700">
-                      {t('formSelector.features')}
+                      {language === 'fr' ? 'Fonctionnalités:' : 'Features:'}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {form.features.map((feature, index) => (
@@ -172,7 +183,7 @@ export default function FormSelector({
                     onClick={() => handleFormSelect(form.id)}
                   >
                     <span>
-                      {t('formSelector.openForm')}
+                      {language === 'fr' ? 'Ouvrir le formulaire' : 'Open Form'}
                     </span>
                     <ArrowRight className="w-4 h-4" />
                   </Button>
@@ -188,19 +199,19 @@ export default function FormSelector({
             <div className="bg-white/50 rounded-lg p-4">
               <div className="text-2xl font-bold text-blue-900">{availableForms.length}</div>
               <div className="text-sm text-gray-600">
-                {t('formSelector.availableForms')}
+                {language === 'fr' ? 'Formulaires disponibles' : 'Available Forms'}
               </div>
             </div>
             <div className="bg-white/50 rounded-lg p-4">
               <div className="text-2xl font-bold text-green-700">100%</div>
               <div className="text-sm text-gray-600">
-                {t('formSelector.aiCompatible')}
+                {language === 'fr' ? 'Compatibilité IA' : 'AI Compatible'}
               </div>
             </div>
             <div className="bg-white/50 rounded-lg p-4">
               <div className="text-2xl font-bold text-purple-700">2</div>
               <div className="text-sm text-gray-600">
-                {t('formSelector.supportedLanguages')}
+                {language === 'fr' ? 'Langues supportées' : 'Supported Languages'}
               </div>
             </div>
           </div>
