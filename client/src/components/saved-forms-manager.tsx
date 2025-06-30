@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileText, Download, Trash2, Calendar, Clock, Printer, FileDown } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { exportToPDF } from "@/lib/pdf-export";
-import { exportToWord } from "@/lib/word-export";
+import { exportToWord } from "@/lib/word-export-simple";
 import { fr, enUS } from "date-fns/locale";
 
 interface SavedFormsManagerProps {

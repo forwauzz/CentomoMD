@@ -675,6 +675,7 @@ export async function exportToWord(formData: FormData, filename: string = 'medic
     
   } catch (error) {
     console.error('Error exporting to Word:', error);
-    throw new Error('Erreur lors de l\'exportation du document Word');
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    throw new Error(`Erreur lors de l'exportation du document Word: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
