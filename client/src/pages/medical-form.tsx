@@ -29,6 +29,7 @@ import { exportToPDF } from "@/lib/pdf-export";
 import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive, FolderOpen, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
 const formSchema = z.object({
   // Section 1: Mandat de l'évaluation (checkboxes)
@@ -549,7 +550,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const { user, logout } = useAuth();
 
   // Query for saved forms count
-  const { data: savedForms = [] } = useQuery({
+  const { data: savedForms = [] } = useQuery<any[]>({
     queryKey: ["/api/saved-forms"],
     retry: false,
   });
@@ -697,6 +698,11 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       ...prev,
       [sectionKey]: !prev[sectionKey]
     }));
+  };
+
+  const handleSectionNavigate = (sectionId: string) => {
+    // Handler for left navigation section clicks
+    // The actual scrolling is handled in the LeftNavigationPane component
   };
 
   const form = useForm<FormData>({
@@ -1185,7 +1191,22 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Left Navigation Pane */}
+      {useLeftNavigation && (
+        <LeftNavigationPane
+          language={language}
+          onSectionNavigate={handleSectionNavigate}
+          onSavedForms={() => setShowSavedForms(true)}
+          onSaveDialog={() => setShowSaveDialog(true)}
+          onSave={handleSave}
+          savedFormsCount={savedForms.length}
+          completedFormsCount={0}
+        />
+      )}
+
+      {/* Main Content */}
+      <div className={`flex-1 ${useLeftNavigation ? 'ml-64' : ''}`}>
       {/* Header */}
       <div className="bg-white shadow-sm border-b no-print">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -4909,6 +4930,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
           />
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
