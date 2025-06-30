@@ -316,8 +316,9 @@ export function LeftNavigationPane({
                     {language === 'fr' ? section.titleFr : section.titleEn}
                   </button>
                 ))}
-              </div>
-            </div>
+                </div>
+              )}
+            </>
           )}
           
           {isCollapsed && (
