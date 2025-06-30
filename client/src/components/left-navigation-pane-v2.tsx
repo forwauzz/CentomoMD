@@ -101,7 +101,7 @@ export function LeftNavigationPane({
   const [sectionsCollapsed, setSectionsCollapsed] = useState({
     formActions: false,
     formManagement: false,
-    navigation: false
+    navigation: true
   });
   const t = translations[language];
 

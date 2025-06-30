@@ -106,6 +106,10 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **June 30, 2025**: **Navigation Section Collapsed by Default** - Enhanced user interface by keeping navigation section collapsed on load
+  - Updated both navigation pane components to start with navigation section collapsed
+  - Reduces visual clutter while maintaining full accessibility to all form sections
+  - Users can still expand navigation section when needed via toggle button
 - **June 30, 2025**: **Form Actions UI Enhancement** - Relocated save buttons for better accessibility
   - Moved "Sauvegarder" and "Sauvegarder copie" buttons from navigation to top of form
   - Positioned buttons prominently above Section A for whole-form accessibility
