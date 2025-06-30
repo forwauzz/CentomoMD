@@ -43,11 +43,12 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
 
     recognition.continuous = options.continuous ?? true;
     recognition.interimResults = options.interimResults ?? true;
-    recognition.lang = options.language ?? 'fr-FR';
-    recognition.maxAlternatives = 1;
+    recognition.lang = options.language ?? 'fr-CA';
+    recognition.maxAlternatives = 3;
     
-    // Enhanced settings for better continuous speech recognition
-    // Note: grammars setting removed due to browser compatibility
+    // Enhanced settings for better French medical dictation
+    // Note: For Canadian French, fr-CA provides better medical terminology recognition
+    console.log('Initializing speech recognition with language:', options.language);
 
     recognition.onstart = () => {
       setIsListening(true);
@@ -92,11 +93,54 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}) {
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
-      const errorMessage = options.language?.startsWith('fr') 
-        ? `Erreur de reconnaissance vocale: ${event.error}`
-        : `Speech recognition error: ${event.error}`;
+      
+      // Provide more detailed French error messages for better user experience
+      let errorMessage = '';
+      if (options.language?.startsWith('fr')) {
+        switch (event.error) {
+          case 'network':
+            errorMessage = 'Erreur réseau. Vérifiez votre connexion internet.';
+            break;
+          case 'not-allowed':
+            errorMessage = 'Accès au microphone refusé. Veuillez autoriser l\'accès au microphone.';
+            break;
+          case 'no-speech':
+            errorMessage = 'Aucune parole détectée. Parlez plus fort ou rapprochez-vous du microphone.';
+            break;
+          case 'audio-capture':
+            errorMessage = 'Erreur de capture audio. Vérifiez votre microphone.';
+            break;
+          case 'service-not-allowed':
+            errorMessage = 'Service de reconnaissance vocale non autorisé.';
+            break;
+          default:
+            errorMessage = `Erreur de reconnaissance vocale: ${event.error}`;
+        }
+      } else {
+        switch (event.error) {
+          case 'network':
+            errorMessage = 'Network error. Please check your internet connection.';
+            break;
+          case 'not-allowed':
+            errorMessage = 'Microphone access denied. Please allow microphone access.';
+            break;
+          case 'no-speech':
+            errorMessage = 'No speech detected. Speak louder or move closer to the microphone.';
+            break;
+          case 'audio-capture':
+            errorMessage = 'Audio capture error. Please check your microphone.';
+            break;
+          case 'service-not-allowed':
+            errorMessage = 'Speech recognition service not allowed.';
+            break;
+          default:
+            errorMessage = `Speech recognition error: ${event.error}`;
+        }
+      }
+      
       setError(errorMessage);
       setIsListening(false);
+      isListeningRef.current = false;
     };
 
     recognition.onend = () => {
