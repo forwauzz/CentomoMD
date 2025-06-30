@@ -700,8 +700,16 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
       // Section 2: Diagnostics acceptés par la CNESST
       diagnosticsCnesst: "Déchirure mollet droit.",
       
-      // Section 3: Modalité de l'entrevue
-      modaliteEntrevue: "L'évaluation suivante s'est tenue dans les locaux de la clinique du Complexe Médical Nord-de-Île (CMNDI). Nous avons clairement expliqué à notre mandat d'évaluateur indépendant désigné par la CNESST dans le cadre de l'application de l'article 204 de la LATMP. Nous lui avons précisé que nous n'agirons pas en tant que médecins traitants. Notre rapport d'évaluation sera d'abord envoyé́ à la CNESST.\n\nNous avons procédé́ au questionnaire subjectif ainsi qu'à un examen physique détaillé́ en relation avec les lésions à évaluer, nous nous sommes assurés à la fin de l'entrevue d'avoir couvert l'ensemble de la problématique.\n\nNous avons revu le dossier CNESST de même que le dossier médical. Nous avons pu consulter l'ensemble des rapports et des bilans radiologiques réalisés dans le cadre de l'évaluation de la lésion.\n\nL'entrevue s'est effectuée cordialement, la patiente participait pleinement à son entrevue. L'entrevue s'est déroulée entre.\n\nÀ la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.",
+      // Section 3: Modalité de l'entrevue (Default to Site A template)
+      modaliteEntrevue: `L'évaluation suivante s'est tenue dans les locaux de la clinique du Complexe Médical Nord-de-Île (CMNDI). Nous avons clairement expliqué à notre mandat d'évaluateur indépendant désigné par la CNESST dans le cadre de l'application de l'article 204 de la LATMP. Nous lui avons précisé que nous n'agirons pas en tant que médecins traitants. Notre rapport d'évaluation sera d'abord envoyé́ à la CNESST.
+
+Nous avons procédé́ au questionnaire subjectif ainsi qu'à un examen physique détaillé́ en relation avec les lésions à évaluer, nous nous sommes assurés à la fin de l'entrevue d'avoir couvert l'ensemble de la problématique.
+
+Nous avons revu le dossier CNESST de même que le dossier médical. Nous avons pu consulter l'ensemble des rapports et des bilans radiologiques réalisés dans le cadre de l'évaluation de la lésion.
+
+L'entrevue s'est effectuée cordialement, la patiente participait pleinement à son entrevue. L'entrevue s'est déroulée entre.
+
+À la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.`,
       
       // Section 4: Identification
       age: "",
@@ -1491,17 +1499,27 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  const currentText = field.value || '';
-                                  const newText = currentText.replace(
-                                    /L'évaluation suivante s'est tenue dans les locaux de la [^.]+\./,
-                                    "L'évaluation suivante s'est tenue dans les locaux de la clinique d'orthopédie du Complexe Médical Nord-de-Île (CMNDI), Montréal."
-                                  );
-                                  if (newText === currentText) {
-                                    // If no replacement was made, prepend the sentence
-                                    field.onChange("L'évaluation suivante s'est tenue dans les locaux de la clinique d'orthopédie du Complexe Médical Nord-de-Île (CMNDI), Montréal. " + currentText);
-                                  } else {
-                                    field.onChange(newText);
-                                  }
+                                  const cnsstTemplateText = language === 'fr' 
+                                    ? `L'évaluation suivante s'est tenue dans les locaux de la clinique du Complexe Médical Nord-de-Île (CMNDI). Nous avons clairement expliqué à notre mandat d'évaluateur indépendant désigné par la CNESST dans le cadre de l'application de l'article 204 de la LATMP. Nous lui avons précisé que nous n'agirons pas en tant que médecins traitants. Notre rapport d'évaluation sera d'abord envoyé́ à la CNESST.
+
+Nous avons procédé́ au questionnaire subjectif ainsi qu'à un examen physique détaillé́ en relation avec les lésions à évaluer, nous nous sommes assurés à la fin de l'entrevue d'avoir couvert l'ensemble de la problématique.
+
+Nous avons revu le dossier CNESST de même que le dossier médical. Nous avons pu consulter l'ensemble des rapports et des bilans radiologiques réalisés dans le cadre de l'évaluation de la lésion.
+
+L'entrevue s'est effectuée cordialement, la patiente participait pleinement à son entrevue. L'entrevue s'est déroulée entre.
+
+À la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.`
+                                    : `The following evaluation was held at the Complexe Médical Nord-de-Île (CMNDI) clinic premises. We clearly explained our mandate as an independent evaluator designated by the CNESST under article 204 of the LATMP. We specified that we will not act as treating physicians. Our evaluation report will first be sent to the CNESST.
+
+We conducted a subjective questionnaire as well as a detailed physical examination in relation to the injuries to be evaluated, ensuring at the end of the interview that we had covered the entire problem.
+
+We reviewed the CNESST file as well as the medical file. We were able to consult all the reports and radiological assessments carried out as part of the injury evaluation.
+
+The interview was conducted cordially, the patient participated fully in the interview. The interview took place between.
+
+At the end of the interview, we asked if she had any other comments or information to share with us. She answered in the negative.`;
+                                  
+                                  field.onChange(cnsstTemplateText);
                                 }}
                                 className="text-xs px-3 py-1 h-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200 no-print"
                               >
@@ -1512,17 +1530,27 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  const currentText = field.value || '';
-                                  const newText = currentText.replace(
-                                    /L'évaluation suivante s'est tenue dans les locaux de la [^.]+\./,
-                                    "L'évaluation suivante s'est tenue dans les locaux de la Clinique Médicale de l'Or et des Bois, Val-d'Or."
-                                  );
-                                  if (newText === currentText) {
-                                    // If no replacement was made, prepend the sentence
-                                    field.onChange("L'évaluation suivante s'est tenue dans les locaux de la Clinique Médicale de l'Or et des Bois, Val-d'Or. " + currentText);
-                                  } else {
-                                    field.onChange(newText);
-                                  }
+                                  const valDorTemplateText = language === 'fr'
+                                    ? `L'évaluation suivante s'est tenue dans les locaux de la Clinique Médicale de l'Or et des Bois, Val-d'Or. Nous avons clairement expliqué à notre mandat d'évaluateur indépendant désigné par la CNESST dans le cadre de l'application de l'article 204 de la LATMP. Nous lui avons précisé que nous n'agirons pas en tant que médecins traitants. Notre rapport d'évaluation sera d'abord envoyé́ à la CNESST.
+
+Nous avons procédé́ au questionnaire subjectif ainsi qu'à un examen physique détaillé́ en relation avec les lésions à évaluer, nous nous sommes assurés à la fin de l'entrevue d'avoir couvert l'ensemble de la problématique.
+
+Nous avons revu le dossier CNESST de même que le dossier médical. Nous avons pu consulter l'ensemble des rapports et des bilans radiologiques réalisés dans le cadre de l'évaluation de la lésion.
+
+L'entrevue s'est effectuée cordialement, la patiente participait pleinement à son entrevue. L'entrevue s'est déroulée entre.
+
+À la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.`
+                                    : `The following evaluation was held at the Clinique Médicale de l'Or et des Bois, Val-d'Or. We clearly explained our mandate as an independent evaluator designated by the CNESST under article 204 of the LATMP. We specified that we will not act as treating physicians. Our evaluation report will first be sent to the CNESST.
+
+We conducted a subjective questionnaire as well as a detailed physical examination in relation to the injuries to be evaluated, ensuring at the end of the interview that we had covered the entire problem.
+
+We reviewed the CNESST file as well as the medical file. We were able to consult all the reports and radiological assessments carried out as part of the injury evaluation.
+
+The interview was conducted cordially, the patient participated fully in the interview. The interview took place between.
+
+At the end of the interview, we asked if she had any other comments or information to share with us. She answered in the negative.`;
+                                  
+                                  field.onChange(valDorTemplateText);
                                 }}
                                 className="text-xs px-3 py-1 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 no-print"
                               >
