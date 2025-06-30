@@ -276,6 +276,7 @@ const translations = {
     formCleared: "Formulaire effacé",
     allDataDeleted: "Toutes les données ont été supprimées.",
     confirmClear: "Êtes-vous sûr de vouloir effacer toutes les données du formulaire?",
+    clearAll: "Effacer tout",
     lastSaved: "Dernière sauvegarde :",
     
     // Section A
@@ -399,6 +400,7 @@ const translations = {
     formCleared: "Form cleared",
     allDataDeleted: "All data has been deleted.",
     confirmClear: "Are you sure you want to clear all form data?",
+    clearAll: "Clear All",
     lastSaved: "Last saved:",
     
     // Section A
@@ -1304,7 +1306,22 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
             </CollapsibleSection>
 
             {/* Section C: Rapport */}
-            <CollapsibleSection id="sectionC" title={t.sectionC}>
+            <CollapsibleSection 
+              id="sectionC" 
+              title={t.sectionC}
+              headerActions={
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleClearForm}
+                  className="ml-2 bg-red-600 hover:bg-red-700 text-white no-print"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  {t.clearAll}
+                </Button>
+              }
+            >
               <div className="space-y-4">
 
                 {/* 1. Mandat de l'évaluation */}
