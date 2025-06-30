@@ -106,6 +106,17 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **June 30, 2025**: **Enhanced Muscle Strength Assessment in Section 9** - Improved neurological examination interface
+  - Added dropdown menus for Forces section with standardized muscle strength ratings (5/5 to 0/5)
+  - Enhanced user experience for neurological assessment in physical examination
+  - Maintained proper form validation and auto-save functionality
+  - Improved clinical accuracy with standardized ASIA impairment scale ratings
+- **June 30, 2025**: **French Dictation System Enhancement** - Advanced speech recognition optimization
+  - Enhanced French speech recognition with fr-CA language support for medical terminology
+  - Improved error handling with detailed French error messages for better user experience
+  - Added comprehensive speech test page (/speech-test) for validation and troubleshooting
+  - Optimized live transcript capture and processing without data loss
+  - Created dedicated French medical terminology testing with suggested clinical phrases
 - **January 27, 2025**: **Phase 4 Technical Infrastructure Enhancement** - Systematic engineering approach to code quality
   - Added logout functionality to form selector page with user info display
   - Created working Simple Form Container with proper TypeScript support

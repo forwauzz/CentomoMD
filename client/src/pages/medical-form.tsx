@@ -4221,7 +4221,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceL2Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4230,7 +4242,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceL2Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4242,7 +4266,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceL3Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4251,7 +4287,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceL3Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4263,7 +4311,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceL4Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4272,7 +4332,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceL4Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4284,7 +4356,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceL5Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4293,7 +4377,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceL5Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4305,7 +4401,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceS1Droit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
@@ -4314,7 +4422,19 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                       control={form.control}
                                       name="piedsForceS1Gauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                          <SelectTrigger className="w-full border-0 h-8">
+                                            <SelectValue placeholder="5/5" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="5/5">5/5</SelectItem>
+                                            <SelectItem value="4/5">4/5</SelectItem>
+                                            <SelectItem value="3/5">3/5</SelectItem>
+                                            <SelectItem value="2/5">2/5</SelectItem>
+                                            <SelectItem value="1/5">1/5</SelectItem>
+                                            <SelectItem value="0/5">0/5</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                       )}
                                     />
                                   </td>
