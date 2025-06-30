@@ -3201,6 +3201,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3219,6 +3222,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3240,6 +3246,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3258,6 +3267,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3279,6 +3291,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3297,6 +3312,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3318,6 +3336,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3336,6 +3357,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3357,6 +3381,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3375,6 +3402,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3396,6 +3426,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3414,6 +3447,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3435,6 +3471,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3453,6 +3492,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3474,6 +3516,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3492,6 +3537,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3513,6 +3561,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3531,6 +3582,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3552,6 +3606,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3570,6 +3627,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3591,6 +3651,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }
@@ -3609,6 +3672,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           onValueChange={field.onChange}
                                           placeholder="Sec"
                                           options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" },
                                             { value: "Sec", label: "Sec" },
                                             { value: "Retardé", label: "Retardé" },
                                             { value: "Aucun arrêt", label: "Aucun arrêt" }

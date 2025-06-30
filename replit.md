@@ -107,11 +107,11 @@ The application follows a full-stack TypeScript architecture with a modular form
 
 ## Recent Changes
 - **June 30, 2025**: **Enhanced Ligament and Muscle Assessment in Section 9** - Improved physical examination interface
-  - Added dropdown menus for Manœuvres ligamentaires with specialized options: "Sec / Retardé / Aucun arrêt"
+  - Added comprehensive dropdown menus for Manœuvres ligamentaires with all six medical options: "Négatif", "Positif", "Non fait", "Sec", "Retardé", "Aucun arrêt"
   - Enhanced Forces section with standardized muscle strength ratings (5/5 to 0/5)
-  - Applied to all ligament test entries: LCI 0°, LCI 20°, LCE 0°, LCE 20°, Lachman, Pivot, Tiroir antérieur, Tiroir postérieur, Sag postérieur, Dial à 30°, Dial à 90°
-  - Improved clinical accuracy with appropriate medical terminology for ligament stability assessment
-  - Enhanced user experience for comprehensive physical examination workflow
+  - Applied to all 22 ligament test fields: LCI 0°, LCI 20°, LCE 0°, LCE 20°, Lachman, Pivot, Tiroir antérieur, Tiroir postérieur, Sag postérieur, Dial à 30°, Dial à 90° (both left and right)
+  - Improved clinical accuracy with complete medical terminology for comprehensive ligament stability assessment
+  - Enhanced user experience for detailed physical examination workflow
   - Maintained proper form validation and auto-save functionality
 - **June 30, 2025**: **French Dictation System Enhancement** - Advanced speech recognition optimization
   - Enhanced French speech recognition with fr-CA language support for medical terminology
