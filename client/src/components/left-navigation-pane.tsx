@@ -28,6 +28,7 @@ interface LeftNavigationPaneProps {
   onSave: () => void;
   onPrint: () => void;
   onExport: () => void;
+  onClearForm: () => void;
   savedFormsCount?: number;
   completedFormsCount?: number;
 }
@@ -58,6 +59,7 @@ const translations = {
     saveAs: "Sauvegarder sous",
     print: "Imprimer",
     export: "Exporter PDF",
+    clearForm: "Effacer tout",
     savedDrafts: "Brouillons sauvés",
     completedForms: "Formulaires complétés",
     collapse: "Réduire",
@@ -71,6 +73,7 @@ const translations = {
     saveAs: "Save As",
     print: "Print",
     export: "Export PDF",
+    clearForm: "Clear All",
     savedDrafts: "Saved Drafts",
     completedForms: "Completed Forms",
     collapse: "Collapse",
@@ -86,6 +89,7 @@ export function LeftNavigationPane({
   onSave,
   onPrint,
   onExport,
+  onClearForm,
   savedFormsCount = 0,
   completedFormsCount = 0
 }: LeftNavigationPaneProps) {
@@ -150,6 +154,39 @@ export function LeftNavigationPane({
             >
               <Archive className="h-4 w-4" />
               {!isCollapsed && <span className="ml-2">{t.saveAs}</span>}
+            </Button>
+            
+            <Button
+              onClick={onPrint}
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+              title={t.print}
+            >
+              <FileText className="h-4 w-4" />
+              {!isCollapsed && <span className="ml-2">{t.print}</span>}
+            </Button>
+            
+            <Button
+              onClick={onExport}
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+              title={t.export}
+            >
+              <Archive className="h-4 w-4" />
+              {!isCollapsed && <span className="ml-2">{t.export}</span>}
+            </Button>
+            
+            <Button
+              onClick={onClearForm}
+              variant="destructive"
+              size="sm"
+              className="w-full justify-start"
+              title={t.clearForm}
+            >
+              <FileText className="h-4 w-4" />
+              {!isCollapsed && <span className="ml-2">{t.clearForm}</span>}
             </Button>
           </div>
         </div>

@@ -1200,6 +1200,8 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
           onSavedForms={() => setShowSavedForms(true)}
           onSaveDialog={() => setShowSaveDialog(true)}
           onSave={handleSave}
+          onPrint={handlePrint}
+          onExport={handleExportPDF}
           savedFormsCount={Array.isArray(savedForms) ? savedForms.length : 0}
           completedFormsCount={0}
         />
@@ -1263,35 +1265,37 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
             </div>
           </div>
           
-          {/* Bottom Row - Action Buttons */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-2">
-              <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700">
-                <Save className="w-4 h-4" />
-                <span className="ml-1">Sauvegarder</span>
-              </Button>
-              
-              <Button onClick={() => setShowSaveDialog(true)} size="sm" className="bg-orange-600 hover:bg-orange-700">
-                <Archive className="w-4 h-4" />
-                <span className="ml-1">Sauvegarder</span>
-              </Button>
-              
-              <Button onClick={() => setShowSavedForms(true)} size="sm" variant="outline">
-                <FolderOpen className="w-4 h-4" />
-                <span className="ml-1">Charger</span>
-              </Button>
-              
-              <Button onClick={handleExportPDF} size="sm" className="bg-blue-600 hover:bg-blue-700">
-                <Printer className="w-4 h-4" />
-                <span className="ml-1">Imprimer</span>
-              </Button>
-              
-              <Button onClick={handleClearForm} size="sm" variant="destructive">
-                <Trash2 className="w-4 h-4" />
-                <span className="ml-1">Effacer</span>
-              </Button>
+          {/* Bottom Row - Action Buttons - Only show when left navigation is disabled */}
+          {!useLeftNavigation && (
+            <div className="flex justify-center">
+              <div className="flex items-center gap-2">
+                <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700">
+                  <Save className="w-4 h-4" />
+                  <span className="ml-1">Sauvegarder</span>
+                </Button>
+                
+                <Button onClick={() => setShowSaveDialog(true)} size="sm" className="bg-orange-600 hover:bg-orange-700">
+                  <Archive className="w-4 h-4" />
+                  <span className="ml-1">Sauvegarder</span>
+                </Button>
+                
+                <Button onClick={() => setShowSavedForms(true)} size="sm" variant="outline">
+                  <FolderOpen className="w-4 h-4" />
+                  <span className="ml-1">Charger</span>
+                </Button>
+                
+                <Button onClick={handleExportPDF} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Printer className="w-4 h-4" />
+                  <span className="ml-1">Imprimer</span>
+                </Button>
+                
+                <Button onClick={handleClearForm} size="sm" variant="destructive">
+                  <Trash2 className="w-4 h-4" />
+                  <span className="ml-1">Effacer</span>
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
