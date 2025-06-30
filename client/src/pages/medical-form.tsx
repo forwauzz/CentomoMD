@@ -15,6 +15,7 @@ import { MedicalSelect } from "@/components/ui/medical-select";
 import { DictationModal } from "@/components/dictation-modal";
 import { FloatingRecordButton } from "@/components/floating-record-button";
 import { FloatingNavigation } from "@/components/floating-navigation";
+import { LeftNavigationPane } from "@/components/left-navigation-pane";
 import { AIFormatSection7 } from "@/components/ai-format-section7";
 import { AIFormatSection8 } from "@/components/ai-format-section8";
 import { AIGenerateSection11 } from "@/components/ai-generate-section11";
@@ -529,6 +530,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSavedForms, setShowSavedForms] = useState(false);
+  const [useLeftNavigation, setUseLeftNavigation] = useState(true); // Feature flag for new navigation
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
   const [showGenderWarning, setShowGenderWarning] = useState(false);
   const [genderInconsistencies, setGenderInconsistencies] = useState<string[]>([]);
@@ -545,6 +547,12 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   });
   const { toast } = useToast();
   const { user, logout } = useAuth();
+
+  // Query for saved forms count
+  const { data: savedForms = [] } = useQuery({
+    queryKey: ["/api/saved-forms"],
+    retry: false,
+  });
   
   const t = translations[language];
 
