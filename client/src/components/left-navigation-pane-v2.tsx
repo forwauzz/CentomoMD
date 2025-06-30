@@ -201,17 +201,6 @@ export function LeftNavigationPane({
                 <Archive className="h-4 w-4" />
                 <span className="ml-2">{t.export}</span>
               </Button>
-              
-              <Button
-                onClick={onClearForm}
-                variant="destructive"
-                size="sm"
-                className="w-full justify-start"
-                title={t.clearForm}
-              >
-                <FileText className="h-4 w-4" />
-                <span className="ml-2">{t.clearForm}</span>
-              </Button>
             </div>
           )}
         </div>
