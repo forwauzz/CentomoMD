@@ -277,6 +277,8 @@ const translations = {
     allDataDeleted: "Toutes les données ont été supprimées.",
     confirmClear: "Êtes-vous sûr de vouloir effacer toutes les données du formulaire?",
     clearAll: "Effacer tout",
+    sectionCleared: "Section effacée",
+    sectionDataCleared: "Les données de la section C ont été supprimées.",
     lastSaved: "Dernière sauvegarde :",
     
     // Section A
@@ -401,6 +403,8 @@ const translations = {
     allDataDeleted: "All data has been deleted.",
     confirmClear: "Are you sure you want to clear all form data?",
     clearAll: "Clear All",
+    sectionCleared: "Section cleared",
+    sectionDataCleared: "Section C data has been cleared.",
     lastSaved: "Last saved:",
     
     // Section A
@@ -1053,6 +1057,40 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     }
   };
 
+  const handleClearSectionC = () => {
+    if (confirm(t.confirmClear)) {
+      // Clear only Section C fields
+      const sectionCFields = [
+        'mandatDiagnostic', 'mandatConsolidation', 'mandatSoins', 'mandatAtteinte', 
+        'mandatAtteintePourcentage', 'mandatLimitations', 'mandatLimitationsEvaluation',
+        'diagnosticsCnesst', 'modaliteEntrevue', 'age', 'dominance', 'emploi',
+        'antecedentsMedicaux', 'antecedentsChirurgicaux', 'antecedentsLesion',
+        'antecedentsCnesst', 'antecedentsSaaq', 'antecedentsAutres', 'antecedentsAllergie',
+        'antecedentsTabac', 'antecedentsCannabis', 'antecedentsAlcool',
+        'medicamentActuel', 'historiqueEvolution'
+      ];
+      
+      const currentValues = form.getValues();
+      const resetValues = { ...currentValues };
+      
+      sectionCFields.forEach(field => {
+        const fieldName = field as keyof FormData;
+        if (typeof currentValues[fieldName] === 'boolean') {
+          resetValues[fieldName] = false as any;
+        } else {
+          resetValues[fieldName] = '' as any;
+        }
+      });
+      
+      form.reset(resetValues);
+      setLastSaved(t.notSaved);
+      toast({
+        title: t.sectionCleared,
+        description: t.sectionDataCleared,
+      });
+    }
+  };
+
   const parseSection8Content = (formattedText: string) => {
     const sections = {
       appreciation: '',
@@ -1314,7 +1352,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
                   type="button"
                   size="sm"
                   variant="destructive"
-                  onClick={handleClearForm}
+                  onClick={handleClearSectionC}
                   className="ml-2 bg-red-600 hover:bg-red-700 text-white no-print"
                 >
                   <Trash2 className="w-4 h-4 mr-1" />
