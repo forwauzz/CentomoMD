@@ -1202,6 +1202,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
           onSave={handleSave}
           onPrint={handlePrint}
           onExport={handleExportPDF}
+          onClearForm={handleClearForm}
           savedFormsCount={Array.isArray(savedForms) ? savedForms.length : 0}
           completedFormsCount={0}
         />
