@@ -241,10 +241,10 @@ export function LeftNavigationPane({
             </Button>
             
             <Button
+              onClick={onSavedForms}
               size="sm"
               variant="outline"
-              className="w-full justify-start opacity-50 cursor-not-allowed"
-              disabled
+              className="w-full justify-start"
               title={t.completedForms}
             >
               <FileText className="h-4 w-4" />

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CollapsibleSection } from "@/components/collapsible-section";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -5253,15 +5253,13 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
             <DialogTitle>
               {language === 'fr' ? 'Sauvegarder en brouillon ?' : 'Save to Draft?'}
             </DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-gray-600">
+            <DialogDescription>
               {language === 'fr' 
                 ? 'Voulez-vous sauvegarder ce formulaire en brouillon pour y revenir plus tard ?'
                 : 'Would you like to save this form as a draft to return to it later?'
               }
-            </p>
-          </div>
+            </DialogDescription>
+          </DialogHeader>
           <div className="flex gap-3 justify-end">
             <Button
               variant="outline"

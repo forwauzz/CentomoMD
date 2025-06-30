@@ -276,6 +276,7 @@ export const savedForms = pgTable("saved_forms", {
   userId: varchar("user_id").notNull().references(() => users.id),
   title: varchar("title").notNull(),
   formData: jsonb("form_data").notNull(),
+  formType: varchar("form_type").notNull().default("copy"), // "draft" or "copy"
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
