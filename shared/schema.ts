@@ -141,6 +141,14 @@ export const medicalForms = pgTable("medical_forms", {
   genouxThessalyDroit: text("genoux_thessaly_droit"),
   genouxThessalyGauche: text("genoux_thessaly_gauche"),
 
+  // Manoeuvres rotules
+  genouxTrackingRotuleDroit: text("genoux_tracking_rotule_droit"),
+  genouxTrackingRotuleGauche: text("genoux_tracking_rotule_gauche"),
+  genouxJSignDroit: text("genoux_j_sign_droit"),
+  genouxJSignGauche: text("genoux_j_sign_gauche"),
+  genouxTranslationDroit: text("genoux_translation_droit"),
+  genouxTranslationGauche: text("genoux_translation_gauche"),
+
   // Circonférence genoux
   genouxCirconferenceCuisseDroit: text("genoux_circonference_cuisse_droit"),
   genouxCirconferenceCuisseGauche: text("genoux_circonference_cuisse_gauche"),

@@ -170,6 +170,14 @@ const formSchema = z.object({
   genouxThessalyDroit: z.string().optional(),
   genouxThessalyGauche: z.string().optional(),
   
+  // Manoeuvres rotules
+  genouxTrackingRotuleDroit: z.string().optional(),
+  genouxTrackingRotuleGauche: z.string().optional(),
+  genouxJSignDroit: z.string().optional(),
+  genouxJSignGauche: z.string().optional(),
+  genouxTranslationDroit: z.string().optional(),
+  genouxTranslationGauche: z.string().optional(),
+  
   // Circonférence genoux
   genouxCirconferenceCuisseDroit: z.string().optional(),
   genouxCirconferenceCuisseGauche: z.string().optional(),
@@ -856,6 +864,14 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       genouxMcMurrayGauche: "Négatif",
       genouxThessalyDroit: "Négatif",
       genouxThessalyGauche: "Négatif",
+      
+      // Manoeuvres rotules defaults
+      genouxTrackingRotuleDroit: "Normal",
+      genouxTrackingRotuleGauche: "Normal",
+      genouxJSignDroit: "Négatif",
+      genouxJSignGauche: "Négatif",
+      genouxTranslationDroit: "Normale",
+      genouxTranslationGauche: "Normale",
       
       // Circonférence defaults (empty for measurements)
       genouxCirconferenceCuisseDroit: "",
@@ -3865,6 +3881,141 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                           value={field.value} 
                                           onValueChange={field.onChange}
                                           placeholder="Négatif"
+                                        />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Manoeuvres rotules table */}
+                        <div>
+                          <FormLabel className="mb-2 block">Manoeuvres rotules :</FormLabel>
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm">
+                              <thead>
+                                <tr className="bg-teal-600 text-white">
+                                  <th className="border p-2 text-left"></th>
+                                  <th className="border p-2 text-center">Droite</th>
+                                  <th className="border p-2 text-center">Gauche</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td className="border p-2">Tracking rotule</td>
+                                  <td className="border p-1">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTrackingRotuleDroit"
+                                      render={({ field }) => (
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Anormal", label: "Anormal" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-1">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTrackingRotuleGauche"
+                                      render={({ field }) => (
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Anormal", label: "Anormal" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">J-Sign</td>
+                                  <td className="border p-1">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxJSignDroit"
+                                      render={({ field }) => (
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                          options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-1">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxJSignGauche"
+                                      render={({ field }) => (
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Négatif"
+                                          options={[
+                                            { value: "Négatif", label: "Négatif" },
+                                            { value: "Positif", label: "Positif" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
+                                      )}
+                                    />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="border p-2">Translation</td>
+                                  <td className="border p-1">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTranslationDroit"
+                                      render={({ field }) => (
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normale"
+                                          options={[
+                                            { value: "Normale", label: "Normale" },
+                                            { value: "Anormale", label: "Anormale" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
+                                      )}
+                                    />
+                                  </td>
+                                  <td className="border p-1">
+                                    <FormField
+                                      control={form.control}
+                                      name="genouxTranslationGauche"
+                                      render={({ field }) => (
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normale"
+                                          options={[
+                                            { value: "Normale", label: "Normale" },
+                                            { value: "Anormale", label: "Anormale" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
                                         />
                                       )}
                                     />
