@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileText, Download, Trash2, Calendar, Clock, Printer, FileDown } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { exportToPDF } from "@/lib/pdf-export";
+import { exportToWord } from "@/lib/word-export";
 import { fr, enUS } from "date-fns/locale";
 
 interface SavedFormsManagerProps {
@@ -36,6 +37,7 @@ const translations = {
     delete: "Supprimer",
     print: "Imprimer",
     exportPdf: "Exporter PDF",
+    exportWord: "Exporter Word",
     createdAt: "Créé",
     expiresIn: "Expire dans",
     expired: "Expiré",
@@ -46,6 +48,7 @@ const translations = {
     deleteSuccess: "Formulaire supprimé avec succès",
     printSuccess: "Impression en cours...",
     exportSuccess: "Export PDF en cours...",
+    exportWordSuccess: "Export Word en cours...",
     error: "Une erreur est survenue"
   },
   en: {
@@ -65,6 +68,7 @@ const translations = {
     delete: "Delete",
     print: "Print",
     exportPdf: "Export PDF",
+    exportWord: "Export Word",
     createdAt: "Created",
     expiresIn: "Expires in",
     expired: "Expired",
