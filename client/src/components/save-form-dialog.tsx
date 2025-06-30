@@ -98,7 +98,8 @@ export function SaveFormDialog({ open, onClose, formData, language }: SaveFormDi
     saveMutation.mutate({
       title: title.trim(),
       formData,
-      retentionDays: retentionDays[0]
+      retentionDays: retentionDays[0],
+      formType: "copy"
     });
   };
 

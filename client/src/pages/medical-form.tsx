@@ -550,9 +550,17 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const { toast } = useToast();
   const { user, logout } = useAuth();
 
-  // Query for saved forms count
-  const { data: savedForms = [] } = useQuery<any[]>({
-    queryKey: ["/api/saved-forms"],
+  // Query for draft forms count
+  const { data: draftForms = [] } = useQuery<any[]>({
+    queryKey: ["/api/saved-forms", "draft"],
+    queryFn: () => fetch("/api/saved-forms?formType=draft", { credentials: "include" }).then(res => res.json()),
+    retry: false,
+  });
+  
+  // Query for copy forms count  
+  const { data: copyForms = [] } = useQuery<any[]>({
+    queryKey: ["/api/saved-forms", "copy"],
+    queryFn: () => fetch("/api/saved-forms?formType=copy", { credentials: "include" }).then(res => res.json()),
     retry: false,
   });
   
@@ -1154,14 +1162,40 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     setShowDraftDialog(true);
   };
 
-  const handleSaveToDraft = () => {
+  const handleSaveToDraft = async () => {
     const data = form.getValues();
-    saveData(data);
-    setShowDraftDialog(false);
-    toast({
-      title: language === 'fr' ? "Sauvegardé en brouillon" : "Saved to Draft",
-      description: language === 'fr' ? "Le formulaire a été sauvegardé en brouillon avec succès." : "The form has been saved to drafts successfully.",
-    });
+    const title = language === 'fr' ? "Brouillon" : "Draft";
+    
+    try {
+      const response = await fetch("/api/saved-forms", {
+        method: "POST",
+        body: JSON.stringify({
+          title: `${title} - ${new Date().toLocaleDateString()}`,
+          formData: data,
+          retentionDays: 30,
+          formType: "draft"
+        }),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to save draft");
+      }
+      
+      setShowDraftDialog(false);
+      toast({
+        title: language === 'fr' ? "Sauvegardé en brouillon" : "Saved to Draft",
+        description: language === 'fr' ? "Le formulaire a été sauvegardé en brouillon avec succès." : "The form has been saved to drafts successfully.",
+      });
+    } catch (error) {
+      console.error('Save draft error:', error);
+      toast({
+        title: language === 'fr' ? "Erreur" : "Error",
+        description: language === 'fr' ? "Erreur lors de la sauvegarde" : "Error saving draft",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePrint = () => {
@@ -1209,8 +1243,8 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
           onPrint={handlePrint}
           onExport={handleExportPDF}
           onClearForm={handleClearForm}
-          savedFormsCount={Array.isArray(savedForms) ? savedForms.length : 0}
-          completedFormsCount={0}
+          savedFormsCount={Array.isArray(copyForms) ? copyForms.length : 0}
+          completedFormsCount={Array.isArray(draftForms) ? draftForms.length : 0}
         />
       )}
 

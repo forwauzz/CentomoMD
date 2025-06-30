@@ -163,11 +163,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Saved forms routes (authentication required)
   
-  // Get all saved forms for the authenticated user
+  // Get all saved forms for the authenticated user, optionally filtered by type
   app.get("/api/saved-forms", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId;
-      const savedForms = await storage.getSavedFormsByUserId(userId);
+      const { formType } = req.query;
+      
+      let savedForms;
+      if (formType && (formType === 'draft' || formType === 'copy')) {
+        savedForms = await storage.getSavedFormsByType(userId, formType as 'draft' | 'copy');
+      } else {
+        savedForms = await storage.getSavedFormsByUserId(userId);
+      }
+      
       res.json(savedForms);
     } catch (error) {
       console.error('Get saved forms error:', error);
@@ -203,17 +211,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Save a medical form temporarily
   app.post("/api/saved-forms", requireAuth, async (req, res) => {
     try {
-      const { title, formData, retentionDays = 7 } = req.body;
+      const { title, formData, retentionDays = 7, formType = 'copy' } = req.body;
       
       if (!title || !formData) {
         return res.status(400).json({ message: "Title and form data are required" });
+      }
+
+      // Validate form type
+      if (formType !== 'draft' && formType !== 'copy') {
+        return res.status(400).json({ message: "Form type must be 'draft' or 'copy'" });
       }
 
       // Validate retention days (1-30 days)
       const validRetentionDays = Math.min(Math.max(parseInt(retentionDays) || 7, 1), 30);
       
       const userId = req.session.userId;
-      const savedForm = await storage.saveMedicalForm(userId, title, formData, validRetentionDays);
+      const savedForm = await storage.saveMedicalForm(userId, title, formData, validRetentionDays, formType);
       
       res.status(201).json(savedForm);
     } catch (error) {
