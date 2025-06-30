@@ -35,7 +35,8 @@ export interface IStorage {
   // Saved forms management
   getSavedForm(id: number): Promise<SavedForm | undefined>;
   getSavedFormsByUserId(userId: string): Promise<SavedForm[]>;
-  saveMedicalForm(userId: string, title: string, formData: any, retentionDays: number): Promise<SavedForm>;
+  getSavedFormsByType(userId: string, formType: 'draft' | 'copy'): Promise<SavedForm[]>;
+  saveMedicalForm(userId: string, title: string, formData: any, retentionDays: number, formType?: 'draft' | 'copy'): Promise<SavedForm>;
   updateSavedForm(id: number, title: string, formData: any, retentionDays: number): Promise<SavedForm | undefined>;
   deleteSavedForm(id: number): Promise<boolean>;
   deleteExpiredForms(): Promise<number>;
@@ -140,7 +141,16 @@ export class DatabaseStorage implements IStorage {
     return forms;
   }
 
-  async saveMedicalForm(userId: string, title: string, formData: any, retentionDays: number): Promise<SavedForm> {
+  async getSavedFormsByType(userId: string, formType: 'draft' | 'copy'): Promise<SavedForm[]> {
+    const forms = await db
+      .select()
+      .from(savedForms)
+      .where(and(eq(savedForms.userId, userId), eq(savedForms.formType, formType)))
+      .orderBy(desc(savedForms.createdAt));
+    return forms;
+  }
+
+  async saveMedicalForm(userId: string, title: string, formData: any, retentionDays: number, formType: 'draft' | 'copy' = 'copy'): Promise<SavedForm> {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + Math.min(retentionDays, 30)); // Cap at 30 days
 
@@ -150,6 +160,7 @@ export class DatabaseStorage implements IStorage {
         userId,
         title,
         formData,
+        formType,
         expiresAt,
       })
       .returning();
