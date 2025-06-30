@@ -1305,6 +1305,27 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         <Form {...form}>
           <form className="space-y-6">
             
+            {/* Save Actions */}
+            <div className="flex gap-3 mb-6 no-print">
+              <Button
+                type="button"
+                onClick={handleSave}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {language === 'fr' ? 'Sauvegarder' : 'Save'}
+              </Button>
+              
+              <Button
+                type="button"
+                onClick={() => setShowSaveDialog(true)}
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-6"
+              >
+                <Archive className="w-4 h-4 mr-2" />
+                {language === 'fr' ? 'Sauvegarder copie' : 'Save Copy'}
+              </Button>
+            </div>
+            
             {/* Section A: Renseignements sur le travailleur (Static) */}
             <CollapsibleSection id="section1" title={t.sectionA}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

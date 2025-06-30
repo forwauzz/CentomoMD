@@ -63,7 +63,7 @@ const translations = {
     export: "Exporter PDF",
     clearForm: "Effacer tout",
     savedDrafts: "Copies sauvées",
-    completedForms: "Formulaires complétés",
+    completedForms: "Drafts",
     collapse: "Réduire",
     expand: "Développer"
   },
@@ -161,26 +161,7 @@ export function LeftNavigationPane({
           )}
           {!isCollapsed && !sectionsCollapsed.formActions && (
             <div className="px-3 pb-3 space-y-2">
-            <Button
-              onClick={onSave}
-              size="sm"
-              className="w-full bg-green-600 hover:bg-green-700 justify-start"
-              title={t.save}
-            >
-              <Save className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">{t.save}</span>}
-            </Button>
-            
-            <Button
-              onClick={onSaveDialog}
-              size="sm"
-              className="w-full bg-orange-600 hover:bg-orange-700 justify-start"
-              title={t.saveAs}
-            >
-              <Archive className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">{t.saveAs}</span>}
-            </Button>
-            
+
             <Button
               onClick={onPrint}
               variant="outline"

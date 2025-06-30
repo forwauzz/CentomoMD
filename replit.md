@@ -106,6 +106,12 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **June 30, 2025**: **Form Actions UI Enhancement** - Relocated save buttons for better accessibility
+  - Moved "Sauvegarder" and "Sauvegarder copie" buttons from navigation to top of form
+  - Positioned buttons prominently above Section A for whole-form accessibility
+  - Styled with distinct colors: green for save, orange for save copy
+  - Maintained bilingual support and proper iconography
+  - Enhanced user workflow by making primary actions more prominent
 - **June 30, 2025**: **Enhanced Ligament and Muscle Assessment in Section 9** - Improved physical examination interface
   - Added comprehensive dropdown menus for Manœuvres ligamentaires with all six medical options: "Négatif", "Positif", "Non fait", "Sec", "Retardé", "Aucun arrêt"
   - Enhanced Forces section with standardized muscle strength ratings (5/5 to 0/5)
