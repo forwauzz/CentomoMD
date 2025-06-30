@@ -6,6 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { 
   ChevronLeft, 
   ChevronRight, 
+  ChevronDown,
+  ChevronUp,
   Save, 
   Archive, 
   FolderOpen, 
@@ -94,7 +96,19 @@ export function LeftNavigationPane({
   completedFormsCount = 0
 }: LeftNavigationPaneProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [sectionsCollapsed, setSectionsCollapsed] = useState({
+    formActions: false,
+    formManagement: false,
+    navigation: false
+  });
   const t = translations[language];
+
+  const toggleSection = (section: keyof typeof sectionsCollapsed) => {
+    setSectionsCollapsed(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   const scrollToSection = (sectionId: string) => {
     onSectionNavigate(sectionId);
@@ -131,11 +145,22 @@ export function LeftNavigationPane({
 
       <div className="flex flex-col h-full overflow-hidden">
         {/* Form Actions Section */}
-        <div className="p-3 border-b border-gray-100">
+        <div className="border-b border-gray-100">
           {!isCollapsed && (
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">{t.formActions}</h3>
+            <button
+              onClick={() => toggleSection('formActions')}
+              className="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-gray-700">{t.formActions}</h3>
+              {sectionsCollapsed.formActions ? (
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              ) : (
+                <ChevronUp className="h-4 w-4 text-gray-500" />
+              )}
+            </button>
           )}
-          <div className="space-y-2">
+          {!isCollapsed && !sectionsCollapsed.formActions && (
+            <div className="px-3 pb-3 space-y-2">
             <Button
               onClick={onSave}
               size="sm"
@@ -188,15 +213,27 @@ export function LeftNavigationPane({
               <FileText className="h-4 w-4" />
               {!isCollapsed && <span className="ml-2">{t.clearForm}</span>}
             </Button>
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Form Management Section */}
-        <div className="p-3 border-b border-gray-100">
+        <div className="border-b border-gray-100">
           {!isCollapsed && (
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">{t.formManagement}</h3>
+            <button
+              onClick={() => toggleSection('formManagement')}
+              className="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-gray-700">{t.formManagement}</h3>
+              {sectionsCollapsed.formManagement ? (
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              ) : (
+                <ChevronUp className="h-4 w-4 text-gray-500" />
+              )}
+            </button>
           )}
-          <div className="space-y-2">
+          {!isCollapsed && !sectionsCollapsed.formManagement && (
+            <div className="px-3 pb-3 space-y-2">
             <Button
               onClick={onSavedForms}
               size="sm"
@@ -246,18 +283,30 @@ export function LeftNavigationPane({
                 </Badge>
               )}
             </Button>
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Section Navigation */}
         <div className="flex-1 overflow-y-auto">
           {!isCollapsed && (
-            <div className="p-3">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                <Navigation className="h-4 w-4 mr-2" />
-                {t.navigation}
-              </h3>
-              <div className="space-y-1">
+            <>
+              <button
+                onClick={() => toggleSection('navigation')}
+                className="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                  <Navigation className="h-4 w-4 mr-2" />
+                  {t.navigation}
+                </h3>
+                {sectionsCollapsed.navigation ? (
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <ChevronUp className="h-4 w-4 text-gray-500" />
+                )}
+              </button>
+              {!sectionsCollapsed.navigation && (
+                <div className="px-3 pb-3 space-y-1">
                 {sections.map((section) => (
                   <button
                     key={section.id}
