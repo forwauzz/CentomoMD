@@ -4901,10 +4901,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
         onDirectDictation={handleDirectDictation}
       />
 
-      {/* Floating Navigation */}
-      <FloatingNavigation 
-        language={language}
-      />
+      {/* Floating Navigation - Only show when left navigation is disabled */}
+      {!useLeftNavigation && (
+        <FloatingNavigation 
+          language={language}
+        />
+      )}
 
 
 

@@ -26,12 +26,14 @@ interface LeftNavigationPaneProps {
   onSavedForms: () => void;
   onSaveDialog: () => void;
   onSave: () => void;
+  onPrint: () => void;
+  onExport: () => void;
   savedFormsCount?: number;
   completedFormsCount?: number;
 }
 
 const sections: NavigationSection[] = [
-  { id: "section1", titleFr: "A. Renseignements travailleur", titleEn: "A. Worker Information" },
+  { id: "sectionA", titleFr: "A. Renseignements travailleur", titleEn: "A. Worker Information" },
   { id: "sectionB", titleFr: "B. Renseignements médecin", titleEn: "B. Doctor Information" },
   { id: "sectionC", titleFr: "C. Rapport", titleEn: "C. Report" },
   { id: "section1", titleFr: "1. Mandat évaluation", titleEn: "1. Evaluation Mandate" },
@@ -54,6 +56,8 @@ const translations = {
     formManagement: "Gestion formulaires",
     save: "Sauvegarder",
     saveAs: "Sauvegarder sous",
+    print: "Imprimer",
+    export: "Exporter PDF",
     savedDrafts: "Brouillons sauvés",
     completedForms: "Formulaires complétés",
     collapse: "Réduire",
@@ -65,6 +69,8 @@ const translations = {
     formManagement: "Form Management",
     save: "Save",
     saveAs: "Save As",
+    print: "Print",
+    export: "Export PDF",
     savedDrafts: "Saved Drafts",
     completedForms: "Completed Forms",
     collapse: "Collapse",
@@ -78,6 +84,8 @@ export function LeftNavigationPane({
   onSavedForms,
   onSaveDialog,
   onSave,
+  onPrint,
+  onExport,
   savedFormsCount = 0,
   completedFormsCount = 0
 }: LeftNavigationPaneProps) {
