@@ -813,28 +813,28 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       genouxExtensionGauchePassif: "",
       
       // Manœuvres ligamentaires defaults
-      genouxLci0Droit: "Négatif",
-      genouxLci0Gauche: "Négatif",
-      genouxLci20Droit: "Négatif",
-      genouxLci20Gauche: "Négatif",
-      genouxLce0Droit: "Négatif",
-      genouxLce0Gauche: "Négatif",
-      genouxLce20Droit: "Négatif",
-      genouxLce20Gauche: "Négatif",
-      genouxLachmanDroit: "Négatif",
-      genouxLachmanGauche: "Négatif",
-      genouxPivotDroit: "Négatif",
-      genouxPivotGauche: "Négatif",
-      genouxTiroirAnterieurDroit: "Négatif",
-      genouxTiroirAnterieurGauche: "Négatif",
-      genouxTiroirPosterieurDroit: "Négatif",
-      genouxTiroirPosterieurGauche: "Négatif",
-      genouxSagPosterieurDroit: "Négatif",
-      genouxSagPosterieurGauche: "Négatif",
-      genouxDial30Droit: "Négatif",
-      genouxDial30Gauche: "Négatif",
-      genouxDial90Droit: "Négatif",
-      genouxDial90Gauche: "Négatif",
+      genouxLci0Droit: "Sec",
+      genouxLci0Gauche: "Sec",
+      genouxLci20Droit: "Sec",
+      genouxLci20Gauche: "Sec",
+      genouxLce0Droit: "Sec",
+      genouxLce0Gauche: "Sec",
+      genouxLce20Droit: "Sec",
+      genouxLce20Gauche: "Sec",
+      genouxLachmanDroit: "Sec",
+      genouxLachmanGauche: "Sec",
+      genouxPivotDroit: "Sec",
+      genouxPivotGauche: "Sec",
+      genouxTiroirAnterieurDroit: "Sec",
+      genouxTiroirAnterieurGauche: "Sec",
+      genouxTiroirPosterieurDroit: "Sec",
+      genouxTiroirPosterieurGauche: "Sec",
+      genouxSagPosterieurDroit: "Sec",
+      genouxSagPosterieurGauche: "Sec",
+      genouxDial30Droit: "Sec",
+      genouxDial30Gauche: "Sec",
+      genouxDial90Droit: "Sec",
+      genouxDial90Gauche: "Sec",
       
       // Manœuvres méniscales defaults
       genouxApleyDroit: "Négatif",
@@ -3199,7 +3199,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3212,7 +3217,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3228,7 +3238,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3241,7 +3256,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3257,7 +3277,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3270,7 +3295,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3286,7 +3316,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3299,7 +3334,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3315,7 +3355,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3328,7 +3373,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3344,7 +3394,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3357,7 +3412,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3373,7 +3433,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3386,7 +3451,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3402,7 +3472,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3415,7 +3490,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3431,7 +3511,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3444,7 +3529,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3460,7 +3550,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3473,7 +3568,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3489,7 +3589,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />
@@ -3502,7 +3607,12 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                         <MedicalSelect 
                                           value={field.value} 
                                           onValueChange={field.onChange}
-                                          placeholder="Négatif"
+                                          placeholder="Sec"
+                                          options={[
+                                            { value: "Sec", label: "Sec" },
+                                            { value: "Retardé", label: "Retardé" },
+                                            { value: "Aucun arrêt", label: "Aucun arrêt" }
+                                          ]}
                                         />
                                       )}
                                     />

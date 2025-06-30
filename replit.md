@@ -106,11 +106,13 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
-- **June 30, 2025**: **Enhanced Muscle Strength Assessment in Section 9** - Improved neurological examination interface
-  - Added dropdown menus for Forces section with standardized muscle strength ratings (5/5 to 0/5)
-  - Enhanced user experience for neurological assessment in physical examination
+- **June 30, 2025**: **Enhanced Ligament and Muscle Assessment in Section 9** - Improved physical examination interface
+  - Added dropdown menus for Manœuvres ligamentaires with specialized options: "Sec / Retardé / Aucun arrêt"
+  - Enhanced Forces section with standardized muscle strength ratings (5/5 to 0/5)
+  - Applied to all ligament test entries: LCI 0°, LCI 20°, LCE 0°, LCE 20°, Lachman, Pivot, Tiroir antérieur, Tiroir postérieur, Sag postérieur, Dial à 30°, Dial à 90°
+  - Improved clinical accuracy with appropriate medical terminology for ligament stability assessment
+  - Enhanced user experience for comprehensive physical examination workflow
   - Maintained proper form validation and auto-save functionality
-  - Improved clinical accuracy with standardized ASIA impairment scale ratings
 - **June 30, 2025**: **French Dictation System Enhancement** - Advanced speech recognition optimization
   - Enhanced French speech recognition with fr-CA language support for medical terminology
   - Improved error handling with detailed French error messages for better user experience
