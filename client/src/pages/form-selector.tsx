@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User } from 'lucide-react';
+import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User, TestTube } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -88,6 +88,17 @@ export default function FormSelector({
 
             {/* Header Actions */}
             <div className="flex items-center space-x-4">
+              {/* Speech Test Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation('/speech-test')}
+                className="flex items-center space-x-1 text-purple-600 border-purple-200 hover:bg-purple-50"
+              >
+                <TestTube className="w-4 h-4" />
+                <span>{language === 'fr' ? 'Test Vocal' : 'Speech Test'}</span>
+              </Button>
+
               {/* User Info & Logout */}
               {user && (
                 <div className="flex items-center space-x-2">
