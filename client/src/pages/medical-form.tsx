@@ -1200,7 +1200,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
           onSavedForms={() => setShowSavedForms(true)}
           onSaveDialog={() => setShowSaveDialog(true)}
           onSave={handleSave}
-          savedFormsCount={savedForms.length}
+          savedFormsCount={Array.isArray(savedForms) ? savedForms.length : 0}
           completedFormsCount={0}
         />
       )}
