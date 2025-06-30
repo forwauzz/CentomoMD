@@ -53,7 +53,7 @@ export function SaveFormDialog({ open, onClose, formData, language }: SaveFormDi
   const t = translations[language];
 
   const saveMutation = useMutation({
-    mutationFn: async (data: { title: string; formData: any; retentionDays: number }) => {
+    mutationFn: async (data: { title: string; formData: any; retentionDays: number; formType?: string }) => {
       const response = await fetch("/api/saved-forms", {
         method: "POST",
         body: JSON.stringify(data),
@@ -67,6 +67,7 @@ export function SaveFormDialog({ open, onClose, formData, language }: SaveFormDi
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "copy"] });
       toast({
         title: t.success,
         description: `${t.retentionLabel}: ${retentionDays[0]} ${retentionDays[0] === 1 ? 'jour' : 'jours'}`,

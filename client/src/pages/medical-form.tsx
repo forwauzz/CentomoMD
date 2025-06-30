@@ -29,7 +29,7 @@ import { exportToPDF } from "@/lib/pdf-export";
 import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive, FolderOpen, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   // Section 1: Mandat de l'évaluation (checkboxes)
@@ -549,6 +549,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   });
   const { toast } = useToast();
   const { user, logout } = useAuth();
+  const queryClient = useQueryClient();
 
   // Query for draft forms count
   const { data: draftForms = [] } = useQuery<any[]>({
@@ -1182,6 +1183,9 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       if (!response.ok) {
         throw new Error("Failed to save draft");
       }
+      
+      // Invalidate queries to update counts
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "draft"] });
       
       setShowDraftDialog(false);
       toast({
