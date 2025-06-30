@@ -531,6 +531,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSavedForms, setShowSavedForms] = useState(false);
+  const [showDraftDialog, setShowDraftDialog] = useState(false);
   const [useLeftNavigation, setUseLeftNavigation] = useState(true); // Feature flag for new navigation
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
   const [showGenderWarning, setShowGenderWarning] = useState(false);
@@ -1150,11 +1151,16 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
   };
 
   const handleSave = () => {
+    setShowDraftDialog(true);
+  };
+
+  const handleSaveToDraft = () => {
     const data = form.getValues();
     saveData(data);
+    setShowDraftDialog(false);
     toast({
-      title: t.saved,
-      description: language === 'fr' ? "Le formulaire a été sauvegardé avec succès." : "The form has been saved successfully.",
+      title: language === 'fr' ? "Sauvegardé en brouillon" : "Saved to Draft",
+      description: language === 'fr' ? "Le formulaire a été sauvegardé en brouillon avec succès." : "The form has been saved to drafts successfully.",
     });
   };
 
@@ -5239,6 +5245,39 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
         formData={form.getValues()}
         language={language}
       />
+
+      {/* Draft Confirmation Dialog */}
+      <Dialog open={showDraftDialog} onOpenChange={setShowDraftDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'fr' ? 'Sauvegarder en brouillon ?' : 'Save to Draft?'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              {language === 'fr' 
+                ? 'Voulez-vous sauvegarder ce formulaire en brouillon pour y revenir plus tard ?'
+                : 'Would you like to save this form as a draft to return to it later?'
+              }
+            </p>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowDraftDialog(false)}
+            >
+              {language === 'fr' ? 'Annuler' : 'Cancel'}
+            </Button>
+            <Button
+              onClick={handleSaveToDraft}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {language === 'fr' ? 'Sauvegarder' : 'Save'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Saved Forms Manager Dialog */}
       <Dialog open={showSavedForms} onOpenChange={setShowSavedForms}>

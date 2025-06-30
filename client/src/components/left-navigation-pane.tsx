@@ -77,7 +77,7 @@ const translations = {
     export: "Export PDF",
     clearForm: "Clear All",
     savedDrafts: "Saved Copies",
-    completedForms: "Completed Forms",
+    completedForms: "Drafts",
     collapse: "Collapse",
     expand: "Expand"
   }
