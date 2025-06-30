@@ -1344,6 +1344,11 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
                   <Printer className="w-4 h-4" />
                   <span className="ml-1">Imprimer</span>
                 </Button>
+
+                <Button onClick={handleExportWord} size="sm" className="bg-green-600 hover:bg-green-700">
+                  <FileText className="w-4 h-4" />
+                  <span className="ml-1">Export Word</span>
+                </Button>
                 
                 <Button onClick={handleClearForm} size="sm" variant="destructive">
                   <Trash2 className="w-4 h-4" />
@@ -5263,6 +5268,14 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   Exporter PDF
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={handleExportWord}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Exporter Word
                 </Button>
               </div>
             </div>
