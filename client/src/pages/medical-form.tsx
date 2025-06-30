@@ -5330,6 +5330,39 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
           <SavedFormsManager
             language={language}
             onLoadForm={handleLoadForm}
+            formType="all"
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Drafts Manager Dialog */}
+      <Dialog open={showDrafts} onOpenChange={setShowDrafts}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'fr' ? 'Brouillons' : 'Drafts'}
+            </DialogTitle>
+          </DialogHeader>
+          <SavedFormsManager
+            language={language}
+            onLoadForm={handleLoadForm}
+            formType="draft"
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Saved Copies Manager Dialog */}
+      <Dialog open={showSavedCopies} onOpenChange={setShowSavedCopies}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'fr' ? 'Copies sauvegardées' : 'Saved Copies'}
+            </DialogTitle>
+          </DialogHeader>
+          <SavedFormsManager
+            language={language}
+            onLoadForm={handleLoadForm}
+            formType="copy"
           />
         </DialogContent>
       </Dialog>

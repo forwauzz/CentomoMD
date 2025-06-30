@@ -24,6 +24,8 @@ interface LeftNavigationPaneProps {
   language: 'fr' | 'en';
   onSectionNavigate: (sectionId: string) => void;
   onSavedForms: () => void;
+  onDrafts: () => void;
+  onSavedCopies: () => void;
   onSaveDialog: () => void;
   onSave: () => void;
   onPrint: () => void;
@@ -85,6 +87,8 @@ export function LeftNavigationPane({
   language,
   onSectionNavigate,
   onSavedForms,
+  onDrafts,
+  onSavedCopies,
   onSaveDialog,
   onSave,
   onPrint,
@@ -205,7 +209,7 @@ export function LeftNavigationPane({
           {!isCollapsed && !sectionsCollapsed.formManagement && (
             <div className="px-3 pb-3 space-y-2">
               <Button
-                onClick={onSavedForms}
+                onClick={onDrafts}
                 size="sm"
                 variant="outline"
                 className="w-full justify-start"
@@ -221,7 +225,7 @@ export function LeftNavigationPane({
               </Button>
               
               <Button
-                onClick={onSavedForms}
+                onClick={onSavedCopies}
                 size="sm"
                 variant="outline"
                 className="w-full justify-start"
