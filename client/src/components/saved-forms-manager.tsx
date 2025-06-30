@@ -79,6 +79,7 @@ const translations = {
     deleteSuccess: "Form deleted successfully",
     printSuccess: "Printing...",
     exportSuccess: "Exporting PDF...",
+    exportWordSuccess: "Exporting Word...",
     error: "An error occurred"
   }
 };
@@ -165,6 +166,24 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
       toast({
         title: t.error,
         description: "Failed to export PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportWord = (savedForm: any) => {
+    try {
+      const filename = `${savedForm.title.replace(/[^a-zA-Z0-9]/g, '_')}.docx`;
+      exportToWord(savedForm.formData, filename);
+      toast({
+        title: t.exportWordSuccess,
+        description: savedForm.title,
+      });
+    } catch (error) {
+      console.error("Word export error:", error);
+      toast({
+        title: t.error,
+        description: "Failed to export Word document",
         variant: "destructive",
       });
     }
@@ -291,6 +310,16 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
                       >
                         <FileDown className="w-4 h-4 mr-1" />
                         {t.exportPdf}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExportWord(savedForm)}
+                        disabled={expiration.status === 'expired'}
+                        className="flex-1 min-w-[80px]"
+                      >
+                        <FileDown className="w-4 h-4 mr-1" />
+                        {t.exportWord}
                       </Button>
                       <Button
                         size="sm"

@@ -26,6 +26,7 @@ import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useAuth } from "@/hooks/useAuth";
 import { exportToPDF } from "@/lib/pdf-export";
+import { exportToWord } from "@/lib/word-export";
 import { Mic, Save, Printer, Trash2, Eye, FileText, Globe, LogOut, User, Archive, FolderOpen, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -1211,6 +1212,12 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
   const handleExportPDF = () => {
     const data = form.getValues();
     exportToPDF(data);
+  };
+
+  const handleExportWord = () => {
+    const data = form.getValues();
+    const filename = `medical-evaluation-${new Date().toISOString().split('T')[0]}.docx`;
+    exportToWord(data, filename);
   };
 
   const handleLoadForm = (formData: any) => {
