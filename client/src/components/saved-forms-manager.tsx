@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Download, Trash2, Calendar, Clock } from "lucide-react";
+import { FileText, Download, Trash2, Calendar, Clock, Printer, FileDown } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
+import { exportToPDF } from "@/lib/pdf-export";
 import { fr, enUS } from "date-fns/locale";
 
 interface SavedFormsManagerProps {
@@ -24,6 +25,8 @@ const translations = {
     noFormsDescription: "Vous n'avez pas encore de formulaires sauvegardés.",
     load: "Charger",
     delete: "Supprimer",
+    print: "Imprimer",
+    exportPdf: "Exporter PDF",
     createdAt: "Créé",
     expiresIn: "Expire dans",
     expired: "Expiré",
@@ -32,6 +35,8 @@ const translations = {
     deleting: "Suppression...",
     loadSuccess: "Formulaire chargé avec succès",
     deleteSuccess: "Formulaire supprimé avec succès",
+    printSuccess: "Impression en cours...",
+    exportSuccess: "Export PDF en cours...",
     error: "Une erreur est survenue"
   },
   en: {
@@ -41,6 +46,8 @@ const translations = {
     noFormsDescription: "You don't have any saved forms yet.",
     load: "Load",
     delete: "Delete",
+    print: "Print",
+    exportPdf: "Export PDF",
     createdAt: "Created",
     expiresIn: "Expires in",
     expired: "Expired",
@@ -49,6 +56,8 @@ const translations = {
     deleting: "Deleting...",
     loadSuccess: "Form loaded successfully",
     deleteSuccess: "Form deleted successfully",
+    printSuccess: "Printing...",
+    exportSuccess: "Exporting PDF...",
     error: "An error occurred"
   }
 };
@@ -104,6 +113,40 @@ export function SavedFormsManager({ language, onLoadForm }: SavedFormsManagerPro
 
   const handleDeleteForm = (id: number) => {
     deleteMutation.mutate(id);
+  };
+
+  const handlePrintForm = (savedForm: any) => {
+    try {
+      exportToPDF(savedForm.formData);
+      toast({
+        title: t.printSuccess,
+        description: savedForm.title,
+      });
+    } catch (error) {
+      console.error("Print error:", error);
+      toast({
+        title: t.error,
+        description: "Failed to print form",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportPdf = (savedForm: any) => {
+    try {
+      exportToPDF(savedForm.formData);
+      toast({
+        title: t.exportSuccess,
+        description: savedForm.title,
+      });
+    } catch (error) {
+      console.error("Export error:", error);
+      toast({
+        title: t.error,
+        description: "Failed to export PDF",
+        variant: "destructive",
+      });
+    }
   };
 
   const getExpirationStatus = (expiresAt: string) => {
@@ -173,12 +216,12 @@ export function SavedFormsManager({ language, onLoadForm }: SavedFormsManagerPro
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button
                         size="sm"
                         onClick={() => handleLoadForm(savedForm)}
                         disabled={expiration.status === 'expired'}
-                        className="flex-1"
+                        className="flex-1 min-w-[80px]"
                       >
                         <Download className="w-4 h-4 mr-1" />
                         {t.load}
@@ -186,8 +229,29 @@ export function SavedFormsManager({ language, onLoadForm }: SavedFormsManagerPro
                       <Button
                         size="sm"
                         variant="outline"
+                        onClick={() => handlePrintForm(savedForm)}
+                        disabled={expiration.status === 'expired'}
+                        className="flex-1 min-w-[80px]"
+                      >
+                        <Printer className="w-4 h-4 mr-1" />
+                        {t.print}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExportPdf(savedForm)}
+                        disabled={expiration.status === 'expired'}
+                        className="flex-1 min-w-[80px]"
+                      >
+                        <FileDown className="w-4 h-4 mr-1" />
+                        {t.exportPdf}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => setDeleteFormId(savedForm.id)}
                         disabled={deleteMutation.isPending}
+                        className="px-3"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
