@@ -531,6 +531,8 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSavedForms, setShowSavedForms] = useState(false);
+  const [showDrafts, setShowDrafts] = useState(false);
+  const [showSavedCopies, setShowSavedCopies] = useState(false);
   const [showDraftDialog, setShowDraftDialog] = useState(false);
   const [useLeftNavigation, setUseLeftNavigation] = useState(true); // Feature flag for new navigation
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
@@ -1242,6 +1244,8 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
           language={language}
           onSectionNavigate={handleSectionNavigate}
           onSavedForms={() => setShowSavedForms(true)}
+          onDrafts={() => setShowDrafts(true)}
+          onSavedCopies={() => setShowSavedCopies(true)}
           onSaveDialog={() => setShowSaveDialog(true)}
           onSave={handleSave}
           onPrint={handlePrint}

@@ -15,14 +15,23 @@ import { fr, enUS } from "date-fns/locale";
 interface SavedFormsManagerProps {
   language: 'fr' | 'en';
   onLoadForm?: (formData: any) => void;
+  formType?: 'draft' | 'copy' | 'all';
 }
 
 const translations = {
   fr: {
     title: "Formulaires sauvegardés",
+    titleDrafts: "Brouillons",
+    titleCopies: "Copies sauvegardées",
     description: "Gérez vos formulaires sauvegardés temporairement",
+    descriptionDrafts: "Gérez vos brouillons de formulaires",
+    descriptionCopies: "Gérez vos copies de formulaires sauvegardées",
     noForms: "Aucun formulaire sauvegardé",
+    noFormsDrafts: "Aucun brouillon",
+    noFormsCopies: "Aucune copie sauvegardée",
     noFormsDescription: "Vous n'avez pas encore de formulaires sauvegardés.",
+    noFormsDescriptionDrafts: "Vous n'avez pas encore de brouillons.",
+    noFormsDescriptionCopies: "Vous n'avez pas encore de copies sauvegardées.",
     load: "Charger",
     delete: "Supprimer",
     print: "Imprimer",
@@ -41,9 +50,17 @@ const translations = {
   },
   en: {
     title: "Saved Forms",
+    titleDrafts: "Drafts",
+    titleCopies: "Saved Copies",
     description: "Manage your temporarily saved forms",
+    descriptionDrafts: "Manage your form drafts",
+    descriptionCopies: "Manage your saved form copies",
     noForms: "No saved forms",
+    noFormsDrafts: "No drafts",
+    noFormsCopies: "No saved copies",
     noFormsDescription: "You don't have any saved forms yet.",
+    noFormsDescriptionDrafts: "You don't have any drafts yet.",
+    noFormsDescriptionCopies: "You don't have any saved copies yet.",
     load: "Load",
     delete: "Delete",
     print: "Print",
@@ -62,7 +79,7 @@ const translations = {
   }
 };
 
-export function SavedFormsManager({ language, onLoadForm }: SavedFormsManagerProps) {
+export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: SavedFormsManagerProps) {
   const [deleteFormId, setDeleteFormId] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -70,7 +87,7 @@ export function SavedFormsManager({ language, onLoadForm }: SavedFormsManagerPro
   const locale = language === 'fr' ? fr : enUS;
 
   const { data: savedForms = [], isLoading } = useQuery({
-    queryKey: ["/api/saved-forms"],
+    queryKey: formType === 'all' ? ["/api/saved-forms"] : ["/api/saved-forms", formType],
     retry: false,
   });
 
@@ -173,13 +190,38 @@ export function SavedFormsManager({ language, onLoadForm }: SavedFormsManagerPro
     );
   }
 
+  // Get dynamic title and description based on formType
+  const getTitle = () => {
+    if (formType === 'draft') return t.titleDrafts;
+    if (formType === 'copy') return t.titleCopies;
+    return t.title;
+  };
+
+  const getDescription = () => {
+    if (formType === 'draft') return t.descriptionDrafts;
+    if (formType === 'copy') return t.descriptionCopies;
+    return t.description;
+  };
+
+  const getNoFormsTitle = () => {
+    if (formType === 'draft') return t.noFormsDrafts;
+    if (formType === 'copy') return t.noFormsCopies;
+    return t.noForms;
+  };
+
+  const getNoFormsDescription = () => {
+    if (formType === 'draft') return t.noFormsDescriptionDrafts;
+    if (formType === 'copy') return t.noFormsDescriptionCopies;
+    return t.noFormsDescription;
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <FileText className="w-5 h-5" />
         <div>
-          <h3 className="font-medium">{t.title}</h3>
-          <p className="text-sm text-gray-500">{t.description}</p>
+          <h3 className="font-medium">{getTitle()}</h3>
+          <p className="text-sm text-gray-500">{getDescription()}</p>
         </div>
       </div>
 
@@ -187,8 +229,8 @@ export function SavedFormsManager({ language, onLoadForm }: SavedFormsManagerPro
         <Card>
           <CardContent className="p-6 text-center">
             <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <CardTitle className="text-lg mb-2">{t.noForms}</CardTitle>
-            <CardDescription>{t.noFormsDescription}</CardDescription>
+            <CardTitle className="text-lg mb-2">{getNoFormsTitle()}</CardTitle>
+            <CardDescription>{getNoFormsDescription()}</CardDescription>
           </CardContent>
         </Card>
       ) : (
