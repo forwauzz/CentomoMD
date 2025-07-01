@@ -193,10 +193,14 @@ const formSchema = z.object({
   // Amplitude articulaire pieds/chevilles
   piedsDorsiflexionCheville: z.string().optional(),
   piedsPlantifexionCheville: z.string().optional(),
-  piedsMvtsSousAstragaliensDroit: z.string().optional(),
-  piedsMvtsSousAstragaliensGauche: z.string().optional(),
-  piedsMvtsMidTarsienDroit: z.string().optional(),
-  piedsMvtsMidTarsienGauche: z.string().optional(),
+  piedsMvtsSousAstragaliensActifDroit: z.string().optional(),
+  piedsMvtsSousAstragaliensPassifDroit: z.string().optional(),
+  piedsMvtsSousAstragaliensActifGauche: z.string().optional(),
+  piedsMvtsSousAstragaliensPassifGauche: z.string().optional(),
+  piedsMvtsMidTarsienActifDroit: z.string().optional(),
+  piedsMvtsMidTarsienPassifDroit: z.string().optional(),
+  piedsMvtsMidTarsienActifGauche: z.string().optional(),
+  piedsMvtsMidTarsienPassifGauche: z.string().optional(),
   
   // Manœuvres ligamentaires pieds/chevilles
   piedsTiroir0Droit: z.string().optional(),
@@ -889,10 +893,14 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       // Amplitude articulaire pieds/chevilles defaults
       piedsDorsiflexionCheville: "20",
       piedsPlantifexionCheville: "40",
-      piedsMvtsSousAstragaliensDroit: "Présent",
-      piedsMvtsSousAstragaliensGauche: "Présent",
-      piedsMvtsMidTarsienDroit: "Présent",
-      piedsMvtsMidTarsienGauche: "Présent",
+      piedsMvtsSousAstragaliensActifDroit: "Normal",
+      piedsMvtsSousAstragaliensPassifDroit: "Normal",
+      piedsMvtsSousAstragaliensActifGauche: "Normal",
+      piedsMvtsSousAstragaliensPassifGauche: "Normal",
+      piedsMvtsMidTarsienActifDroit: "Normal",
+      piedsMvtsMidTarsienPassifDroit: "Normal",
+      piedsMvtsMidTarsienActifGauche: "Normal",
+      piedsMvtsMidTarsienPassifGauche: "Normal",
       
       // Manœuvres ligamentaires pieds/chevilles defaults
       piedsTiroir0Droit: "Négatif",
@@ -4225,39 +4233,83 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Mvts sous-astragaliens</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
-                                      name="piedsMvtsSousAstragaliensDroit"
+                                      name="piedsMvtsSousAstragaliensActifDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Diminué < 50%", label: "Diminué < 50%" },
+                                            { value: "Diminué > 50%", label: "Diminué > 50%" },
+                                            { value: "Absent", label: "Absent" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
-                                      name="piedsMvtsSousAstragaliensDroit"
+                                      name="piedsMvtsSousAstragaliensPassifDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Diminué < 50%", label: "Diminué < 50%" },
+                                            { value: "Diminué > 50%", label: "Diminué > 50%" },
+                                            { value: "Absent", label: "Absent" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
-                                      name="piedsMvtsSousAstragaliensGauche"
+                                      name="piedsMvtsSousAstragaliensActifGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Diminué < 50%", label: "Diminué < 50%" },
+                                            { value: "Diminué > 50%", label: "Diminué > 50%" },
+                                            { value: "Absent", label: "Absent" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
-                                      name="piedsMvtsSousAstragaliensGauche"
+                                      name="piedsMvtsSousAstragaliensPassifGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Diminué < 50%", label: "Diminué < 50%" },
+                                            { value: "Diminué > 50%", label: "Diminué > 50%" },
+                                            { value: "Absent", label: "Absent" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
                                       )}
                                     />
                                   </td>
@@ -4265,39 +4317,83 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                                 </tr>
                                 <tr>
                                   <td className="border p-2">Mvts mid-tarsien</td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
-                                      name="piedsMvtsMidTarsienDroit"
+                                      name="piedsMvtsMidTarsienActifDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Diminué < 50%", label: "Diminué < 50%" },
+                                            { value: "Diminué > 50%", label: "Diminué > 50%" },
+                                            { value: "Absent", label: "Absent" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
-                                      name="piedsMvtsMidTarsienDroit"
+                                      name="piedsMvtsMidTarsienPassifDroit"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Diminué < 50%", label: "Diminué < 50%" },
+                                            { value: "Diminué > 50%", label: "Diminué > 50%" },
+                                            { value: "Absent", label: "Absent" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
-                                      name="piedsMvtsMidTarsienGauche"
+                                      name="piedsMvtsMidTarsienActifGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Diminué < 50%", label: "Diminué < 50%" },
+                                            { value: "Diminué > 50%", label: "Diminué > 50%" },
+                                            { value: "Absent", label: "Absent" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
                                       )}
                                     />
                                   </td>
-                                  <td className="border p-2">
+                                  <td className="border p-1">
                                     <FormField
                                       control={form.control}
-                                      name="piedsMvtsMidTarsienGauche"
+                                      name="piedsMvtsMidTarsienPassifGauche"
                                       render={({ field }) => (
-                                        <Input {...field} className="w-full border-0 p-1 text-center" />
+                                        <MedicalSelect 
+                                          value={field.value} 
+                                          onValueChange={field.onChange}
+                                          placeholder="Normal"
+                                          options={[
+                                            { value: "Normal", label: "Normal" },
+                                            { value: "Diminué < 50%", label: "Diminué < 50%" },
+                                            { value: "Diminué > 50%", label: "Diminué > 50%" },
+                                            { value: "Absent", label: "Absent" },
+                                            { value: "Non fait", label: "Non fait" }
+                                          ]}
+                                        />
                                       )}
                                     />
                                   </td>

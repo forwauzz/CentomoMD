@@ -164,10 +164,14 @@ export const medicalForms = pgTable("medical_forms", {
   // Amplitude articulaire pieds/chevilles
   piedsDorsiflexionCheville: text("pieds_dorsiflexion_cheville"),
   piedsPlantifexionCheville: text("pieds_plantiflexion_cheville"),
-  piedsMvtsSousAstragaliensDroit: text("pieds_mvts_sous_astragaliens_droit"),
-  piedsMvtsSousAstragaliensGauche: text("pieds_mvts_sous_astragaliens_gauche"),
-  piedsMvtsMidTarsienDroit: text("pieds_mvts_mid_tarsien_droit"),
-  piedsMvtsMidTarsienGauche: text("pieds_mvts_mid_tarsien_gauche"),
+  piedsMvtsSousAstragaliensActifDroit: text("pieds_mvts_sous_astragaliens_actif_droit"),
+  piedsMvtsSousAstragaliensPassifDroit: text("pieds_mvts_sous_astragaliens_passif_droit"),
+  piedsMvtsSousAstragaliensActifGauche: text("pieds_mvts_sous_astragaliens_actif_gauche"),
+  piedsMvtsSousAstragaliensPassifGauche: text("pieds_mvts_sous_astragaliens_passif_gauche"),
+  piedsMvtsMidTarsienActifDroit: text("pieds_mvts_mid_tarsien_actif_droit"),
+  piedsMvtsMidTarsienPassifDroit: text("pieds_mvts_mid_tarsien_passif_droit"),
+  piedsMvtsMidTarsienActifGauche: text("pieds_mvts_mid_tarsien_actif_gauche"),
+  piedsMvtsMidTarsienPassifGauche: text("pieds_mvts_mid_tarsien_passif_gauche"),
 
   // Manœuvres ligamentaires pieds/chevilles
   piedsTiroir0Droit: text("pieds_tiroir_0_droit"),
