@@ -546,6 +546,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const urlParams = new URLSearchParams(window.location.search);
   const isNewVisit = urlParams.get('visit') === 'new';
   const draftId = urlParams.get('draft');
+  const visitName = urlParams.get('name');
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSavedForms, setShowSavedForms] = useState(false);
@@ -1235,13 +1236,17 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
 
   const handleSaveToDraft = async () => {
     const data = form.getValues();
-    const title = language === 'fr' ? "Brouillon" : "Draft";
+    const baseTitle = language === 'fr' ? "Brouillon" : "Draft";
+    
+    // Use visit name if provided, otherwise use date
+    const titleSuffix = visitName ? visitName : new Date().toLocaleDateString();
+    const title = `${baseTitle} - ${titleSuffix}`;
     
     try {
       const response = await fetch("/api/saved-forms", {
         method: "POST",
         body: JSON.stringify({
-          title: `${title} - ${new Date().toLocaleDateString()}`,
+          title: title,
           formData: data,
           retentionDays: 30,
           formType: "draft"

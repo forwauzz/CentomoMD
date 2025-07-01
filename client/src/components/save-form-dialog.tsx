@@ -14,6 +14,7 @@ interface SaveFormDialogProps {
   onClose: () => void;
   formData: any;
   language: 'fr' | 'en';
+  defaultTitle?: string;
 }
 
 const translations = {
@@ -45,7 +46,7 @@ const translations = {
   }
 };
 
-export function SaveFormDialog({ open, onClose, formData, language }: SaveFormDialogProps) {
+export function SaveFormDialog({ open, onClose, formData, language, defaultTitle }: SaveFormDialogProps) {
   const [title, setTitle] = useState("");
   const [retentionDays, setRetentionDays] = useState([7]);
   const { toast } = useToast();

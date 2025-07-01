@@ -47,12 +47,13 @@ export default function FormSelector({
     setShowVisitModal(true);
   };
 
-  const handleNewVisit = () => {
+  const handleNewVisit = (visitName?: string) => {
+    const nameParam = visitName ? `&name=${encodeURIComponent(visitName)}` : '';
     if (selectedForm === 'cnesst-medical') {
       // Route to medical form with new visit parameter
-      setLocation('/forms/cnesst-medical?visit=new');
+      setLocation(`/forms/cnesst-medical?visit=new${nameParam}`);
     } else {
-      setLocation(`/forms/${selectedForm}?visit=new`);
+      setLocation(`/forms/${selectedForm}?visit=new${nameParam}`);
     }
   };
 
