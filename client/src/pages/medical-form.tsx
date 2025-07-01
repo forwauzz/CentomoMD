@@ -539,8 +539,13 @@ interface MedicalFormProps {
 }
 
 export default function MedicalForm({ language, onLanguageChange }: MedicalFormProps) {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [currentDictationField, setCurrentDictationField] = useState<string | null>(null);
+  
+  // Parse URL parameters to determine visit type
+  const urlParams = new URLSearchParams(window.location.search);
+  const isNewVisit = urlParams.get('visit') === 'new';
+  const draftId = urlParams.get('draft');
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSavedForms, setShowSavedForms] = useState(false);
@@ -565,6 +570,33 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const { toast } = useToast();
   const { user, logout } = useAuth();
   const queryClient = useQueryClient();
+
+  // Function to load a specific draft form
+  const loadDraftForm = async (id: number) => {
+    try {
+      const response = await fetch(`/api/saved-forms/${id}`, { credentials: 'include' });
+      if (response.ok) {
+        const draftData = await response.json();
+        if (draftData.formData) {
+          form.reset(draftData.formData);
+          setLastSaved(`${language === 'fr' ? 'Brouillon chargé' : 'Draft loaded'}: ${draftData.title}`);
+        }
+      } else {
+        toast({
+          title: language === 'fr' ? 'Erreur' : 'Error',
+          description: language === 'fr' ? 'Impossible de charger le brouillon' : 'Could not load draft',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      console.error('Error loading draft:', error);
+      toast({
+        title: language === 'fr' ? 'Erreur' : 'Error',
+        description: language === 'fr' ? 'Erreur lors du chargement' : 'Loading error',
+        variant: 'destructive'
+      });
+    }
+  };
 
   // Query for draft forms count
   const { data: draftForms = [] } = useQuery<any[]>({
@@ -994,14 +1026,25 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     }
   }, [language, stopListening, isListening]);
 
-  // Load saved data on mount
+  // Load saved data on mount based on visit type
   useEffect(() => {
-    const savedData = loadData();
-    if (savedData) {
-      form.reset(savedData);
-      setLastSaved('Données récupérées');
+    if (isNewVisit) {
+      // For new visits, clear localStorage and start with blank form
+      clearData();
+      form.reset(); // Reset to completely blank form
+      setLastSaved(language === 'fr' ? 'Nouveau formulaire' : 'New form');
+    } else if (draftId) {
+      // Load specific draft from server
+      loadDraftForm(parseInt(draftId));
+    } else {
+      // Default behavior - load from localStorage
+      const savedData = loadData();
+      if (savedData) {
+        form.reset(savedData);
+        setLastSaved('Données récupérées');
+      }
     }
-  }, [form, loadData]);
+  }, [form, loadData, clearData, isNewVisit, draftId, language]);
 
   // Auto-save on form changes
   useEffect(() => {

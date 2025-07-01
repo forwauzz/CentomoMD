@@ -47,13 +47,25 @@ function Router() {
       <Route path="/speech-test" component={() => <SpeechTestPage />} />
       <Route path="/forms" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
       <Route path="/forms/:formType">
-        {(params) => (
-          <SimpleFormContainer 
-            formType={params.formType} 
-            language={language} 
-            onLanguageChange={setLanguage}
-          />
-        )}
+        {(params) => {
+          // Handle CNESST medical form with special routing
+          if (params.formType === 'cnesst-medical') {
+            return (
+              <MedicalForm 
+                language={language} 
+                onLanguageChange={setLanguage}
+              />
+            );
+          }
+          
+          return (
+            <SimpleFormContainer 
+              formType={params.formType} 
+              language={language} 
+              onLanguageChange={setLanguage}
+            />
+          );
+        }}
       </Route>
       <Route path="/ai-test" component={SimpleAITest} />
       <Route component={NotFound} />
