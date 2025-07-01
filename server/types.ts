@@ -18,5 +18,5 @@ export interface AuthenticatedRequest extends Express.Request {
   session: {
     userId: string;
     userRole?: string;
-  } & Express.SessionData;
+  } & import('express-session').SessionData;
 }

@@ -367,7 +367,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     const isNewVisit = returnPath.includes('visit=new');
 
     // Save to localStorage for form to pick up
-    let formData = {};
+    let formData: Record<string, any> = {};
     
     if (!isNewVisit) {
       // For existing visits, load and merge with existing data
@@ -401,8 +401,8 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     setEditableText("");
 
     // Navigate back to the original form with section anchor for immediate navigation
-    const returnPath = sessionStorage.getItem('dictationReturnPath') || '/forms/cnesst-medical-evaluation';
-    setLocation(returnPath + '#' + targetSection);
+    const finalReturnPath = returnPath || '/forms/cnesst-medical-evaluation';
+    setLocation(finalReturnPath + '#' + targetSection);
   };
 
   const handleFormatText = () => {
