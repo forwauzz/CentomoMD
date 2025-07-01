@@ -110,8 +110,8 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
       }
       // Always store current language for persistence
       sessionStorage.setItem('dictationLanguage', language);
-      // Store current location for seamless return
-      sessionStorage.setItem('dictationReturnPath', window.location.pathname);
+      // Store current location with query parameters for seamless return
+      sessionStorage.setItem('dictationReturnPath', window.location.pathname + window.location.search);
       console.log('Navigating to dictation page with language:', language);
       setLocation('/dictation');
     }

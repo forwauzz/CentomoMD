@@ -1127,6 +1127,10 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     sessionStorage.setItem('activeField', fieldName);
     sessionStorage.setItem('dictationLanguage', language);
     
+    // Store the current location with query parameters so dictation page can detect new visits
+    const currentPath = window.location.pathname + window.location.search;
+    sessionStorage.setItem('dictationReturnPath', currentPath);
+    
     // Navigate to the dedicated dictation page using router
     setLocation('/dictation');
   };

@@ -142,9 +142,10 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     if (activeField) {
       setSelectedSection(activeField);
       
-      // Check if this is a new visit by looking at the return path
+      // Check if this is a new visit by looking at the return path and URL parameters
       const returnPath = sessionStorage.getItem('dictationReturnPath') || '';
-      const isNewVisit = returnPath.includes('visit=new');
+      const currentUrl = window.location.href;
+      const isNewVisit = returnPath.includes('visit=new') || currentUrl.includes('visit=new');
       
       // Only load existing text if NOT a new visit
       if (!isNewVisit) {
@@ -168,7 +169,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
           }
         }
       } else {
-        // For new visits, clear any existing dictation state and localStorage
+        // For new visits, ensure everything starts blank
         setFinalText("");
         setEditableText("");
         setInterimText("");
@@ -177,7 +178,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
         localStorage.removeItem('medical-form-draft');
         localStorage.removeItem('centMD_formData');
         
-        console.log('New visit detected - clearing dictation state and localStorage for sections 7 and 8');
+        console.log('New visit detected - clearing dictation state and localStorage. Return path:', returnPath);
       }
     }
 
@@ -361,9 +362,19 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     const textToSave = isEditing ? editableText : finalText;
     if (!selectedSection || !textToSave) return;
 
+    // Check if this is a new visit
+    const returnPath = sessionStorage.getItem('dictationReturnPath') || '';
+    const isNewVisit = returnPath.includes('visit=new');
+
     // Save to localStorage for form to pick up
-    const savedData = localStorage.getItem('medical-form-draft');
-    const formData = savedData ? JSON.parse(savedData) : {};
+    let formData = {};
+    
+    if (!isNewVisit) {
+      // For existing visits, load and merge with existing data
+      const savedData = localStorage.getItem('medical-form-draft');
+      formData = savedData ? JSON.parse(savedData) : {};
+    }
+    // For new visits, start with empty formData to avoid mixing old data
 
     formData[selectedSection] = textToSave;
     localStorage.setItem('medical-form-draft', JSON.stringify(formData));
@@ -476,7 +487,18 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                 <ArrowLeft className="w-4 h-4" />
                 {t.backToForm}
               </Button>
-              <h1 className="text-2xl font-bold text-blue-600">{t.title}</h1>
+              <div>
+                <h1 className="text-2xl font-bold text-blue-600">{t.title}</h1>
+                {(() => {
+                  const returnPath = sessionStorage.getItem('dictationReturnPath') || '';
+                  const isNewVisit = returnPath.includes('visit=new');
+                  return isNewVisit ? (
+                    <p className="text-sm text-green-600 font-medium">
+                      {currentLanguage === 'fr' ? '• Nouvelle visite - formulaire vierge' : '• New visit - blank form'}
+                    </p>
+                  ) : null;
+                })()}
+              </div>
             </div>
 
             <div className="flex items-center gap-4">
