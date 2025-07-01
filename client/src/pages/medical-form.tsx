@@ -549,6 +549,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const visitName = urlParams.get('name');
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [saveFormType, setSaveFormType] = useState<'draft' | 'copy'>('copy');
   const [showSavedForms, setShowSavedForms] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
   const [showSavedCopies, setShowSavedCopies] = useState(false);
@@ -1235,6 +1236,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
   };
 
   const handleSaveCopy = () => {
+    setSaveFormType('copy');
     setShowSaveDialog(true);
   };
 
@@ -1455,7 +1457,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
               
               <Button
                 type="button"
-                onClick={() => setShowSaveDialog(true)}
+                onClick={handleSaveCopy}
                 className="w-full sm:flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 sm:px-6"
               >
                 <Archive className="w-4 h-4 mr-2" />
@@ -5606,7 +5608,8 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
         onClose={() => setShowSaveDialog(false)}
         formData={form.getValues()}
         language={language}
-        defaultTitle={visitName ? `${language === 'fr' ? 'Copie' : 'Copy'} - ${visitName}` : undefined}
+        defaultTitle={visitName ? `${saveFormType === 'copy' ? (language === 'fr' ? 'Copie' : 'Copy') : (language === 'fr' ? 'Brouillon' : 'Draft')} - ${visitName}` : undefined}
+        formType={saveFormType}
       />
 
       {/* Draft Confirmation Dialog */}
