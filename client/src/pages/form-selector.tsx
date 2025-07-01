@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User, TestTube } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { VisitSelectionModal } from '@/components/visit-selection-modal';
+import { useQuery } from '@tanstack/react-query';
 
 interface FormSelectorProps {
   language?: 'fr' | 'en';
@@ -18,6 +20,8 @@ export default function FormSelector({
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const [showVisitModal, setShowVisitModal] = useState(false);
+  const [selectedForm, setSelectedForm] = useState<string | null>(null);
 
   // Available form types with metadata
   const availableForms = [
@@ -38,11 +42,26 @@ export default function FormSelector({
   ];
 
   const handleFormSelect = (formId: string) => {
-    // Route CNESST form to the dedicated medical form page
-    if (formId === 'cnesst') {
-      setLocation('/medical-form');
+    // Show visit selection modal for all forms
+    setSelectedForm(formId);
+    setShowVisitModal(true);
+  };
+
+  const handleNewVisit = () => {
+    if (selectedForm === 'cnesst-medical') {
+      // Route to medical form with new visit parameter
+      setLocation('/forms/cnesst-medical?visit=new');
     } else {
-      setLocation(`/forms/${formId}`);
+      setLocation(`/forms/${selectedForm}?visit=new`);
+    }
+  };
+
+  const handleSelectDraft = (draftId: number) => {
+    if (selectedForm === 'cnesst-medical') {
+      // Route to medical form with draft parameter
+      setLocation(`/forms/cnesst-medical?draft=${draftId}`);
+    } else {
+      setLocation(`/forms/${selectedForm}?draft=${draftId}`);
     }
   };
 
@@ -228,6 +247,21 @@ export default function FormSelector({
           </div>
         </div>
       </div>
+
+      {/* Visit Selection Modal */}
+      {selectedForm && (
+        <VisitSelectionModal
+          open={showVisitModal}
+          onClose={() => {
+            setShowVisitModal(false);
+            setSelectedForm(null);
+          }}
+          onNewVisit={handleNewVisit}
+          onSelectDraft={handleSelectDraft}
+          formTitle={availableForms.find(f => f.id === selectedForm)?.title[language] || ''}
+          language={language}
+        />
+      )}
     </div>
   );
 }
