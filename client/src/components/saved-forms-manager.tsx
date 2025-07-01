@@ -175,7 +175,7 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
 
   const handleExportPDF = (savedForm: any) => {
     try {
-      exportToPDF(savedForm.formData, savedForm.title);
+      exportToPDF(savedForm.formData);
       toast({
         title: t.exportSuccess,
         description: savedForm.title,
