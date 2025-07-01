@@ -215,13 +215,13 @@ export function LeftNavigationPane({
                 size="sm"
                 variant="outline"
                 className="w-full justify-start"
-                title={t.savedDrafts}
+                title={t.completedForms}
               >
-                <FolderOpen className="h-4 w-4" />
-                <span className="ml-2">{t.savedDrafts}</span>
-                {savedFormsCount > 0 && (
+                <FileText className="h-4 w-4" />
+                <span className="ml-2">{t.completedForms}</span>
+                {completedFormsCount > 0 && (
                   <Badge variant="secondary" className="ml-auto">
-                    {savedFormsCount}
+                    {completedFormsCount}
                   </Badge>
                 )}
               </Button>
@@ -231,13 +231,13 @@ export function LeftNavigationPane({
                 size="sm"
                 variant="outline"
                 className="w-full justify-start"
-                title={t.completedForms}
+                title={t.savedDrafts}
               >
-                <FileText className="h-4 w-4" />
-                <span className="ml-2">{t.completedForms}</span>
-                {completedFormsCount > 0 && (
+                <FolderOpen className="h-4 w-4" />
+                <span className="ml-2">{t.savedDrafts}</span>
+                {savedFormsCount > 0 && (
                   <Badge variant="secondary" className="ml-auto">
-                    {completedFormsCount}
+                    {savedFormsCount}
                   </Badge>
                 )}
               </Button>
