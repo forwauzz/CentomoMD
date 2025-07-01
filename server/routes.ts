@@ -271,13 +271,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-      res.json(savedForm);
-    } catch (error) {
-      console.error('Get saved form error:', error);
-      res.status(500).json({ message: "Failed to fetch saved form" });
-    }
-  });
-
   // Save a medical form temporarily
   app.post("/api/saved-forms", requireAuth, async (req, res) => {
     try {

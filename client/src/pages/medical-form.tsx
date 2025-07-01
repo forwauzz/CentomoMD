@@ -1234,6 +1234,10 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     setShowDraftDialog(true);
   };
 
+  const handleSaveCopy = () => {
+    setShowSaveDialog(true);
+  };
+
   const handleSaveToDraft = async () => {
     const data = form.getValues();
     const baseTitle = language === 'fr' ? "Brouillon" : "Draft";
@@ -1327,6 +1331,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
           onSavedCopies={() => setShowSavedCopies(true)}
           onSaveDialog={() => setShowSaveDialog(true)}
           onSave={handleSave}
+          onSaveCopy={handleSaveCopy}
           onPrint={handlePrint}
           onExport={handleExportPDF}
           onClearForm={handleClearForm}
