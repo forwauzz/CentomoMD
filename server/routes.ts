@@ -56,7 +56,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/me", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUserById(req.session.userId);
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const user = await storage.getUserById(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -167,6 +171,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/saved-forms", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const { formType } = req.query;
 
       let savedForms;
@@ -193,6 +200,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/saved-forms", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const { title, formData, retentionDays = 7, formType = 'draft' } = req.body;
 
       if (!title || !formData) {
@@ -295,6 +305,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validRetentionDays = Math.min(Math.max(parseInt(retentionDays) || 7, 1), 30);
 
       const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const savedForm = await storage.saveMedicalForm(userId, title, formData, validRetentionDays, formType);
 
       res.status(201).json(savedForm);
@@ -407,7 +420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Format Section 7 error:', error);
 
       // Check if it's an OpenAI API error
-      if (error.message && error.message.includes('API')) {
+      if (error instanceof Error && error.message.includes('API')) {
         return res.status(500).json({ 
           message: "OpenAI API error - please check your API key",
           error: "API_ERROR"

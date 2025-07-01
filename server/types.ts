@@ -12,3 +12,11 @@ declare module 'express' {
     session: any;
   }
 }
+
+// Authenticated request with guaranteed session data
+export interface AuthenticatedRequest extends Express.Request {
+  session: {
+    userId: string;
+    userRole?: string;
+  } & Express.SessionData;
+}
