@@ -15,7 +15,6 @@ interface VisitSelectionModalProps {
   onSelectDraft: (draftId: number) => void;
   formTitle: string;
   language: 'fr' | 'en';
-  patientName?: string;
 }
 
 interface SavedForm {
@@ -79,8 +78,7 @@ export function VisitSelectionModal({
   onNewVisit,
   onSelectDraft,
   formTitle,
-  language,
-  patientName
+  language
 }: VisitSelectionModalProps) {
   const [selectedDraft, setSelectedDraft] = useState<number | null>(null);
   const [showNameInput, setShowNameInput] = useState(false);
@@ -152,18 +150,6 @@ export function VisitSelectionModal({
           <p className="text-gray-600 mt-2">
             {showNameInput ? t.nameVisitDesc : t.subtitle}
           </p>
-          {/* Patient/Chart Name Display */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm font-medium text-blue-800">
-                {language === 'fr' ? 'Dossier du patient:' : 'Patient Chart:'}
-              </span>
-              <span className="text-sm text-blue-700 font-semibold">
-                {patientName || 'Test Patient'}
-              </span>
-            </div>
-          </div>
         </DialogHeader>
 
         {showNameInput ? (

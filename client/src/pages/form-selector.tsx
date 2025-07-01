@@ -261,7 +261,6 @@ export default function FormSelector({
           onSelectDraft={handleSelectDraft}
           formTitle={availableForms.find(f => f.id === selectedForm)?.title[language] || ''}
           language={language}
-          patientName={user?.name || 'Test Patient'}
         />
       )}
     </div>
