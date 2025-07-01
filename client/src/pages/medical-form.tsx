@@ -1268,7 +1268,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row lg:gap-0">
       {/* Left Navigation Pane */}
       {useLeftNavigation && (
         <LeftNavigationPane
@@ -1288,10 +1288,10 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       )}
 
       {/* Main Content */}
-      <div className={`flex-1 ${useLeftNavigation ? 'lg:ml-64' : ''} w-full`}>
+      <div className={`flex-1 ${useLeftNavigation ? 'lg:ml-0' : ''} w-full`}>
       {/* Header */}
       <div className="bg-white shadow-sm border-b no-print">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
+        <div className="w-full px-2 sm:px-4 py-3">
           {/* Top Row */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-8 w-full sm:w-auto">
@@ -1385,7 +1385,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       </div>
 
       {/* Main Form */}
-      <div className="max-w-4xl mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-8">
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-8">
         <Form {...form}>
           <form className="space-y-4 sm:space-y-6">
             

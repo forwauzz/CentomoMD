@@ -125,7 +125,7 @@ export function LeftNavigationPane({
 
   return (
     <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out z-30 flex flex-col lg:relative lg:h-auto lg:shadow-none ${
-      isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
+      isCollapsed ? 'w-12 sm:w-14' : 'w-48 sm:w-52'
     }`}>
       
       {/* Collapse/Expand Toggle */}
