@@ -183,6 +183,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create a new saved form
+  app.post("/api/saved-forms", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const { title, formData, retentionDays = 7, formType = 'draft' } = req.body;
+
+      if (!title || !formData) {
+        return res.status(400).json({ message: "Title and form data are required" });
+      }
+
+      if (retentionDays < 1 || retentionDays > 365) {
+        return res.status(400).json({ message: "Retention days must be between 1 and 365" });
+      }
+
+      if (!['draft', 'copy'].includes(formType)) {
+        return res.status(400).json({ message: "Form type must be 'draft' or 'copy'" });
+      }
+
+      const savedForm = await storage.saveForm(userId, title, formData, retentionDays, formType);
+      res.status(201).json(savedForm);
+    } catch (error) {
+      console.error('Save form error:', error);
+      res.status(500).json({ message: "Failed to save form" });
+    }
+  });
+
   // Get a specific saved form
   app.get("/api/saved-forms/:id", requireAuth, async (req, res) => {
     try {
@@ -200,6 +226,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (savedForm.userId !== req.session.userId) {
         return res.status(403).json({ message: "Access denied" });
       }
+
+      res.json(savedForm);
+    } catch (error) {
+      console.error('Get saved form error:', error);
+      res.status(500).json({ message: "Failed to fetch saved form" });
+    }
+  });
+
+  // Delete a saved form
+  app.delete("/api/saved-forms/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid form ID" });
+      }
+
+      const savedForm = await storage.getSavedForm(id);
+      if (!savedForm) {
+        return res.status(404).json({ message: "Saved form not found" });
+      }
+
+      // Check if the form belongs to the authenticated user
+      if (savedForm.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      await storage.deleteSavedForm(id);
+      res.status(204).end();
+    } catch (error) {
+      console.error('Delete saved form error:', error);
+      res.status(500).json({ message: "Failed to delete saved form" });
+    }
+  });
+
+  // Cleanup expired forms (can be called periodically)
+  app.post("/api/saved-forms/cleanup", requireAuth, async (req, res) => {
+    try {
+      await storage.cleanupExpiredForms();
+      res.json({ message: "Cleanup completed" });
+    } catch (error) {
+      console.error('Cleanup error:', error);
+      res.status(500).json({ message: "Failed to cleanup expired forms" });
+    }
+  });
 
       res.json(savedForm);
     } catch (error) {

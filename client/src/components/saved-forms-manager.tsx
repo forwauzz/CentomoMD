@@ -1,17 +1,17 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { FileText, Download, Trash2, Calendar, Clock, Printer, FileDown } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { FileText, Calendar, Clock, Trash2, Download, Printer, Eye } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
+import { fr, enUS } from "date-fns/locale";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { exportToPDF } from "@/lib/pdf-export";
 import { exportToWord } from "@/lib/word-export-simple";
-import { fr, enUS } from "date-fns/locale";
 
 interface SavedFormsManagerProps {
   language: 'fr' | 'en';
@@ -85,23 +85,26 @@ const translations = {
 };
 
 export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: SavedFormsManagerProps) {
-  const [deleteFormId, setDeleteFormId] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const t = translations[language];
   const locale = language === 'fr' ? fr : enUS;
+  const t = translations[language];
 
+  // Fetch saved forms based on type
   const { data: savedForms = [], isLoading } = useQuery({
-    queryKey: formType === 'all' ? ["/api/saved-forms"] : ["/api/saved-forms", formType],
-    queryFn: () => {
-      const url = formType === 'all' 
-        ? "/api/saved-forms" 
-        : `/api/saved-forms?formType=${formType}`;
-      return fetch(url, { credentials: "include" }).then(res => res.json());
+    queryKey: ["/api/saved-forms", formType],
+    queryFn: async () => {
+      const params = formType !== 'all' ? `?formType=${formType}` : '';
+      const response = await fetch(`/api/saved-forms${params}`, { credentials: "include" });
+      if (!response.ok) {
+        throw new Error("Failed to fetch saved forms");
+      }
+      return response.json();
     },
     retry: false,
   });
 
+  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/saved-forms/${id}`, {
@@ -114,10 +117,11 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "draft"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "copy"] });
       toast({
         title: t.deleteSuccess,
       });
-      setDeleteFormId(null);
     },
     onError: (error) => {
       console.error("Delete form error:", error);
@@ -130,7 +134,7 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
   });
 
   const handleLoadForm = (savedForm: any) => {
-    if (onLoadForm) {
+    if (onLoadForm && savedForm.formData) {
       onLoadForm(savedForm.formData);
       toast({
         title: t.loadSuccess,
@@ -143,9 +147,18 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
     deleteMutation.mutate(id);
   };
 
-  const handlePrintForm = (savedForm: any) => {
+  const handlePrint = (savedForm: any) => {
     try {
-      exportToPDF(savedForm.formData);
+      // Create a temporary form with the saved data for printing
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write('<html><head><title>Print Form</title></head><body>');
+        printWindow.document.write(`<h1>${savedForm.title}</h1>`);
+        printWindow.document.write('<pre>' + JSON.stringify(savedForm.formData, null, 2) + '</pre>');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+      }
       toast({
         title: t.printSuccess,
         description: savedForm.title,
@@ -160,15 +173,15 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
     }
   };
 
-  const handleExportPdf = (savedForm: any) => {
+  const handleExportPDF = (savedForm: any) => {
     try {
-      exportToPDF(savedForm.formData);
+      exportToPDF(savedForm.formData, savedForm.title);
       toast({
         title: t.exportSuccess,
         description: savedForm.title,
       });
     } catch (error) {
-      console.error("Export error:", error);
+      console.error("PDF export error:", error);
       toast({
         title: t.error,
         description: "Failed to export PDF",
@@ -287,55 +300,73 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         onClick={() => handleLoadForm(savedForm)}
                         disabled={expiration.status === 'expired'}
-                        className="flex-1 min-w-[80px]"
+                        className="bg-blue-600 hover:bg-blue-700"
                       >
-                        <Download className="w-4 h-4 mr-1" />
+                        <Eye className="w-3 h-3 mr-1" />
                         {t.load}
                       </Button>
+                      
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handlePrintForm(savedForm)}
-                        disabled={expiration.status === 'expired'}
-                        className="flex-1 min-w-[80px]"
+                        onClick={() => handlePrint(savedForm)}
                       >
-                        <Printer className="w-4 h-4 mr-1" />
+                        <Printer className="w-3 h-3 mr-1" />
                         {t.print}
                       </Button>
+                      
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleExportPdf(savedForm)}
-                        disabled={expiration.status === 'expired'}
-                        className="flex-1 min-w-[80px]"
+                        onClick={() => handleExportPDF(savedForm)}
                       >
-                        <FileDown className="w-4 h-4 mr-1" />
+                        <Download className="w-3 h-3 mr-1" />
                         {t.exportPdf}
                       </Button>
+                      
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleExportWord(savedForm)}
-                        disabled={expiration.status === 'expired'}
-                        className="flex-1 min-w-[80px]"
                       >
-                        <FileDown className="w-4 h-4 mr-1" />
+                        <FileText className="w-3 h-3 mr-1" />
                         {t.exportWord}
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setDeleteFormId(savedForm.id)}
-                        disabled={deleteMutation.isPending}
-                        className="px-3"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            {deleteMutation.isPending ? t.deleting : t.delete}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t.deleteConfirm}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {savedForm.title}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteForm(savedForm.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              {t.delete}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </CardContent>
                 </Card>
@@ -344,30 +375,6 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
           </div>
         </ScrollArea>
       )}
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteFormId !== null} onOpenChange={() => setDeleteFormId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t.deleteConfirm}</DialogTitle>
-            <DialogDescription>
-              Cette action est irréversible.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setDeleteFormId(null)}>
-              Annuler
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => deleteFormId && handleDeleteForm(deleteFormId)}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? t.deleting : t.delete}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

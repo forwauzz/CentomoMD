@@ -268,6 +268,77 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return deletedForms.length;
   }
+
+  // Save a form with expiration
+  async saveForm(userId: string, title: string, formData: any, retentionDays: number = 7, formType: 'draft' | 'copy' = 'draft') {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + retentionDays);
+
+    const result = await db.insert(savedForms).values({
+      userId,
+      title,
+      formData: JSON.stringify(formData),
+      expiresAt,
+      formType,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+
+    return result[0];
+  }
+
+  // Get all saved forms for a user
+  async getSavedFormsByUserId_new(userId: string) {
+    const forms = await db.select().from(savedForms)
+      .where(eq(savedForms.userId, userId))
+      .orderBy(savedForms.createdAt);
+
+    return forms.map(form => ({
+      ...form,
+      formData: JSON.parse(form.formData)
+    }));
+  }
+
+  // Get saved forms by type
+  async getSavedFormsByType_new(userId: string, formType: 'draft' | 'copy') {
+    const forms = await db.select().from(savedForms)
+      .where(and(
+        eq(savedForms.userId, userId),
+        eq(savedForms.formType, formType)
+      ))
+      .orderBy(savedForms.createdAt);
+
+    return forms.map(form => ({
+      ...form,
+      formData: JSON.parse(form.formData)
+    }));
+  }
+
+  // Get a specific saved form
+  async getSavedForm_new(id: number) {
+    const forms = await db.select().from(savedForms)
+      .where(eq(savedForms.id, id))
+      .limit(1);
+
+    if (forms.length === 0) return null;
+
+    const form = forms[0];
+    return {
+      ...form,
+      formData: JSON.parse(form.formData)
+    };
+  }
+
+  // Delete a saved form
+  async deleteSavedForm_new(id: number) {
+    await db.delete(savedForms).where(eq(savedForms.id, id));
+  }
+
+  // Clean up expired forms
+  async cleanupExpiredForms() {
+    const now = new Date();
+    await db.delete(savedForms).where(lt(savedForms.expiresAt, now));
+  }
 }
 
 export const storage = new DatabaseStorage();
