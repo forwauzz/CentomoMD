@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,13 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const t = translations[language];
+
+  // Set default title when dialog opens
+  useEffect(() => {
+    if (open && defaultTitle) {
+      setTitle(defaultTitle);
+    }
+  }, [open, defaultTitle]);
 
   const saveMutation = useMutation({
     mutationFn: async (data: { title: string; formData: any; retentionDays: number; formType?: string }) => {

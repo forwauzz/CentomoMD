@@ -5601,6 +5601,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
         onClose={() => setShowSaveDialog(false)}
         formData={form.getValues()}
         language={language}
+        defaultTitle={visitName ? `${language === 'fr' ? 'Copie' : 'Copy'} - ${visitName}` : undefined}
       />
 
       {/* Draft Confirmation Dialog */}
