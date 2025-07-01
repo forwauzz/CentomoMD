@@ -141,18 +141,43 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
 
     if (activeField) {
       setSelectedSection(activeField);
-      // Load existing text for this field if available
-      const savedData = localStorage.getItem('medical-form-draft');
-      if (savedData) {
-        try {
-          const formData = JSON.parse(savedData);
-          if (formData[activeField]) {
-            setFinalText(formData[activeField]);
-            setEditableText(formData[activeField]);
+      
+      // Check if this is a new visit by looking at the return path
+      const returnPath = sessionStorage.getItem('dictationReturnPath') || '';
+      const isNewVisit = returnPath.includes('visit=new');
+      
+      // Only load existing text if NOT a new visit
+      if (!isNewVisit) {
+        // Try multiple localStorage keys used by the form system
+        const savedDataKeys = ['medical-form-draft', 'centMD_formData'];
+        let formData = null;
+        
+        for (const key of savedDataKeys) {
+          const savedData = localStorage.getItem(key);
+          if (savedData) {
+            try {
+              formData = JSON.parse(savedData);
+              if (formData && formData[activeField]) {
+                setFinalText(formData[activeField]);
+                setEditableText(formData[activeField]);
+                break;
+              }
+            } catch (error) {
+              console.error(`Error loading saved form data from ${key}:`, error);
+            }
           }
-        } catch (error) {
-          console.error('Error loading saved form data:', error);
         }
+      } else {
+        // For new visits, clear any existing dictation state and localStorage
+        setFinalText("");
+        setEditableText("");
+        setInterimText("");
+        
+        // Clear both localStorage keys that might contain old form data
+        localStorage.removeItem('medical-form-draft');
+        localStorage.removeItem('centMD_formData');
+        
+        console.log('New visit detected - clearing dictation state and localStorage for sections 7 and 8');
       }
     }
 
