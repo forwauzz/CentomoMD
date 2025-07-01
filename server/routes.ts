@@ -10,35 +10,35 @@ import { setupInitialUsers } from "./setup-users";
 import "./types";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
+
   // Setup initial users
   await setupInitialUsers();
-  
+
   // Setup session middleware
   app.use(getSessionConfig());
-  
+
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { username, password } = req.body;
-      
+
       if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required" });
       }
-      
+
       const user = await storage.getUserByUsername(username);
       if (!user) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      
+
       const isValidPassword = await verifyPassword(password, user.passwordHash);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      
+
       req.session.userId = user.id;
       req.session.userRole = user.role;
-      
+
       // Return user without password hash
       const { passwordHash, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
@@ -47,20 +47,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   app.post("/api/auth/logout", (req, res) => {
     req.session.destroy(() => {
       res.json({ message: "Logged out successfully" });
     });
   });
-  
+
   app.get("/api/auth/me", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUserById(req.session.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       const { passwordHash, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
@@ -68,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
-  
+
   // Protected medical forms routes
   app.get("/api/medical-forms", requireAuth, async (req, res) => {
     try {
@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validatedData = insertMedicalFormSchema.partial().parse(req.body);
       const updatedForm = await storage.updateMedicalForm(id, validatedData);
-      
+
       if (!updatedForm) {
         return res.status(404).json({ message: "Medical form not found" });
       }
@@ -162,21 +162,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Saved forms routes (authentication required)
-  
+
   // Get all saved forms for the authenticated user, optionally filtered by type
   app.get("/api/saved-forms", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId;
       const { formType } = req.query;
-      
+
       let savedForms;
       if (formType && (formType === 'draft' || formType === 'copy')) {
         savedForms = await storage.getSavedFormsByType(userId, formType as 'draft' | 'copy');
       } else {
         savedForms = await storage.getSavedFormsByUserId(userId);
       }
-      
-      res.json(savedForms);
+
+      // Ensure consistent data format
+      const processedForms = savedForms.map(form => ({
+        ...form,
+        formData: typeof form.formData === 'string' ? JSON.parse(form.formData) : form.formData
+      }));
+
+      res.json(processedForms);
     } catch (error) {
       console.error('Get saved forms error:', error);
       res.status(500).json({ message: "Failed to fetch saved forms" });
@@ -275,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/saved-forms", requireAuth, async (req, res) => {
     try {
       const { title, formData, retentionDays = 7, formType = 'copy' } = req.body;
-      
+
       if (!title || !formData) {
         return res.status(400).json({ message: "Title and form data are required" });
       }
@@ -287,10 +293,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate retention days (1-30 days)
       const validRetentionDays = Math.min(Math.max(parseInt(retentionDays) || 7, 1), 30);
-      
+
       const userId = req.session.userId;
       const savedForm = await storage.saveMedicalForm(userId, title, formData, validRetentionDays, formType);
-      
+
       res.status(201).json(savedForm);
     } catch (error) {
       console.error('Save form error:', error);
@@ -307,7 +313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { title, formData, retentionDays = 7 } = req.body;
-      
+
       if (!title || !formData) {
         return res.status(400).json({ message: "Title and form data are required" });
       }
@@ -324,9 +330,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate retention days (1-30 days)
       const validRetentionDays = Math.min(Math.max(parseInt(retentionDays) || 7, 1), 30);
-      
+
       const updatedForm = await storage.updateSavedForm(id, title, formData, validRetentionDays);
-      
+
       if (!updatedForm) {
         return res.status(404).json({ message: "Form not found" });
       }
@@ -383,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/format-section7", async (req, res) => {
     try {
       const { text, language = 'fr' } = req.body;
-      
+
       if (!text) {
         return res.status(400).json({ message: "Text is required" });
       }
@@ -399,7 +405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ formatted: formattedText });
     } catch (error) {
       console.error('Format Section 7 error:', error);
-      
+
       // Check if it's an OpenAI API error
       if (error.message && error.message.includes('API')) {
         return res.status(500).json({ 
@@ -407,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: "API_ERROR"
         });
       }
-      
+
       res.status(500).json({ 
         message: "Failed to format text", 
         error: error.message || "Unknown error"
@@ -419,7 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/enhance-section7-dictation", async (req, res) => {
     try {
       const { transcript, language = 'fr' } = req.body;
-      
+
       if (!transcript) {
         return res.status(400).json({ message: "Transcript is required" });
       }
@@ -436,7 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/format-section8", async (req, res) => {
     try {
       const { text, language = 'fr' } = req.body;
-      
+
       if (!text) {
         return res.status(400).json({ message: "Text is required" });
       }
@@ -452,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ formatted: formattedText });
     } catch (error) {
       console.error('Format Section 8 error:', error);
-      
+
       // Check if it's an OpenAI API error
       if (error.message && error.message.includes('API')) {
         return res.status(500).json({ 
@@ -460,7 +466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: "API_ERROR"
         });
       }
-      
+
       res.status(500).json({ 
         message: "Failed to format text", 
         error: error.message || "Unknown error"
@@ -472,7 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/enhance-section8-dictation", async (req, res) => {
     try {
       const { transcript, language = 'fr' } = req.body;
-      
+
       if (!transcript) {
         return res.status(400).json({ message: "Transcript is required" });
       }
@@ -489,7 +495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate-section11", async (req, res) => {
     try {
       const { formData, language = 'fr' } = req.body;
-      
+
       // Redirect to modular AI processing endpoint
       const response = await fetch(`${req.protocol}://${req.get('host')}/api/ai/process-field`, {
         method: 'POST',
@@ -504,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           language,
         }),
       });
-      
+
       const result = await response.json();
       res.json(result);
     } catch (error) {
@@ -520,7 +526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/process-field", async (req, res) => {
     try {
       const { fieldId, processingType, formType, formData, language = 'fr', contextFields, targetFields, prompt } = req.body;
-      
+
       if (!fieldId || !processingType || !formType || !formData) {
         return res.status(400).json({ message: "Missing required parameters" });
       }
@@ -548,7 +554,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const result = await aiProcessingEngine.processField(rule, context);
-      
+
       if (result.success) {
         res.json({ 
           success: true, 
@@ -562,14 +568,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('AI processing error:', error);
-      
+
       if (error.message && error.message.includes('API')) {
         return res.status(500).json({ 
           message: "OpenAI API error - please check your API key",
           error: "API_ERROR"
         });
       }
-      
+
       res.status(500).json({ 
         message: "Failed to process field with AI", 
         error: error.message || "Unknown error"
@@ -581,7 +587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/distribute-section8", async (req, res) => {
     try {
       const { text, language = 'fr', contextData = {} } = req.body;
-      
+
       if (!text) {
         return res.status(400).json({ message: "Text is required" });
       }
@@ -620,7 +626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const result = await aiProcessingEngine.processField(rule, context);
-      
+
       if (result.success) {
         res.json({ 
           success: true, 
@@ -634,14 +640,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('Section 8 distribution error:', error);
-      
+
       if (error.message && error.message.includes('API')) {
         return res.status(500).json({ 
           message: "OpenAI API error - please check your API key",
           error: "API_ERROR"
         });
       }
-      
+
       res.status(500).json({ 
         message: "Failed to distribute Section 8 content", 
         error: error.message || "Unknown error"

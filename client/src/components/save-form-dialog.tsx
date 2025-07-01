@@ -1,12 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { FileText } from "lucide-react";
 
 interface SaveFormDialogProps {
   open: boolean;
@@ -92,13 +92,13 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms"] });
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "draft"] });
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "copy"] });
-      
+
       const successMessage = formType === 'draft' ? t.successDraft : t.successCopy;
       toast({
         title: successMessage,
         description: formType === 'draft' ? `${t.retentionLabel}: ${retentionDays[0]} ${retentionDays[0] === 1 ? 'jour' : 'jours'}` : t.retentionDescriptionCopy,
       });
-      
+
       setTitle("");
       setRetentionDays([7]);
       onClose();
@@ -140,7 +140,7 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
             {formType === 'draft' ? t.descriptionDraft : t.descriptionCopy}
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="title">{t.titleLabel}</Label>
@@ -152,7 +152,7 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
               maxLength={100}
             />
           </div>
-          
+
           {formType === 'draft' && (
             <div className="grid gap-2">
               <Label htmlFor="retention">{t.retentionLabel}</Label>
@@ -182,7 +182,7 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
             </div>
           )}
         </div>
-        
+
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saveMutation.isPending}>
             {t.cancel}

@@ -137,8 +137,11 @@ export class DatabaseStorage implements IStorage {
   async getSavedFormsByUserId(userId: string): Promise<SavedForm[]> {
     const forms = await db.select().from(savedForms)
       .where(eq(savedForms.userId, userId))
-      .orderBy(savedForms.createdAt);
-    return forms;
+      .orderBy(desc(savedForms.createdAt));
+    return forms.map(form => ({
+      ...form,
+      formData: typeof form.formData === 'string' ? JSON.parse(form.formData) : form.formData
+    }));
   }
 
   async getSavedFormsByType(userId: string, formType: 'draft' | 'copy'): Promise<SavedForm[]> {
@@ -147,7 +150,10 @@ export class DatabaseStorage implements IStorage {
       .from(savedForms)
       .where(and(eq(savedForms.userId, userId), eq(savedForms.formType, formType)))
       .orderBy(desc(savedForms.createdAt));
-    return forms;
+    return forms.map(form => ({
+      ...form,
+      formData: typeof form.formData === 'string' ? JSON.parse(form.formData) : form.formData
+    }));
   }
 
   async saveMedicalForm(userId: string, title: string, formData: any, retentionDays: number, formType: 'draft' | 'copy' = 'copy'): Promise<SavedForm> {
@@ -159,12 +165,15 @@ export class DatabaseStorage implements IStorage {
       .values({
         userId,
         title,
-        formData,
+        formData: typeof formData === 'object' ? JSON.stringify(formData) : formData,
         formType,
         expiresAt,
       })
       .returning();
-    return savedForm;
+    return {
+      ...savedForm,
+      formData: typeof savedForm.formData === 'string' ? JSON.parse(savedForm.formData) : savedForm.formData
+    };
   }
 
   async updateSavedForm(id: number, title: string, formData: any, retentionDays: number): Promise<SavedForm | undefined> {
