@@ -127,7 +127,7 @@ export function LeftNavigationPane({
     <div className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out z-30 flex flex-col lg:relative lg:h-auto lg:shadow-none ${
       isCollapsed ? 'w-12 sm:w-14' : 'w-48 sm:w-52'
     }`}>
-      
+
       {/* Collapse/Expand Toggle */}
       <div className="flex justify-end p-2 border-b border-gray-100">
         <Button
@@ -161,7 +161,7 @@ export function LeftNavigationPane({
               )}
             </button>
           )}
-          
+
           {!isCollapsed && !sectionsCollapsed.formActions && (
             <div className="px-3 pb-3 space-y-2">
 
@@ -175,7 +175,7 @@ export function LeftNavigationPane({
                 <FileText className="h-4 w-4" />
                 <span className="ml-2">{t.print}</span>
               </Button>
-              
+
               <Button
                 onClick={onExport}
                 variant="outline"
@@ -205,7 +205,7 @@ export function LeftNavigationPane({
               )}
             </button>
           )}
-          
+
           {!isCollapsed && !sectionsCollapsed.formManagement && (
             <div className="px-3 pb-3 space-y-2">
               <Button
@@ -223,7 +223,7 @@ export function LeftNavigationPane({
                   </Badge>
                 )}
               </Button>
-              
+
               <Button
                 onClick={onSavedCopies}
                 size="sm"
@@ -261,7 +261,7 @@ export function LeftNavigationPane({
                   <ChevronUp className="h-4 w-4 text-gray-500" />
                 )}
               </button>
-              
+
               {!sectionsCollapsed.navigation && (
                 <div className="px-3 pb-3 space-y-1">
                   {sections.map((section) => (
@@ -277,7 +277,7 @@ export function LeftNavigationPane({
               )}
             </>
           )}
-          
+
           {isCollapsed && (
             <div className="p-2">
               <Button
