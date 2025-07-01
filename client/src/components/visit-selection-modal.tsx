@@ -2,14 +2,16 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Plus, FolderOpen, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FileText, Plus, FolderOpen, Clock, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 
 interface VisitSelectionModalProps {
   open: boolean;
   onClose: () => void;
-  onNewVisit: () => void;
+  onNewVisit: (visitName?: string) => void;
   onSelectDraft: (draftId: number) => void;
   formTitle: string;
   language: 'fr' | 'en';
@@ -38,7 +40,14 @@ const translations = {
     cancel: "Annuler",
     continue: "Continuer",
     lastModified: "Modifié le",
-    expires: "Expire le"
+    expires: "Expire le",
+    nameVisit: "Nommer la visite",
+    nameVisitDesc: "Donnez un nom à cette visite pour l'identifier plus tard",
+    visitNameLabel: "Nom de la visite",
+    visitNamePlaceholder: "Ex: Visite1, Controle-2024, etc.",
+    startVisit: "Commencer la visite",
+    back: "Retour",
+    required: "Requis"
   },
   en: {
     title: "New Visit",
@@ -52,7 +61,14 @@ const translations = {
     cancel: "Cancel",
     continue: "Continue",
     lastModified: "Modified on",
-    expires: "Expires on"
+    expires: "Expires on",
+    nameVisit: "Name Visit",
+    nameVisitDesc: "Give this visit a name to identify it later",
+    visitNameLabel: "Visit Name",
+    visitNamePlaceholder: "Ex: Visit1, Checkup-2024, etc.",
+    startVisit: "Start Visit",
+    back: "Back",
+    required: "Required"
   }
 };
 
@@ -65,6 +81,9 @@ export function VisitSelectionModal({
   language
 }: VisitSelectionModalProps) {
   const [selectedDraft, setSelectedDraft] = useState<number | null>(null);
+  const [showNameInput, setShowNameInput] = useState(false);
+  const [visitName, setVisitName] = useState('');
+  const [nameError, setNameError] = useState('');
   const t = translations[language];
 
   // Fetch draft forms
@@ -74,9 +93,40 @@ export function VisitSelectionModal({
     select: (data: SavedForm[]) => data.filter(form => form.formType === 'draft')
   });
 
-  const handleNewVisit = () => {
-    onNewVisit();
-    onClose();
+  const handleNewVisitClick = () => {
+    setShowNameInput(true);
+  };
+
+  const handleBackToSelection = () => {
+    setShowNameInput(false);
+    setVisitName('');
+    setNameError('');
+  };
+
+  const validateVisitName = (name: string): boolean => {
+    if (!name.trim()) {
+      setNameError(t.required);
+      return false;
+    }
+    // Allow alphanumeric characters, spaces, hyphens, and underscores
+    const alphanumericRegex = /^[a-zA-Z0-9\s\-_àâäéèêëïîôöùûüÿç]+$/;
+    if (!alphanumericRegex.test(name.trim())) {
+      setNameError(language === 'fr' ? 'Utilisez seulement des lettres, chiffres, espaces, tirets et underscores' : 'Use only letters, numbers, spaces, hyphens and underscores');
+      return false;
+    }
+    setNameError('');
+    return true;
+  };
+
+  const handleStartVisit = () => {
+    if (validateVisitName(visitName)) {
+      onNewVisit(visitName.trim());
+      onClose();
+      // Reset state
+      setShowNameInput(false);
+      setVisitName('');
+      setNameError('');
+    }
   };
 
   const handleSelectDraft = () => {
@@ -95,29 +145,78 @@ export function VisitSelectionModal({
       <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-gray-900">
-            {t.title} - {formTitle}
+            {showNameInput ? t.nameVisit : t.title} - {formTitle}
           </DialogTitle>
-          <p className="text-gray-600 mt-2">{t.subtitle}</p>
+          <p className="text-gray-600 mt-2">
+            {showNameInput ? t.nameVisitDesc : t.subtitle}
+          </p>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          {/* New Visit Option */}
-          <Card 
-            className="cursor-pointer hover:bg-gray-50 transition-colors border-2 hover:border-blue-200"
-            onClick={handleNewVisit}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="bg-green-100 p-2 rounded-lg">
-                  <Plus className="w-5 h-5 text-green-600" />
+        {showNameInput ? (
+          /* Visit Naming Step */
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="visitName" className="text-sm font-medium text-gray-700">
+                {t.visitNameLabel} <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="visitName"
+                value={visitName}
+                onChange={(e) => {
+                  setVisitName(e.target.value);
+                  if (nameError) setNameError('');
+                }}
+                placeholder={t.visitNamePlaceholder}
+                className={nameError ? 'border-red-500' : ''}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleStartVisit();
+                  }
+                }}
+              />
+              {nameError && (
+                <p className="text-sm text-red-600 mt-1">{nameError}</p>
+              )}
+            </div>
+            
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleBackToSelection}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {t.back}
+              </Button>
+              <Button 
+                onClick={handleStartVisit} 
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={!visitName.trim()}
+              >
+                {t.startVisit}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* Main Selection Step */
+          <div className="grid gap-4 py-4">
+            {/* New Visit Option */}
+            <Card 
+              className="cursor-pointer hover:bg-gray-50 transition-colors border-2 hover:border-blue-200"
+              onClick={handleNewVisitClick}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <Plus className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-gray-900">{t.newVisit}</CardTitle>
+                    <CardDescription className="text-gray-600">{t.newVisitDesc}</CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-lg text-gray-900">{t.newVisit}</CardTitle>
-                  <CardDescription className="text-gray-600">{t.newVisitDesc}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
+              </CardHeader>
+            </Card>
 
           {/* Select Draft Option */}
           <Card className="border-2">
@@ -196,7 +295,8 @@ export function VisitSelectionModal({
               )}
             </CardContent>
           </Card>
-        </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
