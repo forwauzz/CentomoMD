@@ -1,0 +1,75 @@
+ 
+
+**I need you to thoroughly investigate and debug the Save Draft and Save Copy functionalities in my CentomoMD medical evaluation application. I'm not sure if these features are working properly or if the UI is configured correctly.**
+
+**BACKGROUND:**
+This is a medical form application for Dr. Centomo that needs to allow users to:
+1. Save forms as drafts 
+2. Save forms as copies 
+3. Load previously saved drafts and copies
+4. Manage multiple saved versions independently
+
+**SPECIFIC ISSUES TO INVESTIGATE:**
+
+**1. UI/UX Investigation:**
+- Are the Save Draft and Save Copy buttons clearly visible and accessible?
+- Is there a proper dialog/modal that appears when saving?
+- Does the save dialog ask for name and retention period?
+- Is there a clear way to access/load previously saved forms?
+- Are drafts and copies visually distinguished in the UI?
+
+**2. Functionality Investigation:**
+- Test if Save Draft actually creates a draft entry in the database
+- Test if Save Copy creates a separate copy entry  
+- Verify that multiple drafts/copies can be saved without overwriting
+- Check if loading a saved form restores all the original data correctly
+- Ensure drafts and copies are stored as separate entities
+
+**3. Database Schema Investigation:**
+- Check if there are proper database tables for drafts vs copies
+- Verify the schema supports name, retention_days, expiration_date fields
+- Look for any foreign key relationships or constraints
+- Check if the database queries are correctly implemented
+
+**4. Code Review Areas:**
+- Review the save form API endpoints (/api/forms)
+- Check React components handling save dialogs
+- Examine form state management during save/load operations
+- Look for any TypeScript interfaces defining draft vs copy structures
+- Review any middleware handling form persistence
+
+**5. Common Issues to Check:**
+- Are environment variables (DATABASE_URL) properly set?
+- Is the database connection working correctly?
+- Are there any JavaScript console errors during save operations?
+- Do API calls return proper success/error responses?
+- Is session management affecting form persistence?
+
+**TESTING REQUESTS:**
+Please perform these specific tests:
+1. Fill out form data and attempt to save as draft
+2. Fill out different data and save as copy  
+3. Navigate to saved forms list and verify both appear
+4. Load each saved form and verify correct data restoration
+5. Create multiple drafts and copies to test independence
+6. Check browser developer console for any errors during save operations
+
+**DELIVERABLES:**
+1. Summary of current save functionality status (working/broken/partially working)
+2. Identification of any UI/UX issues with save features
+3. List of any database or API problems found
+4. Specific code files that need attention
+5. Step-by-step fix recommendations
+6. Any missing components or incomplete implementations
+
+**CODE AREAS TO FOCUS ON:**
+- Form state management components
+- Save dialog/modal implementations  
+- Database schema and migration files
+- API route handlers for form persistence
+- TypeScript type definitions for saved forms
+- React components for loading/displaying saved forms
+
+Please provide a comprehensive analysis with specific findings and actionable recommendations to get the Save Draft and Save Copy features working properly for Dr. Centomo's medical evaluation platform.
+
+---
