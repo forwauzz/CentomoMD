@@ -174,9 +174,11 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
         setEditableText("");
         setInterimText("");
         
-        // Clear both localStorage keys that might contain old form data
+        // Comprehensively clear all potential localStorage keys that might contain old form data
         localStorage.removeItem('medical-form-draft');
         localStorage.removeItem('centMD_formData');
+        localStorage.removeItem('medical-form-data');
+        localStorage.removeItem('medical-form-autosave');
         
         console.log('New visit detected - clearing dictation state and localStorage. Return path:', returnPath);
       }

@@ -1031,10 +1031,27 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
   // Load saved data on mount based on visit type
   useEffect(() => {
     if (isNewVisit) {
-      // For new visits, clear localStorage and start with blank form
+      // For new visits, comprehensively clear all localStorage and session storage
       clearData();
+      // Clear all potential localStorage keys that might contain form data
+      localStorage.removeItem('centMD_formData');
+      localStorage.removeItem('medical-form-data');
+      localStorage.removeItem('medical-form-autosave');
+      // Clear any session storage that might interfere with new visit
+      sessionStorage.removeItem('dictationResult');
+      sessionStorage.removeItem('dictationField');
+      sessionStorage.removeItem('scrollToSection');
+      sessionStorage.removeItem('highlightField');
+      
       form.reset(); // Reset to completely blank form
-      setLastSaved(language === 'fr' ? 'Nouveau formulaire' : 'New form');
+      
+      // Set appropriate status message with visit name if provided
+      const statusMessage = visitName 
+        ? `${language === 'fr' ? 'Nouvelle visite' : 'New visit'}: ${visitName}`
+        : (language === 'fr' ? 'Nouveau formulaire' : 'New form');
+      setLastSaved(statusMessage);
+      
+      console.log('New visit initialized:', { visitName, isNewVisit });
     } else if (draftId) {
       // Load specific draft from server
       loadDraftForm(parseInt(draftId));
@@ -1046,7 +1063,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         setLastSaved('Données récupérées');
       }
     }
-  }, [form, loadData, clearData, isNewVisit, draftId, language]);
+  }, [form, loadData, clearData, isNewVisit, draftId, visitName, language]);
 
   // Auto-save on form changes
   useEffect(() => {
