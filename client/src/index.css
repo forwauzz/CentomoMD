@@ -99,6 +99,44 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
   }
+  
+  /* Responsive table styles */
+  .responsive-table-container {
+    @apply overflow-x-auto border rounded-lg shadow-sm;
+  }
+  
+  .responsive-table {
+    @apply w-full min-w-[600px] border-collapse border text-xs;
+  }
+  
+  @media (min-width: 640px) {
+    .responsive-table {
+      @apply text-sm;
+    }
+  }
+  
+  .responsive-table th,
+  .responsive-table td {
+    @apply border p-1;
+  }
+  
+  @media (min-width: 640px) {
+    .responsive-table th,
+    .responsive-table td {
+      @apply p-2;
+    }
+  }
+  
+  /* Mobile-first field groups */
+  @media (max-width: 639px) {
+    .field-group {
+      @apply flex-col items-start gap-1 mb-4;
+    }
+    
+    .field-label {
+      @apply min-w-full text-sm font-semibold;
+    }
+  }
 }
 
 @media print {
