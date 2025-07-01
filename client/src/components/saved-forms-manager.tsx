@@ -93,6 +93,12 @@ export function SavedFormsManager({ language, onLoadForm, formType = 'all' }: Sa
 
   const { data: savedForms = [], isLoading } = useQuery({
     queryKey: formType === 'all' ? ["/api/saved-forms"] : ["/api/saved-forms", formType],
+    queryFn: () => {
+      const url = formType === 'all' 
+        ? "/api/saved-forms" 
+        : `/api/saved-forms?formType=${formType}`;
+      return fetch(url, { credentials: "include" }).then(res => res.json());
+    },
     retry: false,
   });
 
