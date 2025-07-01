@@ -1268,7 +1268,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
       {/* Left Navigation Pane */}
       {useLeftNavigation && (
         <LeftNavigationPane
@@ -1288,7 +1288,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       )}
 
       {/* Main Content */}
-      <div className={`flex-1 ${useLeftNavigation ? 'ml-64' : ''}`}>
+      <div className={`flex-1 ${useLeftNavigation ? 'lg:ml-64' : ''} w-full`}>
       {/* Header */}
       <div className="bg-white shadow-sm border-b no-print">
         <div className="max-w-7xl mx-auto px-4 py-3">
