@@ -13,7 +13,7 @@ declare module 'express' {
   }
 }
 
-// Authenticated request with guaranteed session data
+// Authenticated request with guaranteed session data  
 export interface AuthenticatedRequest extends Express.Request {
   session: {
     userId: string;

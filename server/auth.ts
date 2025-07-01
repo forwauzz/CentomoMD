@@ -49,11 +49,20 @@ export function getSessionConfig() {
   return session(sessionConfig);
 }
 
-// Authentication middleware
+// Enhanced authentication middleware with session validation
 export function requireAuth(req: any, res: any, next: any) {
   if (!req.session?.userId) {
     return res.status(401).json({ message: 'Authentication required' });
   }
+  
+  // Additional session integrity checks
+  if (typeof req.session.userId !== 'string' || req.session.userId.trim() === '') {
+    req.session.destroy(() => {
+      res.status(401).json({ message: 'Invalid session data' });
+    });
+    return;
+  }
+  
   next();
 }
 
