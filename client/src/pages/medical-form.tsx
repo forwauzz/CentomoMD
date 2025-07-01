@@ -3897,7 +3897,7 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
                           <div className="overflow-x-auto">
                             <table className="w-full border-collapse border text-sm">
                               <thead>
-                                <tr className="bg-teal-600 text-white">
+                                <tr className="bg-gray-50">
                                   <th className="border p-2 text-left"></th>
                                   <th className="border p-2 text-center">Droite</th>
                                   <th className="border p-2 text-center">Gauche</th>
