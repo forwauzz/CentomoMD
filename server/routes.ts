@@ -9,6 +9,14 @@ import { hashPassword, verifyPassword, generateUserId, getSessionConfig, require
 import { setupInitialUsers } from "./setup-users";
 import "./types";
 
+// Helper function for safe error handling
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup initial users
