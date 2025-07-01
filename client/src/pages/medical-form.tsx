@@ -1291,27 +1291,27 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       <div className={`flex-1 ${useLeftNavigation ? 'lg:ml-64' : ''} w-full`}>
       {/* Header */}
       <div className="bg-white shadow-sm border-b no-print">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
           {/* Top Row */}
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-8 w-full sm:w-auto">
+              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setLocation('/forms')}
-                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600"
+                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600 flex-shrink-0"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  <span className="text-xs">{language === 'fr' ? 'Retour' : 'Back'}</span>
+                  <span className="text-xs hidden sm:inline">{language === 'fr' ? 'Retour' : 'Back'}</span>
                 </Button>
-                <div>
-                  <h1 className="text-xl font-bold text-blue-600 leading-tight">{t.title}</h1>
-                  <p className="text-xs text-gray-600">{t.subtitle}</p>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-lg sm:text-xl font-bold text-blue-600 leading-tight truncate">{t.title}</h1>
+                  <p className="text-xs text-gray-600 hidden sm:block">{t.subtitle}</p>
                 </div>
               </div>
               
-              <div className="text-center">
+              <div className="text-center hidden lg:block">
                 <div className="text-base font-medium text-gray-700 leading-tight">
                   Bon retour, Dr. Centomo
                 </div>
@@ -1321,9 +1321,9 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
               <Select value={language} onValueChange={(value: 'fr' | 'en') => onLanguageChange(value)}>
-                <SelectTrigger className="w-20">
+                <SelectTrigger className="w-16 sm:w-20">
                   <Globe className="w-3 h-3" />
                   <SelectValue />
                 </SelectTrigger>
@@ -1337,10 +1337,10 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
                 onClick={handleLogout} 
                 variant="outline" 
                 size="sm"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
               >
                 <LogOut className="w-3 h-3" />
-                <span className="ml-1 text-xs">Déconnexion</span>
+                <span className="ml-1 text-xs hidden sm:inline">Déconnexion</span>
               </Button>
             </div>
           </div>
@@ -1385,16 +1385,16 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       </div>
 
       {/* Main Form */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-8">
         <Form {...form}>
-          <form className="space-y-6">
+          <form className="space-y-4 sm:space-y-6">
             
             {/* Save Actions */}
-            <div className="flex gap-3 mb-6 no-print">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:mb-6 no-print">
               <Button
                 type="button"
                 onClick={handleSave}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6"
+                className="w-full sm:flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 sm:px-6"
               >
                 <Save className="w-4 h-4 mr-2" />
                 {language === 'fr' ? 'Sauvegarder' : 'Save'}
@@ -1403,7 +1403,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
               <Button
                 type="button"
                 onClick={() => setShowSaveDialog(true)}
-                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-6"
+                className="w-full sm:flex-1 bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 sm:px-6"
               >
                 <Archive className="w-4 h-4 mr-2" />
                 {language === 'fr' ? 'Sauvegarder copie' : 'Save Copy'}
@@ -1412,7 +1412,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
             
             {/* Section A: Renseignements sur le travailleur (Static) */}
             <CollapsibleSection id="section1" title={t.sectionA}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="field-group">
                   <label className="field-label">{t.workerName}</label>
                   <div className="field-input border-b border-gray-300 pb-1 min-h-[24px]"></div>
