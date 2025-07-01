@@ -15,6 +15,7 @@ interface SaveFormDialogProps {
   formData: any;
   language: 'fr' | 'en';
   defaultTitle?: string;
+  formType?: 'draft' | 'copy';
 }
 
 const translations = {
@@ -46,7 +47,7 @@ const translations = {
   }
 };
 
-export function SaveFormDialog({ open, onClose, formData, language, defaultTitle }: SaveFormDialogProps) {
+export function SaveFormDialog({ open, onClose, formData, language, defaultTitle, formType = 'draft' }: SaveFormDialogProps) {
   const [title, setTitle] = useState("");
   const [retentionDays, setRetentionDays] = useState([7]);
   const { toast } = useToast();
@@ -75,6 +76,7 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "draft"] });
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "copy"] });
       toast({
         title: t.success,
@@ -108,7 +110,7 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
       title: title.trim(),
       formData,
       retentionDays: retentionDays[0],
-      formType: "copy"
+      formType: formType
     });
   };
 

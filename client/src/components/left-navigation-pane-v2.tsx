@@ -28,6 +28,7 @@ interface LeftNavigationPaneProps {
   onSavedCopies: () => void;
   onSaveDialog: () => void;
   onSave: () => void;
+  onSaveCopy: () => void;
   onPrint: () => void;
   onExport: () => void;
   onClearForm: () => void;
@@ -91,6 +92,7 @@ export function LeftNavigationPane({
   onSavedCopies,
   onSaveDialog,
   onSave,
+  onSaveCopy,
   onPrint,
   onExport,
   onClearForm,
