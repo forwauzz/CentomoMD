@@ -1073,12 +1073,243 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     return () => subscription.unsubscribe();
   }, [form, debouncedSave]);
 
+  // Check for dictation results periodically and on location changes
+  useEffect(() => {
+    const checkDictationResults = () => {
+      console.log('Checking for dictation results on component mount/update');
+      const dictationResult = sessionStorage.getItem('dictationResult');
+      const dictationField = sessionStorage.getItem('dictationField');
+      const scrollToSection = sessionStorage.getItem('scrollToSection');
+      const highlightField = sessionStorage.getItem('highlightField');
+      
+      console.log('SessionStorage check:', { 
+        hasDictationResult: !!dictationResult, 
+        hasDictationField: !!dictationField,
+        dictationField,
+        resultLength: dictationResult?.length
+      });
+
+      if (dictationResult && dictationField) {
+        console.log('Processing dictation result:', { 
+          dictationField, 
+          dictationResult: dictationResult.substring(0, 100) + '...',
+          currentFormValues: Object.keys(form.getValues()),
+          specificFieldValue: form.getValues(dictationField as any)
+        });
+        
+        // Get current value of the field
+        const currentValue = form.getValues(dictationField as any) || '';
+        console.log('Current field value before update:', { fieldName: dictationField, currentValue });
+
+        // Handle different field types appropriately
+        let newValue: string;
+        if (dictationField === 'historiqueEvolution') {
+          // Replace content for Section 7 to avoid duplication
+          newValue = dictationResult;
+        } else if (dictationField === 'section8Input') {
+          // For Section 8 global input, replace content and auto-distribute
+          newValue = dictationResult;
+          
+          // Auto-distribute the content to the three Section 8 fields
+          const sections = parseSection8Content(dictationResult);
+          if (sections.appreciation) form.setValue('appreciationEvolution', sections.appreciation);
+          if (sections.plaintes) form.setValue('plaintesproblemes', sections.plaintes);
+          if (sections.impact) form.setValue('impactAvq', sections.impact);
+        } else if (['appreciationEvolution', 'plaintesproblemes', 'impactAvq'].includes(dictationField)) {
+          // For individual Section 8 fields, replace content
+          newValue = dictationResult;
+        } else {
+          // Append the dictation result to the existing content for other fields
+          newValue = currentValue ? `${currentValue}\n\n${dictationResult}` : dictationResult;
+        }
+        
+        // Update the form field
+        form.setValue(dictationField as any, newValue);
+        console.log('Form field updated:', { 
+          fieldName: dictationField, 
+          newValue: newValue.substring(0, 100) + '...',
+          verifyValue: form.getValues(dictationField as any)
+        });
+        
+        // Force form to recognize the change and trigger re-render
+        form.trigger(dictationField as any);
+        
+        // Additional verification that the field was set
+        setTimeout(() => {
+          const verifiedValue = form.getValues(dictationField as any);
+          console.log('Verification after setValue:', { 
+            fieldName: dictationField, 
+            setValue: verifiedValue?.substring(0, 100) + '...' 
+          });
+        }, 100);
+        
+        // Trigger AI formatting for sections 7 and 8 after dictation
+        if (dictationField === 'historiqueEvolution') {
+          // Auto-trigger AI enhancement for Section 7
+          setTimeout(async () => {
+            try {
+              console.log('Auto-formatting Section 7 text after dictation:', newValue.substring(0, 100) + '...');
+              
+              const response = await fetch('/api/ai/enhance-section7-dictation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ 
+                  transcript: newValue,
+                  language: language 
+                })
+              });
+              
+              if (response.ok) {
+                const result = await response.json();
+                if (result.enhancedText) {
+                  form.setValue('historiqueEvolution', result.enhancedText);
+                  toast({
+                    title: language === 'fr' ? "Section 7 améliorée" : "Section 7 enhanced",
+                    description: language === 'fr' ? "Dictée formatée automatiquement" : "Dictation formatted automatically",
+                  });
+                  console.log('Section 7 auto-enhanced successfully');
+                }
+              }
+            } catch (error) {
+              console.error('Auto-format Section 7 error:', error);
+            }
+          }, 500);
+        } else if (dictationField === 'section8Input' || ['appreciationEvolution', 'plaintesproblemes', 'impactAvq'].includes(dictationField)) {
+          // Auto-trigger AI enhancement for Section 8
+          setTimeout(async () => {
+            try {
+              console.log('Auto-formatting Section 8 text after dictation:', { dictationField, text: newValue.substring(0, 100) + '...' });
+              
+              if (dictationField === 'section8Input') {
+                // For global Section 8 input, use distribution API
+                const response = await fetch('/api/ai/distribute-section8', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ 
+                    text: newValue,
+                    language: language 
+                  })
+                });
+                
+                if (response.ok) {
+                  const result = await response.json();
+                  if (result.sections) {
+                    if (result.sections.appreciation) form.setValue('appreciationEvolution', result.sections.appreciation);
+                    if (result.sections.plaintes) form.setValue('plaintesproblemes', result.sections.plaintes);
+                    if (result.sections.impact) form.setValue('impactAvq', result.sections.impact);
+                    
+                    toast({
+                      title: language === 'fr' ? "Section 8 distribuée" : "Section 8 distributed",
+                      description: language === 'fr' ? "Dictée distribuée et formatée automatiquement" : "Dictation distributed and formatted automatically",
+                    });
+                    console.log('Section 8 auto-distributed successfully');
+                  }
+                }
+              } else {
+                // For individual Section 8 fields, use enhancement API
+                const response = await fetch('/api/ai/enhance-section8-dictation', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ 
+                    transcript: newValue,
+                    language: language 
+                  })
+                });
+                
+                if (response.ok) {
+                  const result = await response.json();
+                  if (result.enhancedText) {
+                    form.setValue(dictationField as any, result.enhancedText);
+                    toast({
+                      title: language === 'fr' ? "Section 8 améliorée" : "Section 8 enhanced",
+                      description: language === 'fr' ? "Dictée formatée automatiquement" : "Dictation formatted automatically",
+                    });
+                    console.log('Section 8 field auto-enhanced successfully:', dictationField);
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Auto-format Section 8 error:', error);
+            }
+          }, 500);
+        }
+        
+        // Clear the dictation session storage
+        sessionStorage.removeItem('dictationResult');
+        sessionStorage.removeItem('dictationField');
+        
+        // Show success message with toast
+        toast({
+          title: language === 'fr' ? "Dictée sauvegardée" : "Dictation saved",
+          description: language === 'fr' 
+            ? `Contenu sauvegardé dans: ${dictationField}` 
+            : `Content saved to: ${dictationField}`,
+        });
+        
+        console.log(`Dictation result saved to field: ${dictationField}`, { newValue: newValue.substring(0, 100) + '...' });
+      }
+
+      // Handle section navigation after dictation
+      if (scrollToSection) {
+        setTimeout(() => {
+          const sectionElement = document.getElementById(scrollToSection);
+          if (sectionElement) {
+            sectionElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+            console.log(`Scrolled to section: ${scrollToSection}`);
+          }
+          sessionStorage.removeItem('scrollToSection');
+        }, 1000);
+      }
+
+      // Handle field highlighting after dictation
+      if (highlightField) {
+        setTimeout(() => {
+          const fieldElement = document.querySelector(`[name="${highlightField}"], [data-field-name="${highlightField}"]`) as HTMLElement;
+          if (fieldElement) {
+            fieldElement.focus();
+            fieldElement.style.outline = '2px solid #3b82f6';
+            setTimeout(() => {
+              fieldElement.style.outline = '';
+            }, 3000);
+            console.log(`Highlighted field: ${highlightField}`);
+          }
+          sessionStorage.removeItem('highlightField');
+        }, 1500);
+      }
+    };
+
+    // Check immediately on mount
+    checkDictationResults();
+
+    // Also check on window focus (when returning from dictation page)
+    const handleFocus = () => {
+      setTimeout(checkDictationResults, 100);
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [form, language, toast]);
+
   // Handle dictation results when returning from dictation page
   useEffect(() => {
+    console.log('Checking for dictation results on component mount/update');
     const dictationResult = sessionStorage.getItem('dictationResult');
     const dictationField = sessionStorage.getItem('dictationField');
     const scrollToSection = sessionStorage.getItem('scrollToSection');
     const highlightField = sessionStorage.getItem('highlightField');
+    
+    console.log('SessionStorage check:', { 
+      hasDictationResult: !!dictationResult, 
+      hasDictationField: !!dictationField,
+      dictationField,
+      resultLength: dictationResult?.length
+    });
     
     if (dictationResult && dictationField) {
       console.log('Processing dictation result:', { 
