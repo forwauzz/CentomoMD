@@ -101,6 +101,56 @@ Le travailleur revoit le docteur Lavoie-Lennon, le 4 octobre 2021. Elle maintien
 
 Le travailleur revoit le docteur Lavoie-Lennon, le 17 janvier 2022. Elle maintient le diagnostic d'entorse genou droit, synovite genou droit et gonarthrose droite. Elle consolide le patient avec atteinte permanente à l'intégrité physique et limitations fonctionnelles. Elle réitère fortement la suggestion d'une orthèse d'extension à tourillon nocturne pour le flexum persistant et une orthèse de stabilisation pour le jour du genou droit.`;
 
+// Sample 4: Complex Ankle Injury with Complications
+const ENHANCED_SECTION_7_SAMPLE_4 = `7. Historique de faits et évolution
+
+La fiche de réclamation du travailleur décrit l'événement suivant survenu le 3 mars 2021 :
+
+« Je nettoyais les tuiles au plafond. Quand je suis descendu de l'échelle, j'ai mis le pied dans un trou qui était dans le sol. Ma cheville droit a fait une torsion et je suis tombé. Au moment de la chute j'ai tenté de retenir avec ma main et je me suis fait mal au 3e doigt de la main droite. Au moment de la chute ça a fait mal, mais je croyais que sa passerait, cependant dans la nuit du 3 mars au 4 mars la DLR est venue de façon vive et intense, m'empêchant de dormir. »
+
+Le travailleur rencontre le docteur Mélinka Blais-Rétamal, le 4 mars 2021. Elle diagnostique une entorse à la cheville droite et une entorse du 3e doigt de la main droite. Elle prescrit des radiographies, suggère d'éviter la mise en charge, prescrit un arrêt de travail et de l'analgésie.
+
+Le travailleur obtient des radiographies du pied et de la cheville droits, le 4 mars 2021. Elles sont interprétées par le docteur Anna Barbara Sinsky, radiologiste. Cette dernière constate :
+
+« Pied et cheville droits
+Il n'y a pas d'épanchement intra-articulaire à la cheville. Œdème des tissus mous autour de la malléole externe. La mortaise est bien préservée. Il n'y a pas d'anomalie démontrée au niveau du pied. »
+
+Le travailleur rencontre le docteur André Ménard, le 12 mars 2021. Il diagnostique une entorse de la cheville droite et une entorse du 3e doigt de la main droite. Il juge la condition clinique stable. Il note une amélioration au niveau du doigt. Il suggère un retour au travail dans une semaine et prescrit de la physiothérapie.
+
+Le travailleur revoit le docteur Ménard, le 28 mars 2021. Il juge la condition clinique stable. Il maintient les traitements en physiothérapie et prescrit un arrêt de travail après un échec de retour au travail.
+
+Le travailleur revoit le docteur Ménard, le 21 avril 2021. Il juge la condition clinique stable. Il maintient les traitements en physiothérapie, l'arrêt de travail et prescrit une botte de marche.
+
+Le travailleur revoit le docteur Ménard, le 23 juin 2021. Il juge la condition clinique stable. Il maintient les traitements en physiothérapie et l'arrêt de travail. Il prescrit une échographie de surface au niveau des tendons fibulaires et une résonance magnétique de la cheville droite afin d'éliminer une atteinte tarsienne.
+
+Le travailleur obtient une résonance magnétique de la cheville droite, le 30 juillet 2021. Elle est interprétée par le docteur Laurent Bilodeau, radiologiste. Ce dernier constate :
+
+« Conclusion :
+Signes d'ancienne entorse des ligaments tibiopéronier antérieurs, talopéronier antérieur, calcanéopéronier et des fibres profondes du ligament deltoïde.
+
+Pas d'atteinte des tendons péroniers.
+
+Doute sur une légère ténosynovite des tendons tibial postérieur, long fléchisseur des orteils et long fléchisseur de l'hallux, de signification clinique incertaine. »
+
+Le travailleur revoit le docteur Ménard, le 25 août 2021. Il juge la condition clinique stable. Il constate les résultats de la résonance magnétique, maintient les traitements en physiothérapie, ergothérapie et l'arrêt de travail.
+
+Le travailleur revoit le docteur Ménard, le 19 janvier 2022. Il juge la condition clinique stable. Il suspecte un syndrome douleur régional complexe. Il prescrit un EMG des membres inférieurs. Il maintient les traitements en physiothérapie, ergothérapie et l'arrêt de travail.
+
+Le travailleur revoit le docteur Ménard, le 14 mars 2022. Il juge la condition clinique stable. Il maintient l'arrêt de travail. Le docteur Ménard note : « a eu des moments difficiles et était en désintox depuis 6 semaines, troubles anxiodépressifs secondaires se sont développé » Le docteur Ménard demande de réinitialiser les traitements physiothérapie et ergothérapie.
+
+Le travailleur rencontre le docteur Blouin, chirurgien orthopédiste, le 18 mai 2022. Le docteur Blouin rapporte aucun signe d'instabilité au niveau de la cheville droite et recommande un traitement conservateur. Il note une lombosciatalgie droite et prescrit un scan du rachis lombaire. Il désire revoir le travailleur après les investigations.
+
+Le travailleur obtient un EMG des membres inférieurs, le 1er mars 2023. L'examen est réalisé par le docteur Valérie Dahan, physiatre. Cette dernière constate :
+
+« Impression :
+L'étude électrophysiologique met en évidence des signes de radiculopathie motrice chronique L5 droite. Il n'y avait pas de dénervation active. Les racines L3, L4 et S1 droites semblent intactes, et cliniquement, je n'ai pas de méralgia paresthetica droite, ne suit pas le territoire. »
+
+Le travailleur revoit le docteur Ménard, le 7 mars 2023. Il diagnostique une entorse de la cheville droite et une atteinte tendineuse au niveau des muscles péroniers. Il juge la condition clinique stable. Il demande que le travailleur revoie le docteur Blouin afin de statuer s'il y a des traitements complémentaires avant de finaliser le dossier.
+
+Le travailleur revoit le docteur Ménard, le 27 février 2024. Il maintient le diagnostic d'entorse de cheville droite et atteinte tendineuse des muscles péroniers de la cheville droite. Il note une aggravation avec une fracture de la jambe gauche à la suite d'un déséquilibre, nombreuses complications post-opératoires avec ostéomyélite. Le docteur Ménard note que le travailleur ne s'est pas présenté à son rendez-vous pour une infiltration à la cheville droite.
+
+Le travailleur revoit le docteur Ménard, le 7 mai 2024. Il juge la condition clinique stable. Il note une infiltration à la cheville droite partiellement efficace. Il est en attente pour une 2ième infiltration prévue dans 1 à 2 mois. Le docteur Ménard demande une IRM de contrôle au niveau de la cheville droite.`;
+
 export async function enhancedFormatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured');
@@ -129,11 +179,11 @@ INSTRUCTIONS SPÉCIALISÉES:
 - Infiltrations et examens d'imagerie
 
 TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
-- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose
-- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire
-- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR
-- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension
-- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant
+- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite
+- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde
+- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis
+- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie
+- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique
 
 EXEMPLES DE FORMAT AUTHENTIQUE:
 
@@ -145,6 +195,9 @@ ${ENHANCED_SECTION_7_SAMPLE_2}
 
 Exemple 3 - Cas genou avec activation d'arthrose:
 ${ENHANCED_SECTION_7_SAMPLE_3}
+
+Exemple 4 - Cas cheville complexe avec complications:
+${ENHANCED_SECTION_7_SAMPLE_4}
 
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
       : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards for occupational injuries.
@@ -168,11 +221,11 @@ CRITICAL ELEMENTS TO PRESERVE:
 - Infiltrations and imaging examinations
 
 QUEBEC SPECIALIZED TERMINOLOGY:
-- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis
-- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus
-- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal
-- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis
-- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum
+- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis
+- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid
+- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan
+- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia
+- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy
 
 AUTHENTIC FORMAT EXAMPLES:
 
@@ -184,6 +237,9 @@ ${ENHANCED_SECTION_7_SAMPLE_2}
 
 Example 3 - Knee Injury with Arthritis Activation:
 ${ENHANCED_SECTION_7_SAMPLE_3}
+
+Example 4 - Complex Ankle Injury with Complications:
+${ENHANCED_SECTION_7_SAMPLE_4}
 
 Respond only with the formatted text according to these strict standards, no explanations.`;
 
@@ -246,6 +302,9 @@ ${ENHANCED_SECTION_7_SAMPLE_2}
 
 Exemple 3 - Cas genou avec activation d'arthrose:
 ${ENHANCED_SECTION_7_SAMPLE_3}
+
+Exemple 4 - Cas cheville complexe avec complications:
+${ENHANCED_SECTION_7_SAMPLE_4}
 
 Retourne le texte amélioré et formaté.`
       : `You are a medical assistant that helps improve dictation for Quebec CNESST medical reports.
