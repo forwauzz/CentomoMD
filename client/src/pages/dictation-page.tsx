@@ -4,11 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { Mic, MicOff, ArrowLeft, Copy, Trash2, Save, Sparkles, Edit } from "lucide-react";
+import { Mic, MicOff, ArrowLeft, Copy, Trash2, Save, Edit } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+
 
 interface DictationPageProps {
   language: 'fr' | 'en';
@@ -207,33 +206,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     interimResults: true,
   });
 
-  // AI formatting mutation
-  const formatTextMutation = useMutation({
-    mutationFn: async (text: string) => {
-      if (!selectedSection) return text;
 
-      const endpoint = selectedSection === 'historiqueEvolution' ? '/api/format-section7' : '/api/format-section8';
-      const response = await apiRequest('POST', endpoint, { text, language: currentLanguage });
-      const data = await response.json();
-      return data.formattedText;
-    },
-    onSuccess: (formattedText) => {
-      setFinalText(formattedText);
-      setEditableText(formattedText);
-      setIsEditing(true);
-      toast({
-        title: currentLanguage === 'fr' ? "Texte formaté" : "Text formatted",
-        description: currentLanguage === 'fr' ? "Le texte a été formaté avec l'IA" : "Text has been formatted with AI",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erreur",
-        description: currentLanguage === 'fr' ? "Erreur lors du formatage" : "Error during formatting",
-        variant: "destructive",
-      });
-    },
-  });
 
   // Handle transcript updates - capture both interim and final transcripts
   useEffect(() => {
@@ -423,10 +396,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     setLocation(finalReturnPath + '#' + targetSection);
   };
 
-  const handleFormatText = () => {
-    if (!finalText) return;
-    formatTextMutation.mutate(finalText);
-  };
+
 
   const handleStartEditing = () => {
     setEditableText(finalText);
@@ -668,20 +638,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                   )}
                 </div>
 
-                {/* AI Formatting Button */}
-                {finalText && (selectedSection === 'historiqueEvolution' || selectedSection === 'appreciationEvolution') && (
-                  <Button
-                    onClick={handleFormatText}
-                    disabled={formatTextMutation.isPending}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white mb-2"
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    {formatTextMutation.isPending 
-                      ? (currentLanguage === 'fr' ? 'Formatage en cours...' : 'Formatting...') 
-                      : (currentLanguage === 'fr' ? 'Formater avec IA' : 'Format with AI')
-                    }
-                  </Button>
-                )}
+
 
                 <div className="flex gap-2">
                   <Button
