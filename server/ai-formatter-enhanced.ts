@@ -260,6 +260,89 @@ Le travailleur revoit le docteur Nolet, le 14 décembre 2023. Elle prescrit des 
 
 Le docteur Nolet produit un rapport final, le 25 janvier 2024. Sur les diagnostics de fracture du pilon tibial droit et fracture de la malléole externe droite, elle consolide le travailleur avec atteinte permanente à l'intégrité physique ou psychique et limitations fonctionnelles. Elle ne produira pas le rapport d'évaluation médicale (REM).`;
 
+// Sample 8: Complex Shoulder/Cervical Case with Extensive Imaging
+const ENHANCED_SECTION_7_SAMPLE_8 = `7. Historique de faits et évolution
+
+La fiche de réclamation du travailleur décrit l'événement suivant survenu le 22 octobre 2022.
+
+« Chez les clients avec mon collègue au moment de descendre du camion avec le comptoir de quartz d'environ 350 lbs, le comptoir a basculer vers la gauche, j'ai senti un coup étirer mon bras vers l'arrière, j'ai senti un grand étirement avec une grosse douleur. »
+
+Le travailleur consulte le docteur Nicolas Bussières, le 23 octobre 2020. Il diagnostique une élongation musculaire thorax gauche, pectoraux et tendinite épaule gauche traumatique. Il prescrit un arrêt de travail, de la physiothérapie et des anti-inflammatoires.
+
+Le travailleur rencontre le docteur Marc Boudreau, le 5 novembre 2020. Il diagnostique une tendinite versus déchirure musculaire au niveau des trapèzes, grand dorsal et grand pectoral gauche. Il prescrit de la physiothérapie, un arrêt de travail et des anti-inflammatoires.
+
+Le travailleur rencontre le docteur Ali Lalavi, le 19 novembre 2020. Il diagnostique une tendinite versus déchirure musculaire au niveau du trapèze, du grand dorsal et du grand pectoral gauche. Il ajoute le diagnostic d'entorse cervicale avec radiculopathie bras gauche. Il note une condition améliorée. Il maintient les traitements en physiothérapie et l'arrêt de travail. Il prescrit une résonance magnétique de l'épaule, du trapèze, du grand pectoral gauche et du rachis cervical.
+
+Le travailleur rencontre le docteur Marie-Claude Brodeur, le 9 décembre 2020. Elle diagnostique une élongation musculaire du grand pectoral gauche, une tendinite à l'épaule gauche et une possible atteinte du plexus brachial. Elle juge la condition clinique stable. Elle maintient les traitements en physiothérapie, ergothérapie ainsi que l'arrêt de travail.
+
+Le travailleur obtient des résonances magnétiques du rachis cervical, de l'épaule gauche et du trapèze et du grand pectoral gauche, le 29 décembre 2020. Elles sont interprétées par le docteur Lionel Buré, radiologiste. Ce dernier constate :
+
+« IRM cervicale
+…
+Conclusion :
+Changement dégénératif multi-étagés tel que décrit ci-haut avec une sténose foraminale sévère à gauche qui pourrait irriter la racine de C7 à corréler avec la clinique. »
+
+IRM épaule gauche
+…
+Conclusion :
+Déchirure partielle supra-substance du supra-épineux tel que décrit ci-haut.
+Anomalie du labrum antérieur qui pourrait représenter une variante anatomique versus une trouvaille post-traumatique. S'il y avait des signes d'instabilité gléno-humérale, une arthro-IRM de l'épaule serait recommandé.
+
+IRM du trapèze et du pectoral gauche
+…
+Conclusion :
+IRM du trapèze du grand pectoral et des muscles de la grille costale gauche dans les limites de la normale. »
+
+Le travailleur rencontre le docteur François Bonneau, le 8 janvier 2021. Il juge la condition améliorée. Elle rapporte les résultats de l'IRM, qu'il considère normaux. Il maintient les traitements en physiothérapie, ergothérapie et ajoute des traitements en acupuncture. Il maintient l'arrêt de travail.
+
+Le travailleur revoit le docteur Lalavi, le 26 janvier 2021. Il rapporte les résultats des résonances magnétiques. Il note une condition clinique stable. Il maintient les traitements en physiothérapie, ergothérapie et acupuncture. Il prescrit une infiltration cortisonée de l'épaule gauche, une consultation en physiatres et en chirurgie orthopédique. Il maintient l'arrêt de travail.
+
+Le travailleur obtient une échographie de l'épaule gauche, le 1er février 2021. Elle est réalisée et interprétée par le docteur Lionel Buré, radiologiste. Ce dernier constate :
+
+« …
+Conclusion :
+Bursopathie sous-acromio-deltoïdienne avec accrochage qui a fait l'objet d'une infiltration cortisonée à des fins thérapeutiques et diagnostiques. Petite déchirure de bas grade partielle du supra-épineux, difficile à bien caractériser à l'échographie. S'il avait aucune amélioration post-infiltration une évaluation de l'anomalie gléno-humérale précédemment mentionnée à la résonance magnétique pourrait être utile avec une arthro-IRM. À suivre. »
+
+Le travailleur rencontre le docteur Ghislain Rivet, physiatre, le 9 février 2021. Il diagnostique une entorse cervicale et brachialgie gauche. Il maintient les traitements en physiothérapie, ergothérapie et acupuncture. Il recommande un EMG afin d'investiguer davantage la radiculopathie et considérer une infiltration au niveau du rachis cervical. Il juge la condition clinique stable.
+
+Le travailleur rencontre le docteur Dominik Cyr, le 22 mars 2021. Il diagnostique une déchirure partielle du supra-épineux gauche, une cervicalgie avec irradiation au membre supérieur gauche. Il juge la condition clinique stable. Il maintient les traitements en physiothérapie, ergothérapie ainsi que l'arrêt de travail.
+
+Le travailleur rencontre le docteur Andréanne Marmen, chirurgienne orthopédiste, le 9 juin 2021. Elle diagnostique une déchirure partielle du supra-épineux, une bursite sous-acromio-deltoïdienne de l'épaule gauche ainsi qu'une symptomatologie cervicale prédominante. Elle maintient les traitements en physiothérapie et ergothérapie. Elle ne suggère pas de chirurgie et ne compte pas revoir le travailleur.
+
+Le travailleur revoit le docteur Cata, le 25 juin 2021. Il juge la condition clinique stable. Il maintient les traitements en physiothérapie et ergothérapie. Il suggère une tentative de retour au travail en assignation temporaire. Il note : « possiblement que le patient ne sera plus en mesure d'accomplir le travail dans la construction comme avant. »
+
+Le travailleur obtient une résonance magnétique de contrôle de l'épaule gauche, le 26 juillet 2021. Elle est interprétée par le docteur Neda Tehranipour, radiologiste. Cette dernière constate :
+
+«…
+Conclusion :
+Très légers changements dégénératifs débutant acromioclaviculaires. Le reste est sans particularité. »
+
+Le travailleur obtient une résonance magnétique de contrôle de la colonne cervicale, le 2 septembre 2021. Elle est interprétée par le docteur Lionel Buré, radiologiste. Ce dernier constate :
+
+« …
+Conclusion :
+Aspect très similaire de changements dégénératifs ci-haut avec petite herniation nouvellement apparue à C5-C6 à droite. Le reste de l'étude est superposable. »
+
+Le travailleur revoit le docteur Brodeur, le 11 octobre 2021. Elle note une progression de l'atteinte clinique de C7 gauche avec paresthésies légères et parésies associées. Elle réfère le travailleur en neurochirurgie. Elle maintient les traitements en physiothérapie, ergothérapie et acupuncture. Elle juge l'état clinique détérioré et maintient l'arrêt de travail.
+
+Le travailleur rencontre le docteur Jimmy Hai Triêu Nguyen, chirurgien orthopédiste surspécialisé en membre supérieur, le 29 novembre 2021. Il note de multiples sources de douleurs, une plexopathie brachiale gauche probable, une cervicobrachialgie gauche sur sténose sévère C7 gauche, une tendinopathie du supra-épineux gauche et une tendinite du long chef du biceps. Il ne suggère pas de chirurgie à l'épaule gauche.
+
+Le travailleur obtient une résonance magnétique de la colonne cervicale, le 26 janvier 2023. Elle est interprétée par le docteur Nicolas Zara, radiologiste. Ce dernier constate :
+
+«… 
+C5-C6 :
+Discarthrose légère à modérée avec complexe disco-ostéophytique circonférentiel débordant en biforaminale à prédominance droite. Petite hernie discale à base large surajoutée postérolatérale droite venant discrètement au contact du cordon médullaire et le déformant. Sténose spinale légère avec sac dural mesurant 9 mm. Arthrose facettaire surajoutée le tout entraînant des sténoses foraminales bilatérales, modérées à droite et légère à gauche.
+
+C6-C7 :
+Discarthrose légère à modérée avec complexe disco-ostéophytique circonférentiel auquel se greffe une hernie discale à base large postérolatérale gauche/foraminale gauche. Arthrose facettaire hypertrophique ligamentaire surajoutée, le tout entraînant une sténose foraminale gauche modérée à sévère. Pas de sténose spinale.
+… »
+
+Le travailleur est convoqué en expertise médicale, le 7 juillet 2023. Celle-ci est réalisée par le docteur Serge Tohmé, chirurgien orthopédiste. Sur la lésion à l'épaule gauche, le docteur Tohmé suggère que le travailleur pourrait bénéficier d'une référence en orthopédie surspécialisée de l'épaule afin d'évaluer l'indication chirurgicale. Pour la lésion au niveau du rachis cervical, le docteur Tohmé suggère une consultation et évaluation en physiatre afin d'évaluer l'indication d'une infiltration cortisonée.
+
+Le docteur Brodeur produit un formulaire sur l'évolution des lésions, le 12 mars 2024. Elle juge que la lésion est toujours active qu'il y a une infiltration prévue en fin mars 2024 à la clinique de la douleur. Si cette infiltration est non efficace, elle suggère de consolider le travailleur avec séquelles. Elle note : « cas complexes qui devrait être évaluée au BEM. » Elle ne produira pas le rapport d'évaluation médicale (REM).
+
+Le travailleur revoit le docteur Brodeur, le 14 juin 2024. Elle note : « Réorientation de carrière fortement suggéré, avis au BEM, long plateau thérapeutique avec échec aux multiples traitements tentés à mon avis, il est temps de consolidé avec séquelles. » Elle maintient les traitements en physiothérapie, acupuncture, psychologie ainsi que l'arrêt de travail.`;
+
 export async function enhancedFormatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured');
@@ -288,11 +371,11 @@ INSTRUCTIONS SPÉCIALISÉES:
 - Infiltrations et examens d'imagerie
 
 TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
-- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite, déchirure méniscale, déchirure ligament croisé antérieur, cellulite, bursite rotulienne surinfectée, collection purulente, fracture bimalléolaire médiale et latérale, fracture malléolaire médiale déplacée et impactée, fracture fibulaire distal oblique, fracture du pilon tibial
-- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde, ménisque interne, corne postérieure, échancrure intercondylienne, ligament collatéral interne, chondromalacie, rotule, tibia, fibula, malléole médiale, malléole postérieure, articulation tibio-talienne
-- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis, déchirure en anse de seau, aspect macéré, collection purulente au scan, épanchement interarticulaire, épaississement des tissus mous, dislocation
-- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie, orthèse genou, ankylose, antibiotiques par voie intraveineuse, visites quotidiennes au centre hospitalier, réduction ouverte et fixation interne, plaque vis, foam walker, exérèse de matériel orthopédique, mise en charge, suivi post-opératoire
-- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique, expertise 204, infection résolue, bursite réactive, guérison sous optimale, douleurs résiduelles post-infection, intolérance à la position agenouillée, consolidation en cours, assignations temporaires, chirurgie bien tolérée sans complication immédiate
+- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite, déchirure méniscale, déchirure ligament croisé antérieur, cellulite, bursite rotulienne surinfectée, collection purulente, fracture bimalléolaire médiale et latérale, fracture malléolaire médiale déplacée et impactée, fracture fibulaire distal oblique, fracture du pilon tibial, déchirure partielle supra-substance du supra-épineux, bursopathie sous-acromio-deltoïdienne, cervicobrachialgie, tendinopathie du supra-épineux, tendinite du long chef du biceps
+- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde, ménisque interne, corne postérieure, échancrure intercondylienne, ligament collatéral interne, chondromalacie, rotule, tibia, fibula, malléole médiale, malléole postérieure, articulation tibio-talienne, labrum antérieur, instabilité gléno-humérale, bourse sous-acromio-deltoïdienne, gouttière bicipitale, longue portion du biceps, cordon médullaire, sac dural, sténose foraminale, complexe disco-ostéophytique, hernie discale à base large, arthrose facettaire hypertrophique
+- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis, déchirure en anse de seau, aspect macéré, collection purulente au scan, épanchement interarticulaire, épaississement des tissus mous, dislocation, changements dégénératifs multi-étagés, discarthrose légère à modérée, uncodiscarthrose, arthrose facettaire étagée, sténose spinale
+- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie, orthèse genou, ankylose, antibiotiques par voie intraveineuse, visites quotidiennes au centre hospitalier, réduction ouverte et fixation interne, plaque vis, foam walker, exérèse de matériel orthopédique, mise en charge, suivi post-opératoire, infiltration échoguidée, bloc de la branche médiale, clinique de la douleur, chirurgie orthopédique surspécialisée, neurochirurgie
+- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique, expertise 204, infection résolue, bursite réactive, guérison sous optimale, douleurs résiduelles post-infection, intolérance à la position agenouillée, consolidation en cours, assignations temporaires, chirurgie bien tolérée sans complication immédiate, paresthésies légères, parésies associées, multiples sources de douleurs, réorientation de carrière, échec aux multiples traitements, avis au BEM
 
 EXEMPLES DE FORMAT AUTHENTIQUE:
 
@@ -317,6 +400,9 @@ ${ENHANCED_SECTION_7_SAMPLE_6}
 Exemple 7 - Cas fracture cheville avec chirurgie:
 ${ENHANCED_SECTION_7_SAMPLE_7}
 
+Exemple 8 - Cas épaule/cervical complexe avec imagerie extensive:
+${ENHANCED_SECTION_7_SAMPLE_8}
+
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
       : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards for occupational injuries.
 
@@ -339,11 +425,11 @@ CRITICAL ELEMENTS TO PRESERVE:
 - Infiltrations and imaging examinations
 
 QUEBEC SPECIALIZED TERMINOLOGY:
-- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis, meniscal tear, anterior cruciate ligament tear, cellulitis, infected patellar bursitis, purulent collection, bimalleolar fracture medial and lateral, displaced and impacted medial malleolar fracture, oblique distal fibular fracture, tibial pilon fracture
-- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid, internal meniscus, posterior horn, intercondylar notch, internal collateral ligament, chondromalacia, patella, tibia, fibula, medial malleolus, posterior malleolus, tibio-talar joint
-- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan, bucket handle tear, macerated appearance, purulent collection on scan, joint effusion, soft tissue thickening, dislocation
-- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia, knee orthosis, ankylosis, intravenous antibiotics, daily hospital visits, open reduction and internal fixation, plate and screws, foam walker, orthopedic hardware removal, weight bearing, post-operative follow-up
-- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy, 204 expertise, infection resolved, reactive bursitis, suboptimal healing, post-infection residual pain, kneeling position intolerance, consolidation in progress, temporary assignments, surgery well tolerated without immediate complication
+- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis, meniscal tear, anterior cruciate ligament tear, cellulitis, infected patellar bursitis, purulent collection, bimalleolar fracture medial and lateral, displaced and impacted medial malleolar fracture, oblique distal fibular fracture, tibial pilon fracture, partial supra-substance tear of supraspinatus, subacromial-deltoid bursopathy, cervicobrachialgia, supraspinatus tendinopathy, long head of biceps tendinitis
+- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid, internal meniscus, posterior horn, intercondylar notch, internal collateral ligament, chondromalacia, patella, tibia, fibula, medial malleolus, posterior malleolus, tibio-talar joint, anterior labrum, glenohumeral instability, subacromial-deltoid bursa, bicipital groove, long portion of biceps, spinal cord, dural sac, foraminal stenosis, disco-osteophytic complex, broad-based disc herniation, hypertrophic facet arthritis
+- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan, bucket handle tear, macerated appearance, purulent collection on scan, joint effusion, soft tissue thickening, dislocation, multi-level degenerative changes, mild to moderate discopathy, uncodiscarthrosis, staged facet arthritis, spinal stenosis
+- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia, knee orthosis, ankylosis, intravenous antibiotics, daily hospital visits, open reduction and internal fixation, plate and screws, foam walker, orthopedic hardware removal, weight bearing, post-operative follow-up, echo-guided infiltration, medial branch block, pain clinic, specialized orthopedic shoulder surgery, neurosurgery
+- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy, 204 expertise, infection resolved, reactive bursitis, suboptimal healing, post-infection residual pain, kneeling position intolerance, consolidation in progress, temporary assignments, surgery well tolerated without immediate complication, mild paresthesias, associated paresis, multiple pain sources, career reorientation, failure of multiple treatments, referral to BEM
 
 AUTHENTIC FORMAT EXAMPLES:
 
@@ -367,6 +453,9 @@ ${ENHANCED_SECTION_7_SAMPLE_6}
 
 Example 7 - Ankle Fracture with Surgery Case:
 ${ENHANCED_SECTION_7_SAMPLE_7}
+
+Example 8 - Complex Shoulder/Cervical Case with Extensive Imaging:
+${ENHANCED_SECTION_7_SAMPLE_8}
 
 Respond only with the formatted text according to these strict standards, no explanations.`;
 
@@ -441,6 +530,9 @@ ${ENHANCED_SECTION_7_SAMPLE_6}
 
 Exemple 7 - Cas fracture cheville avec chirurgie:
 ${ENHANCED_SECTION_7_SAMPLE_7}
+
+Exemple 8 - Cas épaule/cervical complexe avec imagerie extensive:
+${ENHANCED_SECTION_7_SAMPLE_8}
 
 Retourne le texte amélioré et formaté.`
       : `You are a medical assistant that helps improve dictation for Quebec CNESST medical reports.
