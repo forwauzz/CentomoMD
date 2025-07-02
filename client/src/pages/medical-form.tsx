@@ -1114,6 +1114,100 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       // Force form to recognize the change
       form.trigger(dictationField as any);
       
+      // Trigger AI formatting for sections 7 and 8 after dictation
+      if (dictationField === 'historiqueEvolution') {
+        // Auto-trigger AI enhancement for Section 7
+        setTimeout(async () => {
+          try {
+            console.log('Auto-formatting Section 7 text after dictation:', newValue.substring(0, 100) + '...');
+            
+            const response = await fetch('/api/ai/enhance-section7-dictation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ 
+                transcript: newValue,
+                language: language 
+              })
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              if (result.enhancedText) {
+                form.setValue('historiqueEvolution', result.enhancedText);
+                toast({
+                  title: language === 'fr' ? "Section 7 améliorée" : "Section 7 enhanced",
+                  description: language === 'fr' ? "Dictée formatée automatiquement" : "Dictation formatted automatically",
+                });
+                console.log('Section 7 auto-enhanced successfully');
+              }
+            }
+          } catch (error) {
+            console.error('Auto-format Section 7 error:', error);
+          }
+        }, 500);
+      } else if (dictationField === 'section8Input' || ['appreciationEvolution', 'plaintesproblemes', 'impactAvq'].includes(dictationField)) {
+        // Auto-trigger AI enhancement for Section 8
+        setTimeout(async () => {
+          try {
+            console.log('Auto-formatting Section 8 text after dictation:', { dictationField, text: newValue.substring(0, 100) + '...' });
+            
+            if (dictationField === 'section8Input') {
+              // For global Section 8 input, use distribution API
+              const response = await fetch('/api/ai/distribute-section8', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ 
+                  text: newValue,
+                  language: language 
+                })
+              });
+              
+              if (response.ok) {
+                const result = await response.json();
+                if (result.sections) {
+                  if (result.sections.appreciation) form.setValue('appreciationEvolution', result.sections.appreciation);
+                  if (result.sections.plaintes) form.setValue('plaintesproblemes', result.sections.plaintes);
+                  if (result.sections.impact) form.setValue('impactAvq', result.sections.impact);
+                  
+                  toast({
+                    title: language === 'fr' ? "Section 8 distribuée" : "Section 8 distributed",
+                    description: language === 'fr' ? "Dictée distribuée et formatée automatiquement" : "Dictation distributed and formatted automatically",
+                  });
+                  console.log('Section 8 auto-distributed successfully');
+                }
+              }
+            } else {
+              // For individual Section 8 fields, use enhancement API
+              const response = await fetch('/api/ai/enhance-section8-dictation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ 
+                  transcript: newValue,
+                  language: language 
+                })
+              });
+              
+              if (response.ok) {
+                const result = await response.json();
+                if (result.enhancedText) {
+                  form.setValue(dictationField as any, result.enhancedText);
+                  toast({
+                    title: language === 'fr' ? "Section 8 améliorée" : "Section 8 enhanced",
+                    description: language === 'fr' ? "Dictée formatée automatiquement" : "Dictation formatted automatically",
+                  });
+                  console.log('Section 8 field auto-enhanced successfully:', dictationField);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Auto-format Section 8 error:', error);
+          }
+        }, 500);
+      }
+      
       // Clear the dictation session storage
       sessionStorage.removeItem('dictationResult');
       sessionStorage.removeItem('dictationField');
@@ -1275,6 +1369,8 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     
     return sections;
   };
+
+
 
   const handleSave = () => {
     setShowDraftDialog(true);
