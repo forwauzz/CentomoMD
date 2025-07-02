@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CollapsibleSection } from "@/components/collapsible-section";
+import { CollapsibleSection, CollapsibleSectionRef } from "@/components/collapsible-section";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -569,6 +569,18 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
     section8: false,
     section9: false,
   });
+
+  // Section refs for programmatic control
+  const section1Ref = useRef<CollapsibleSectionRef>(null);
+  const section2Ref = useRef<CollapsibleSectionRef>(null);
+  const section3Ref = useRef<CollapsibleSectionRef>(null);
+  const section4Ref = useRef<CollapsibleSectionRef>(null);
+  const section5Ref = useRef<CollapsibleSectionRef>(null);
+  const section6Ref = useRef<CollapsibleSectionRef>(null);
+  const section7Ref = useRef<CollapsibleSectionRef>(null);
+  const section8Ref = useRef<CollapsibleSectionRef>(null);
+  const section9Ref = useRef<CollapsibleSectionRef>(null);
+
   const { toast } = useToast();
   const { user, logout } = useAuth();
   const queryClient = useQueryClient();
@@ -1476,6 +1488,28 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
 
     // Handle section navigation after dictation
     if (scrollToSection) {
+      // Expand the target section first
+      const getSectionRef = (sectionId: string) => {
+        switch (sectionId) {
+          case 'section1': return section1Ref.current;
+          case 'section2': return section2Ref.current;
+          case 'section3': return section3Ref.current;
+          case 'section4': return section4Ref.current;
+          case 'section5': return section5Ref.current;
+          case 'section6': return section6Ref.current;
+          case 'section7': return section7Ref.current;
+          case 'section8': return section8Ref.current;
+          case 'section9': return section9Ref.current;
+          default: return null;
+        }
+      };
+
+      const sectionRef = getSectionRef(scrollToSection);
+      if (sectionRef && !sectionRef.isOpen) {
+        sectionRef.expand();
+        console.log(`Expanded section: ${scrollToSection}`);
+      }
+
       setTimeout(() => {
         const sectionElement = document.getElementById(scrollToSection);
         if (sectionElement) {
@@ -1504,7 +1538,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         // Clear navigation session storage
         sessionStorage.removeItem('scrollToSection');
         sessionStorage.removeItem('highlightField');
-      }, 100); // Small delay to ensure DOM is ready
+      }, 200); // Slightly longer delay to ensure section expansion happens first
     }
   }, []); // Run only on mount
 
@@ -2093,7 +2127,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
                 </CollapsibleSection>
 
                 {/* 2. Diagnostics acceptés par la CNESST */}
-                <CollapsibleSection title="2. Diagnostics acceptés par la CNESST" defaultOpen={false} id="section2">
+                <CollapsibleSection title="2. Diagnostics acceptés par la CNESST" defaultOpen={false} id="section2" ref={section2Ref}>
                   <FormField
                     control={form.control}
                     name="diagnosticsCnesst"
@@ -2628,7 +2662,7 @@ At the end of the interview, we asked if she had any other comments or informati
                 </CollapsibleSection>
 
                 {/* 7. Historique de faits et évolution (FILLABLE with AI) */}
-                <CollapsibleSection title={t.section7} defaultOpen={false} id="section7">
+                <CollapsibleSection title={t.section7} defaultOpen={false} id="section7" ref={section7Ref}>
                   <div className="flex items-center justify-end mb-4">
                     <Button
                       type="button"
@@ -2659,7 +2693,7 @@ At the end of the interview, we asked if she had any other comments or informati
                 </CollapsibleSection>
 
                 {/* 8. Questionnaire subjectif et état actuel (FILLABLE) */}
-                <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={false} id="section8">
+                <CollapsibleSection title="8. Questionnaire subjectif et état actuel" defaultOpen={false} id="section8" ref={section8Ref}>
                   <div className="space-y-4">
                     {/* Single Input for AI Distribution */}
                     <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
