@@ -1081,10 +1081,16 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     const highlightField = sessionStorage.getItem('highlightField');
     
     if (dictationResult && dictationField) {
-      console.log('Processing dictation result:', { dictationField, dictationResult: dictationResult.substring(0, 100) + '...' });
+      console.log('Processing dictation result:', { 
+        dictationField, 
+        dictationResult: dictationResult.substring(0, 100) + '...',
+        currentFormValues: Object.keys(form.getValues()),
+        specificFieldValue: form.getValues(dictationField as any)
+      });
       
       // Get current value of the field
       const currentValue = form.getValues(dictationField as any) || '';
+      console.log('Current field value before update:', { fieldName: dictationField, currentValue });
       
       // Handle different field types appropriately
       let newValue: string;
@@ -1110,9 +1116,23 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       
       // Update the form field
       form.setValue(dictationField as any, newValue);
+      console.log('Form field updated:', { 
+        fieldName: dictationField, 
+        newValue: newValue.substring(0, 100) + '...',
+        verifyValue: form.getValues(dictationField as any)
+      });
       
-      // Force form to recognize the change
+      // Force form to recognize the change and trigger re-render
       form.trigger(dictationField as any);
+      
+      // Additional verification that the field was set
+      setTimeout(() => {
+        const verifiedValue = form.getValues(dictationField as any);
+        console.log('Verification after setValue:', { 
+          fieldName: dictationField, 
+          setValue: verifiedValue?.substring(0, 100) + '...' 
+        });
+      }, 100);
       
       // Trigger AI formatting for sections 7 and 8 after dictation
       if (dictationField === 'historiqueEvolution') {
