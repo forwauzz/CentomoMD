@@ -1081,14 +1081,26 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     const highlightField = sessionStorage.getItem('highlightField');
     
     if (dictationResult && dictationField) {
+      console.log('Processing dictation result:', { dictationField, dictationResult: dictationResult.substring(0, 100) + '...' });
+      
       // Get current value of the field
       const currentValue = form.getValues(dictationField as any) || '';
       
-      // Append the dictation result to the existing content
-      const newValue = currentValue ? `${currentValue}\n\n${dictationResult}` : dictationResult;
+      // For Section 7 (historiqueEvolution), replace content instead of appending
+      let newValue: string;
+      if (dictationField === 'historiqueEvolution') {
+        // Replace content for Section 7 to avoid duplication
+        newValue = dictationResult;
+      } else {
+        // Append the dictation result to the existing content for other fields
+        newValue = currentValue ? `${currentValue}\n\n${dictationResult}` : dictationResult;
+      }
       
       // Update the form field
       form.setValue(dictationField as any, newValue);
+      
+      // Force form to recognize the change
+      form.trigger(dictationField as any);
       
       // Clear the dictation session storage
       sessionStorage.removeItem('dictationResult');
@@ -1096,13 +1108,13 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       
       // Show success message with toast
       toast({
-        title: language === 'fr' ? "Dictée ajoutée" : "Dictation added",
+        title: language === 'fr' ? "Dictée sauvegardée" : "Dictation saved",
         description: language === 'fr' 
-          ? `Contenu ajouté au champ: ${dictationField}` 
-          : `Content added to field: ${dictationField}`,
+          ? `Contenu sauvegardé dans: ${dictationField}` 
+          : `Content saved to: ${dictationField}`,
       });
       
-      console.log(`Dictation result added to field: ${dictationField}`);
+      console.log(`Dictation result saved to field: ${dictationField}`, { newValue: newValue.substring(0, 100) + '...' });
     }
 
     // Handle section navigation after dictation

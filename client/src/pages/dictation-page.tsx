@@ -362,7 +362,12 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
 
   const handleSaveToSection = () => {
     const textToSave = isEditing ? editableText : finalText;
-    if (!selectedSection || !textToSave) return;
+    if (!selectedSection || !textToSave) {
+      console.warn('Cannot save: missing section or text', { selectedSection, hasText: !!textToSave });
+      return;
+    }
+
+    console.log('Saving dictation to section:', { selectedSection, textLength: textToSave.length });
 
     // Check if this is a new visit
     const returnPath = sessionStorage.getItem('dictationReturnPath') || '';
@@ -385,6 +390,12 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     sessionStorage.setItem('dictationResult', textToSave);
     sessionStorage.setItem('dictationField', selectedSection);
 
+    console.log('Stored in sessionStorage:', { 
+      dictationField: selectedSection, 
+      resultLength: textToSave.length,
+      preview: textToSave.substring(0, 100) + '...'
+    });
+
     // Store the target section for navigation and auto-scroll
     const targetSection = getFormSectionFromField(selectedSection);
     sessionStorage.setItem('scrollToSection', targetSection);
@@ -404,6 +415,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
 
     // Navigate back to the original form with section anchor for immediate navigation
     const finalReturnPath = returnPath || '/forms/cnesst-medical-evaluation';
+    console.log('Navigating back to:', finalReturnPath + '#' + targetSection);
     setLocation(finalReturnPath + '#' + targetSection);
   };
 
