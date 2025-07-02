@@ -188,6 +188,35 @@ Le travailleur revoit le docteur Sairam, le 3 avril 2024. Il maintient les diagn
 
 Le travailleur revoit le docteur Sairam, le 19 juin 2024. Il juge la condition clinique améliorée. Il augmente les jours de travail à tâches régulières à 5 jours par semaine. Il note : « besoin d'expertise 204 ».`;
 
+// Sample 6: Infected Knee Bursa Case
+const ENHANCED_SECTION_7_SAMPLE_6 = `7. Historique de faits et évolution
+
+La fiche de réclamation du travailleur décrit l'événement suivant survenu le 31 mai 2022 :
+
+« Le 31 mai en PM je suis allé à la marina pour réparer les escaliers. Je suis rentré à quattre pattes sous l'escalier pour là soulever une roche qui as planté dans le genou gauche je l'ai retiré rapidement et j'ai continué mon travail. Le soir même j'ai ressenti une légère douleur au genou gauche commu un bleu. Le 1er juin suite à l'enflure j'ai consulté à l'hôpital. »
+
+Le travailleur consulte le docteur Roch Matte, le 2 juin 2022. Il diagnostique une cellulite à la jambe gauche. Il prescrit des antibiotiques et maintient les travaux réguliers.
+
+Le travailleur rencontre le docteur Touzin, le 5 juin 2022. Il diagnostique une bursite rotulienne surinfectée. Il prescrit des antibiotiques par voie intraveineuse. Il juge l'état clinique détérioré.
+
+Le travailleur rencontre le docteur Dominique Garant, le 7 juin 2022. Elle diagnostique une bursite rotulienne surinfectée. Elle juge la condition clinique détérioré. Elle prescrit des restrictions de ne pas s'agenouillée sur sa jambe gauche. Elle prescrit des visites quotidiennes au centre hospitalier, car le travailleur est sous antibiotiques intraveineux.
+
+Le travailleur revoit le docteur Garant, le 8 juin 2022. Elle juge la condition clinique détérioré avec une collection purulente au scan. Elle prescrit un arrêt de travail est réfère le travailleur en chirurgie orthopédique.
+
+Le travailleur revoit le docteur Garant, le 10 juin 2022. Elle juge la condition clinique améliorée. Elle maintient l'arrêt de travail.
+
+Le travailleur revoit le docteur Garant, le 13 juin 2022. Elle juge la condition clinique améliorée. Elle note que l'infection est résolue et qu'il reste une bursite réactive. Elle prescrit un retour au travail à partir du 15 juin 2022 mais avec restriction d'éviter de s'agenouillée sur le genou gauche.
+
+Le travailleur rencontre le docteur Micheline Letendre, le 22 juin 2022. Elle diagnostique une bursite au genou gauche avec douleurs résiduelles post-infection. Elle note une condition clinique améliorée. Elle rapporte qu'il persiste une guérison sous optimale car le travailleur doit s'agenouillée fréquemment.
+
+Le travailleur revoit le docteur Letendre, le 21 septembre 2022. Elle juge la condition clinique améliorée mais que la guérison n'est pas encore optimale.
+
+Le travailleur revoit le docteur Letendre, le 23 novembre 2022. Elle juge la condition clinique améliorée mais que la guérison n'est pas optimale.
+
+Le docteur Letendre produit un rapport final, le 21 février 2023 sur le diagnostic de bursite genou gauche infectée. Elle consolide le travailleur avec atteinte permanente à l'intégrité physique ou psychique et limitations fonctionnelles. Elle ne produira pas le rapport d'évaluation médicale.
+
+Le docteur Letendre produit un 2e rapport final, le 17 mai 2023 sur le diagnostic de bursite genou gauche infectée. Elle consolide le travailleur avec atteinte permanente à l'intégrité physique ou psychique et limitations fonctionnelles. Elle note qu'il reste un léger gonflement et une intolérance à la position agenouillée de plus de 10 minutes. Elle ne produira pas le rapport d'évaluation médicale.`;
+
 export async function enhancedFormatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured');
@@ -216,11 +245,11 @@ INSTRUCTIONS SPÉCIALISÉES:
 - Infiltrations et examens d'imagerie
 
 TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
-- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite, déchirure méniscale, déchirure ligament croisé antérieur
-- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde, ménisque interne, corne postérieure, échancrure intercondylienne, ligament collatéral interne, chondromalacie
-- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis, déchirure en anse de seau, aspect macéré
-- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie, orthèse genou, ankylose
-- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique, expertise 204
+- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite, déchirure méniscale, déchirure ligament croisé antérieur, cellulite, bursite rotulienne surinfectée, collection purulente
+- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde, ménisque interne, corne postérieure, échancrure intercondylienne, ligament collatéral interne, chondromalacie, rotule
+- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis, déchirure en anse de seau, aspect macéré, collection purulente au scan
+- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie, orthèse genou, ankylose, antibiotiques par voie intraveineuse, visites quotidiennes au centre hospitalier
+- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique, expertise 204, infection résolue, bursite réactive, guérison sous optimale, douleurs résiduelles post-infection, intolérance à la position agenouillée
 
 EXEMPLES DE FORMAT AUTHENTIQUE:
 
@@ -238,6 +267,9 @@ ${ENHANCED_SECTION_7_SAMPLE_4}
 
 Exemple 5 - Cas genou d'entrepôt avec déchirure méniscale:
 ${ENHANCED_SECTION_7_SAMPLE_5}
+
+Exemple 6 - Cas bursite genou infectée:
+${ENHANCED_SECTION_7_SAMPLE_6}
 
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
       : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards for occupational injuries.
@@ -261,11 +293,11 @@ CRITICAL ELEMENTS TO PRESERVE:
 - Infiltrations and imaging examinations
 
 QUEBEC SPECIALIZED TERMINOLOGY:
-- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis, meniscal tear, anterior cruciate ligament tear
-- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid, internal meniscus, posterior horn, intercondylar notch, internal collateral ligament, chondromalacia
-- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan, bucket handle tear, macerated appearance
-- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia, knee orthosis, ankylosis
-- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy, 204 expertise
+- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis, meniscal tear, anterior cruciate ligament tear, cellulitis, infected patellar bursitis, purulent collection
+- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid, internal meniscus, posterior horn, intercondylar notch, internal collateral ligament, chondromalacia, patella
+- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan, bucket handle tear, macerated appearance, purulent collection on scan
+- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia, knee orthosis, ankylosis, intravenous antibiotics, daily hospital visits
+- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy, 204 expertise, infection resolved, reactive bursitis, suboptimal healing, post-infection residual pain, kneeling position intolerance
 
 AUTHENTIC FORMAT EXAMPLES:
 
@@ -283,6 +315,9 @@ ${ENHANCED_SECTION_7_SAMPLE_4}
 
 Example 5 - Warehouse Knee Injury with Meniscal Tear:
 ${ENHANCED_SECTION_7_SAMPLE_5}
+
+Example 6 - Infected Knee Bursa Case:
+${ENHANCED_SECTION_7_SAMPLE_6}
 
 Respond only with the formatted text according to these strict standards, no explanations.`;
 
@@ -351,6 +386,9 @@ ${ENHANCED_SECTION_7_SAMPLE_4}
 
 Exemple 5 - Cas genou d'entrepôt avec déchirure méniscale:
 ${ENHANCED_SECTION_7_SAMPLE_5}
+
+Exemple 6 - Cas bursite genou infectée:
+${ENHANCED_SECTION_7_SAMPLE_6}
 
 Retourne le texte amélioré et formaté.`
       : `You are a medical assistant that helps improve dictation for Quebec CNESST medical reports.
