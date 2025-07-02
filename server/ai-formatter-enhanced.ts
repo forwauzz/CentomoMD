@@ -217,6 +217,49 @@ Le docteur Letendre produit un rapport final, le 21 février 2023 sur le diagnos
 
 Le docteur Letendre produit un 2e rapport final, le 17 mai 2023 sur le diagnostic de bursite genou gauche infectée. Elle consolide le travailleur avec atteinte permanente à l'intégrité physique ou psychique et limitations fonctionnelles. Elle note qu'il reste un léger gonflement et une intolérance à la position agenouillée de plus de 10 minutes. Elle ne produira pas le rapport d'évaluation médicale.`;
 
+// Sample 7: Heavy Machinery Ankle Fracture Case
+const ENHANCED_SECTION_7_SAMPLE_7 = `7. Historique de faits et évolution
+
+Le travailleur est un technicien en pose de pneus de poids lourds. Ses tâches consistaient à la réparation, installation et manipulation de gros pneus. Le travailleur rapporte qu'il y a beaucoup de manipulation de charges lourdes sur ses quarts de travail.
+
+La fiche de de l'avis de l'employeur décrit l'événement suivant survenu le 19 janvier 2023 :
+
+« Alors que le travailleur s'affairait à dépiler un pneu (1200 x 20 plein de wing fill) d'un pile de 3 pneus avec le chaine bloc l'employé a tourné la tête car quelqu'un parlait derrière lui et celui-ci étant tourné n'a pas vu que le pneu en touchant la pile déviait de sa trajectoire étant tourné celui-ci n'a pas pu l'éviter et il est de venue le frapper pour ensuite lui est tombé sur la cheville droite. »
+
+Le travailleur a été vu en urgence à l'hôpital de la Sarre, le 19 janvier 2023. Il a bénéficié de radiographies de la jambe droite et de la cheville droite. Elles sont interprétées par le docteur Romuald Ferré, radiologiste. Ce dernier constate :
+
+« Jambe droite :
+Pas de dislocation du genou.
+Fracture bimalléolaire médiale et latérale. Sinon, reste des structures osseuses du tibia et de la fibula sont normales.
+Pas d'autre fracture décelée.
+Pas de dislocation du genou. Pas d'épanchement interarticulaire au sein du genou.
+
+Cheville droite :
+Il existe une fracture malléolaire médiale modérément déplacée et impactée.
+Fracture fibulaire distal oblique. Il s'accompagne un épaississement des tissus mous en regard. On note un épanchement interarticulaire au sein de l'articulation tibio-talienne. Pas de trouvailles pouvant suggérer une éventuelle fracture de la malléole postérieure. En cas de doute cliniquement persistant, une corrélation avec un scanner serait alors indiquée. Avis orthopédique urgent demandé. »
+
+Le travailleur est transféré à l'hôpital d'Amos et rencontre le docteur Marie-Pier Nolet. Le docteur Nolet procède à une chirurgie en urgence, le 21 janvier 2023. Elle réalise une réduction ouverte et fixation interne du pilon tibial droit et une réduction ouverte et fixation interne de la malléole externe de la cheville droite. Chirurgie bien tolérée sans complication immédiate.
+
+Le travailleur revoit le docteur Nolet, le 23 janvier 2023. Suivi post-opératoire standard. Le docteur Nolet prescrit un arrêt de travail.
+
+Le travailleur revoit le docteur Nolet, le 13 mars 2023. Elle prescrit de la physiothérapie, cesse le plâtre et prescrit une botte de type « foam walker ». Elle ne permet pas la mise en charge et maintient l'arrêt de travail.
+
+Le travailleur bénéficie d'une radiographie de la cheville droite, le 13 mars 2023. Elle est interprétée par le docteur Lucie Daoust, radiologiste. Cette dernière constate :
+
+« Fracture de l'extrémité du tibia et de la fibula. Plaque vis en place. Consolidation en cours. »
+
+Le travailleur revoit le docteur Nolet, le 28 juin 2023. Elle maintient les traitements en physiothérapie et note que le travailleur n'est pas en mesure de refaire son travail régulier pour l'instant. Elle prescrit des assignations temporaires.
+
+Le travailleur revoit le docteur Nolet, le 22 août 2023. Elle maintient les traitements en physiothérapie et inscrit le travailleur sur sa liste opératoire pour une exérèse de plaque et vis au niveau de la cheville droite. Elle maintient les assignations temporaires.
+
+Le travailleur est convoqué à une expertise médicale, le 24 août 2023. Elle est réalisée par le docteur Louis Bellemare, chirurgien orthopédiste. Sur le diagnostic de fracture du tibia droit et de la malléole externe droite, le docteur Bellemare ne consolide pas le travailleur. Il est en accord avec sa collègue, le docteur Nolet, et suggère une exérèse de matériel orthopédique.
+
+Le docteur Nolet procède à l'exérèse du matériel orthopédique, le 10 novembre 2023. Procédure bien tolérée sans complication immédiate. Elle prescrit un arrêt de travail.
+
+Le travailleur revoit le docteur Nolet, le 14 décembre 2023. Elle prescrit des assignations temporaires.
+
+Le docteur Nolet produit un rapport final, le 25 janvier 2024. Sur les diagnostics de fracture du pilon tibial droit et fracture de la malléole externe droite, elle consolide le travailleur avec atteinte permanente à l'intégrité physique ou psychique et limitations fonctionnelles. Elle ne produira pas le rapport d'évaluation médicale (REM).`;
+
 export async function enhancedFormatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured');
@@ -245,11 +288,11 @@ INSTRUCTIONS SPÉCIALISÉES:
 - Infiltrations et examens d'imagerie
 
 TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
-- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite, déchirure méniscale, déchirure ligament croisé antérieur, cellulite, bursite rotulienne surinfectée, collection purulente
-- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde, ménisque interne, corne postérieure, échancrure intercondylienne, ligament collatéral interne, chondromalacie, rotule
-- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis, déchirure en anse de seau, aspect macéré, collection purulente au scan
-- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie, orthèse genou, ankylose, antibiotiques par voie intraveineuse, visites quotidiennes au centre hospitalier
-- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique, expertise 204, infection résolue, bursite réactive, guérison sous optimale, douleurs résiduelles post-infection, intolérance à la position agenouillée
+- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite, déchirure méniscale, déchirure ligament croisé antérieur, cellulite, bursite rotulienne surinfectée, collection purulente, fracture bimalléolaire médiale et latérale, fracture malléolaire médiale déplacée et impactée, fracture fibulaire distal oblique, fracture du pilon tibial
+- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde, ménisque interne, corne postérieure, échancrure intercondylienne, ligament collatéral interne, chondromalacie, rotule, tibia, fibula, malléole médiale, malléole postérieure, articulation tibio-talienne
+- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis, déchirure en anse de seau, aspect macéré, collection purulente au scan, épanchement interarticulaire, épaississement des tissus mous, dislocation
+- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie, orthèse genou, ankylose, antibiotiques par voie intraveineuse, visites quotidiennes au centre hospitalier, réduction ouverte et fixation interne, plaque vis, foam walker, exérèse de matériel orthopédique, mise en charge, suivi post-opératoire
+- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique, expertise 204, infection résolue, bursite réactive, guérison sous optimale, douleurs résiduelles post-infection, intolérance à la position agenouillée, consolidation en cours, assignations temporaires, chirurgie bien tolérée sans complication immédiate
 
 EXEMPLES DE FORMAT AUTHENTIQUE:
 
@@ -270,6 +313,9 @@ ${ENHANCED_SECTION_7_SAMPLE_5}
 
 Exemple 6 - Cas bursite genou infectée:
 ${ENHANCED_SECTION_7_SAMPLE_6}
+
+Exemple 7 - Cas fracture cheville avec chirurgie:
+${ENHANCED_SECTION_7_SAMPLE_7}
 
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
       : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards for occupational injuries.
@@ -293,11 +339,11 @@ CRITICAL ELEMENTS TO PRESERVE:
 - Infiltrations and imaging examinations
 
 QUEBEC SPECIALIZED TERMINOLOGY:
-- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis, meniscal tear, anterior cruciate ligament tear, cellulitis, infected patellar bursitis, purulent collection
-- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid, internal meniscus, posterior horn, intercondylar notch, internal collateral ligament, chondromalacia, patella
-- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan, bucket handle tear, macerated appearance, purulent collection on scan
-- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia, knee orthosis, ankylosis, intravenous antibiotics, daily hospital visits
-- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy, 204 expertise, infection resolved, reactive bursitis, suboptimal healing, post-infection residual pain, kneeling position intolerance
+- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis, meniscal tear, anterior cruciate ligament tear, cellulitis, infected patellar bursitis, purulent collection, bimalleolar fracture medial and lateral, displaced and impacted medial malleolar fracture, oblique distal fibular fracture, tibial pilon fracture
+- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid, internal meniscus, posterior horn, intercondylar notch, internal collateral ligament, chondromalacia, patella, tibia, fibula, medial malleolus, posterior malleolus, tibio-talar joint
+- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan, bucket handle tear, macerated appearance, purulent collection on scan, joint effusion, soft tissue thickening, dislocation
+- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia, knee orthosis, ankylosis, intravenous antibiotics, daily hospital visits, open reduction and internal fixation, plate and screws, foam walker, orthopedic hardware removal, weight bearing, post-operative follow-up
+- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy, 204 expertise, infection resolved, reactive bursitis, suboptimal healing, post-infection residual pain, kneeling position intolerance, consolidation in progress, temporary assignments, surgery well tolerated without immediate complication
 
 AUTHENTIC FORMAT EXAMPLES:
 
@@ -318,6 +364,9 @@ ${ENHANCED_SECTION_7_SAMPLE_5}
 
 Example 6 - Infected Knee Bursa Case:
 ${ENHANCED_SECTION_7_SAMPLE_6}
+
+Example 7 - Ankle Fracture with Surgery Case:
+${ENHANCED_SECTION_7_SAMPLE_7}
 
 Respond only with the formatted text according to these strict standards, no explanations.`;
 
@@ -389,6 +438,9 @@ ${ENHANCED_SECTION_7_SAMPLE_5}
 
 Exemple 6 - Cas bursite genou infectée:
 ${ENHANCED_SECTION_7_SAMPLE_6}
+
+Exemple 7 - Cas fracture cheville avec chirurgie:
+${ENHANCED_SECTION_7_SAMPLE_7}
 
 Retourne le texte amélioré et formaté.`
       : `You are a medical assistant that helps improve dictation for Quebec CNESST medical reports.
