@@ -71,7 +71,34 @@ Aspect macéré, dégénéré du ménisque interne où on note une déchirure et
 
 Le travailleur revoit le docteur Sairam, le 18 mai 2023. Il maintient le diagnostic d'entorse du genou droit et ajoute les diagnostics de déchirure du ménisque interne et du ligament croisé antérieur suivant les résultats de la résonance magnétique.
 
-Le travailleur revoit le docteur Sairam, le 19 juin 2024. Il juge la condition clinique améliorée. Il augmente les jours de travail à tâches régulières à 5 jours par semaine. Il note : « besoin d'expertise 204 ».`;
+Le travailleur revoit le docteur Sairam, le 19 juin 2024. Il juge la condition clinique améliorée. Il augmente les jours de travail à tâches régulières à 5 jours par semaine. Il note : « besoin d'expertise 204 ».
+
+EXEMPLE ADDITIONNEL 4 - CAS ÉPAULE COMPLEXE AVEC ÉVOLUTION LONGUE:
+
+La fiche de réclamation du travailleur décrit l'événement suivant survenu le 22 octobre 2022.
+
+« Chez les clients avec mon collègue au moment de descendre du camion avec le comptoir de quartz d'environ 350 lbs, le comptoir a basculer vers la gauche, j'ai senti un coup étirer mon bras vers l'arrière, j'ai senti un grand étirement avec une grosse douleur. »
+
+Le travailleur consulte le docteur Nicolas Bussières, le 23 octobre 2020. Il diagnostique une élongation musculaire thorax gauche, pectoraux et tendinite épaule gauche traumatique. Il prescrit un arrêt de travail, de la physiothérapie et des anti-inflammatoires.
+
+Le travailleur rencontre le docteur Marc Boudreau, le 5 novembre 2020. Il diagnostique une tendinite versus déchirure musculaire au niveau des trapèzes, grand dorsal et grand pectoral gauche. Il prescrit de la physiothérapie, un arrêt de travail et des anti-inflammatoires.
+
+Le travailleur obtient des résonances magnétiques du rachis cervical, de l'épaule gauche et du trapèze et du grand pectoral gauche, le 29 décembre 2020. Elles sont interprétées par le docteur Lionel Buré, radiologiste. Ce dernier constate :
+
+« IRM cervicale
+…
+Conclusion :
+Changement dégénératif multi-étagés tel que décrit ci-haut avec une sténose foraminale sévère à gauche qui pourrait irriter la racine de C7 à corréler avec la clinique. »
+
+Le travailleur rencontre le docteur Andréanne Marmen, chirurgienne orthopédiste, le 9 juin 2021. Elle diagnostique une déchirure partielle du supra-épineux, une bursite sous-acromio-deltoïdienne de l'épaule gauche ainsi qu'une symptomatologie cervicale prédominante. Elle maintient les traitements en physiothérapie et ergothérapie. Elle ne suggère pas de chirurgie et ne compte pas revoir le travailleur.
+
+Le travailleur obtient une 3e infiltration sous-acromio-deltoïdienne de l'épaule gauche, le 2 septembre 2021. Elle est réalisée par le docteur Thierry Sabourin, radiologiste. Procédure bien tolérée sans complication immédiate.
+
+Le travailleur rencontre le docteur Jimmy Hai Triêu Nguyen, chirurgien orthopédiste surspécialisé en membre supérieur, le 29 novembre 2021. Il note de multiples sources de douleurs, une plexopathie brachiale gauche probable, une cervicobrachialgie gauche sur sténose sévère C7 gauche, une tendinopathie du supra-épineux gauche et une tendinite du long chef du biceps. Il ne suggère pas de chirurgie à l'épaule gauche.
+
+Le travailleur revoit le docteur Brodeur, le 21 janvier 2024. Elle suggère fortement une réorientation de carrière. Elle maintient les traitements en physiothérapie, acupuncture, psychologie ainsi que l'arrêt de travail.
+
+Le docteur Brodeur produit un formulaire sur l'évolution des lésions, le 12 mars 2024. Elle juge que la lésion est toujours active qu'il y a une infiltration prévue en fin mars 2024 à la clinique de la douleur. Si cette infiltration est non efficace, elle suggère de consolider le travailleur avec séquelles. Elle note : « cas complexes qui devrait être évaluée au BEM. »`;
 
 export async function formatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
@@ -80,22 +107,37 @@ export async function formatSection7Text(rawText: string, language: 'fr' | 'en' 
 
   try {
     const systemPrompt = language === 'fr' 
-      ? `Tu es un assistant médical expert qui formate les textes de rapports médicaux selon les standards professionnels québécois. 
+      ? `Tu es un assistant médical expert qui formate les textes de rapports médicaux selon les standards professionnels québécois pour les lésions professionnelles CNESST.
 
-INSTRUCTIONS:
+INSTRUCTIONS SPÉCIALISÉES:
 - Formate le texte brut fourni selon le style de la Section 7 "Historique de faits et évolution"
-- Utilise le format chronologique avec dates précises
-- Structure le texte en paragraphes logiques
-- Utilise le vocabulaire médical approprié
-- Maintiens la troisième personne (le/la travailleur/travailleuse)
-- Inclus les détails des consultations médicales, diagnostics, traitements
-- Organise par dates et rendez-vous médicaux
-- Respecte les conventions d'écriture médicale québécoise
+- Utilise EXCLUSIVEMENT "Le travailleur" ou "La travailleuse" (jamais "Le patient")
+- Format chronologique strict avec dates précises (format: "le [jour] [mois] [année]")
+- Préserve TOUTE la terminologie médicale spécialisée
+- Maintiens les citations exactes entre guillemets « ... »
+- Structure en paragraphes par consultation/procédure
 
-EXEMPLE DE FORMAT:
+ÉLÉMENTS CRITIQUES À PRÉSERVER:
+- Descriptions d'événements entre guillemets exactes
+- Noms complets des médecins avec titre "docteur"
+- Spécialités complètes (chirurgien orthopédiste, physiatre, radiologiste, etc.)
+- Diagnostics médicaux précis avec terminologie exacte
+- Résultats d'examens avec conclusions complètes
+- Évolution clinique (améliorée, stable, détériorée)
+- Tous les traitements et procédures
+- Infiltrations et examens d'imagerie
+
+TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
+- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale
+- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7
+- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux
+- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée
+- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles
+
+EXEMPLES DE FORMAT AUTHENTIQUE:
 ${SECTION_7_SAMPLE}
 
-Réponds uniquement avec le texte formaté, sans explications.`
+Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
       : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards.
 
 INSTRUCTIONS:

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { storage } from "./storage";
 import { insertMedicalFormSchema } from "@shared/schema";
 import { formatSection7Text, enhanceSection7Dictation, formatSection8Text, enhanceSection8Dictation, generateSection11Conclusion } from "./ai-formatter";
+import { enhancedFormatSection7Text, enhancedEnhanceSection7Dictation } from "./ai-formatter-enhanced";
 import { aiProcessingEngine } from "./ai-processing-engine";
 import { hashPassword, verifyPassword, generateUserId, getSessionConfig, requireAuth, requireAdmin } from "./auth";
 import { setupInitialUsers } from "./setup-users";
@@ -643,6 +644,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(500).json({ 
         message: "Failed to distribute Section 8 content", 
+        error: error.message || "Unknown error"
+      });
+    }
+  });
+
+  // Enhanced Section 7 formatting with Quebec medical training
+  app.post("/api/ai/enhanced-format-section7", async (req, res) => {
+    try {
+      const { text, language = 'fr' } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+
+      const formattedText = await enhancedFormatSection7Text(text, language);
+      res.json({ formattedText });
+    } catch (error: any) {
+      console.error('Enhanced Section 7 formatting error:', error);
+      res.status(500).json({ 
+        message: "Failed to format Section 7 text",
+        error: error.message || "Unknown error"
+      });
+    }
+  });
+
+  // Enhanced Section 7 dictation improvement with Quebec standards
+  app.post("/api/ai/enhanced-enhance-section7-dictation", async (req, res) => {
+    try {
+      const { transcript, language = 'fr' } = req.body;
+      
+      if (!transcript) {
+        return res.status(400).json({ message: "Transcript is required" });
+      }
+
+      const result = await enhancedEnhanceSection7Dictation(transcript, language);
+      res.json({ 
+        enhancedText: result.formatted,
+        suggestions: result.suggestions 
+      });
+    } catch (error: any) {
+      console.error('Enhanced Section 7 dictation enhancement error:', error);
+      res.status(500).json({ 
+        message: "Failed to enhance Section 7 dictation",
         error: error.message || "Unknown error"
       });
     }
