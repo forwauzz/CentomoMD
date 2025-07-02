@@ -1086,10 +1086,22 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       // Get current value of the field
       const currentValue = form.getValues(dictationField as any) || '';
       
-      // For Section 7 (historiqueEvolution), replace content instead of appending
+      // Handle different field types appropriately
       let newValue: string;
       if (dictationField === 'historiqueEvolution') {
         // Replace content for Section 7 to avoid duplication
+        newValue = dictationResult;
+      } else if (dictationField === 'section8Input') {
+        // For Section 8 global input, replace content and auto-distribute
+        newValue = dictationResult;
+        
+        // Auto-distribute the content to the three Section 8 fields
+        const sections = parseSection8Content(dictationResult);
+        if (sections.appreciation) form.setValue('appreciationEvolution', sections.appreciation);
+        if (sections.plaintes) form.setValue('plaintesproblemes', sections.plaintes);
+        if (sections.impact) form.setValue('impactAvq', sections.impact);
+      } else if (['appreciationEvolution', 'plaintesproblemes', 'impactAvq'].includes(dictationField)) {
+        // For individual Section 8 fields, replace content
         newValue = dictationResult;
       } else {
         // Append the dictation result to the existing content for other fields
@@ -2360,7 +2372,17 @@ At the end of the interview, we asked if she had any other comments or informati
                       name="appreciationEvolution"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="mb-2 block">Appréciation subjective de l'évolution :</FormLabel>
+                          <div className="flex items-center justify-between mb-2">
+                            <FormLabel className="block">Appréciation subjective de l'évolution :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleDictation('appreciationEvolution')}
+                              className="no-print bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Mic className="w-4 h-4" />
+                            </Button>
+                          </div>
                           <FormControl>
                             <Textarea 
                               {...field} 
@@ -2377,7 +2399,17 @@ At the end of the interview, we asked if she had any other comments or informati
                       name="plaintesproblemes"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="mb-2 block">Plaintes et problèmes :</FormLabel>
+                          <div className="flex items-center justify-between mb-2">
+                            <FormLabel className="block">Plaintes et problèmes :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleDictation('plaintesproblemes')}
+                              className="no-print bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Mic className="w-4 h-4" />
+                            </Button>
+                          </div>
                           <FormControl>
                             <Textarea 
                               {...field} 
@@ -2394,7 +2426,17 @@ At the end of the interview, we asked if she had any other comments or informati
                       name="impactAvq"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="mb-2 block">Impact sur AVQ/AVD :</FormLabel>
+                          <div className="flex items-center justify-between mb-2">
+                            <FormLabel className="block">Impact sur AVQ/AVD :</FormLabel>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleDictation('impactAvq')}
+                              className="no-print bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Mic className="w-4 h-4" />
+                            </Button>
+                          </div>
                           <FormControl>
                             <Textarea 
                               {...field} 

@@ -356,6 +356,10 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
       'conclusionResume': 'section11',
       'conclusionDiagnostic': 'section11',
       'conclusionDateConsolidation': 'section11',
+      'conclusionSoinsTraitements': 'section11',
+      'conclusionAtteintePermanente': 'section11',
+      'conclusionLimitationsFonctionnelles': 'section11',
+      'conclusionEvaluationLimitations': 'section11',
     };
     return fieldToSectionMap[fieldKey] || 'section1';
   };
