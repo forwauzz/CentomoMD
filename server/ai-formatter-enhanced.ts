@@ -151,6 +151,43 @@ Le travailleur revoit le docteur Ménard, le 27 février 2024. Il maintient le d
 
 Le travailleur revoit le docteur Ménard, le 7 mai 2024. Il juge la condition clinique stable. Il note une infiltration à la cheville droite partiellement efficace. Il est en attente pour une 2ième infiltration prévue dans 1 à 2 mois. Le docteur Ménard demande une IRM de contrôle au niveau de la cheville droite.`;
 
+// Sample 5: Warehouse Knee Injury with Meniscal Tear
+const ENHANCED_SECTION_7_SAMPLE_5 = `7. Historique de faits et évolution
+
+Le travailleur est ouvrier d'entrepôt et travaille au débarcadère. Ses tâches consistent à faire la réception des produits, décharger les camions, manœuvré le chariot élévateur et le chariot électrique, placer les produits dans le réfrigérateur ou congélateur, monter sur des échelles à l'occasion afin de faire l'inventaire et faire l'entretien de l'entrepôt.
+
+La fiche de réclamation du travailleur décrit l'événement suivant survenu le 9 novembre 2022 :
+
+« Je venais juste de finir une tâche qui consistait à débarquer un container. En rentrant les palettes de lait, je ramène le chariot à palettes, je fais un pas et le second je trébuche et c'est mon genou qui fait très mal, après c'est l'hôpital. »
+
+Le travailleur consulte le docteur Ashwin Sairam, le 16 novembre 2022. Il diagnostique une entorse du genou droit et prescrit une résonance magnétique afin d'exclure une déchirure méniscale et une déchirure du ligament collatéral interne du genou droit. Il prescrit de la physiothérapie et un arrêt de travail.
+
+Le travailleur revoit le docteur Sairam, le 14 décembre 2022. Il juge la condition clinique stable. Il maintient les traitements physiothérapie, ergothérapie et l'arrêt de travail. Il note une ankylose importante au niveau du genou droit et prescrit une orthèse.
+
+Le travailleur revoit le docteur Sairam, le 3 avril 2023. Il maintient le diagnostic d'entorse du genou droit. Il juge la condition clinique stable. Il maintient les traitements en physiothérapie, ergothérapie et l'arrêt de travail. Il relance l'investigation par résonance magnétique du genou droit.
+
+Le travailleur obtient une résonance magnétique du genou droit, le 22 avril 2023. Elle est interprétée par le docteur Yves Benabu, radiologiste. Ce dernier constate :
+
+« Compartiment interne :
+Aspect macéré, dégénéré du ménisque interne où on note une déchirure et un aspect macéré complexe de la corne postérieure avec une déchirure en anse de seau avec un fragment du ménisque venant s'interposer au sein de l'échancrure intercondylienne, mesurant jusqu'à 25 x 4 mm.
+Le cartilage m'apparaît préservé mais en hypersignal en lien avec une chondromalacie de grade I. Le ligament collatéral interne est normal et les composantes stabilisatrices profondes également.
+
+Compartiment postérieur :
+Déchirure, jusqu'à preuve du contraire de haut grade du ligament croisé antérieur à son attache proximale, quelques fibres résiduelles d'attache sont visualisées mais cliniquement il faudrait voir si le ligament croisé antérieur est capable toujours d'amener une stabilité antérieure.
+
+Ceci m'apparaît ancien, car il n'y a pas de signe en faveur d'un traumatisme en pivot.
+
+Opinion :
+Plusieurs trouvailles telle que décrite ci-haut, particulièrement compartiment interne avec une déchirure en anse de seau, aspect macéré de la corne postérieure et aspect déchiré, juste qu'à preuve du contraire, de la portion proximale des fibres d'attache du ligament croisé antérieur. Je vous réfère au rapport ci-haut pour description. »
+
+Le travailleur revoit le docteur Sairam, le 18 mai 2023. Il maintient le diagnostic d'entorse du genou droit et ajoute les diagnostics de déchirure du ménisque interne et du ligament croisé antérieur suivant les résultats de la résonance magnétique. Il maintient les traitements en physiothérapie, ergothérapie et acupuncture ainsi que l'arrêt de travail. Il juge la condition clinique améliorée.
+
+Le travailleur revoit le docteur Sairam, le 9 août 2023. Il juge la condition clinique stable. Il maintient les traitements en physiothérapie, ergothérapie et acupuncture. Il note que le travailleur est apte à essayer son travail régulier à temps plein à partir du 28 août 2023.
+
+Le travailleur revoit le docteur Sairam, le 3 avril 2024. Il maintient les diagnostics d'entorse du genou droit, déchirure du ménisque interne et du ligament croisé antérieur du genou droit. Il juge la condition clinique améliorée. Il cesse les traitements en physiothérapie, ergothérapie et acupuncture à la suite d'une atteinte de plateau thérapeutique. Il note que le travailleur doit utiliser son orthèse à son genou droit au travail. Il augmente les jours de travail à tâches régulières.
+
+Le travailleur revoit le docteur Sairam, le 19 juin 2024. Il juge la condition clinique améliorée. Il augmente les jours de travail à tâches régulières à 5 jours par semaine. Il note : « besoin d'expertise 204 ».`;
+
 export async function enhancedFormatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured');
@@ -179,11 +216,11 @@ INSTRUCTIONS SPÉCIALISÉES:
 - Infiltrations et examens d'imagerie
 
 TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
-- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite
-- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde
-- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis
-- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie
-- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique
+- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose, entorse cheville, ténosynovite, déchirure méniscale, déchirure ligament croisé antérieur
+- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire, malléole externe, mortaise, ligaments tibiopéronier, talopéronier, calcanéopéronier, deltoïde, ménisque interne, corne postérieure, échancrure intercondylienne, ligament collatéral interne, chondromalacie
+- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR, échographie de surface, scan du rachis, déchirure en anse de seau, aspect macéré
+- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie, orthèse genou, ankylose
+- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique, expertise 204
 
 EXEMPLES DE FORMAT AUTHENTIQUE:
 
@@ -198,6 +235,9 @@ ${ENHANCED_SECTION_7_SAMPLE_3}
 
 Exemple 4 - Cas cheville complexe avec complications:
 ${ENHANCED_SECTION_7_SAMPLE_4}
+
+Exemple 5 - Cas genou d'entrepôt avec déchirure méniscale:
+${ENHANCED_SECTION_7_SAMPLE_5}
 
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
       : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards for occupational injuries.
@@ -221,11 +261,11 @@ CRITICAL ELEMENTS TO PRESERVE:
 - Infiltrations and imaging examinations
 
 QUEBEC SPECIALIZED TERMINOLOGY:
-- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis
-- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid
-- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan
-- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia
-- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy
+- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis, ankle sprain, tenosynovitis, meniscal tear, anterior cruciate ligament tear
+- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus, external malleolus, mortise, tibiofibular ligaments, talofibular, calcaneofibular, deltoid, internal meniscus, posterior horn, intercondylar notch, internal collateral ligament, chondromalacia
+- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal, surface ultrasound, spine scan, bucket handle tear, macerated appearance
+- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis, walking boot, analgesia, knee orthosis, ankylosis
+- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum, complex regional pain syndrome, secondary anxiety-depressive disorders, chronic motor radiculopathy, 204 expertise
 
 AUTHENTIC FORMAT EXAMPLES:
 
@@ -240,6 +280,9 @@ ${ENHANCED_SECTION_7_SAMPLE_3}
 
 Example 4 - Complex Ankle Injury with Complications:
 ${ENHANCED_SECTION_7_SAMPLE_4}
+
+Example 5 - Warehouse Knee Injury with Meniscal Tear:
+${ENHANCED_SECTION_7_SAMPLE_5}
 
 Respond only with the formatted text according to these strict standards, no explanations.`;
 
@@ -305,6 +348,9 @@ ${ENHANCED_SECTION_7_SAMPLE_3}
 
 Exemple 4 - Cas cheville complexe avec complications:
 ${ENHANCED_SECTION_7_SAMPLE_4}
+
+Exemple 5 - Cas genou d'entrepôt avec déchirure méniscale:
+${ENHANCED_SECTION_7_SAMPLE_5}
 
 Retourne le texte amélioré et formaté.`
       : `You are a medical assistant that helps improve dictation for Quebec CNESST medical reports.
