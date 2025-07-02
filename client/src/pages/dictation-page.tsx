@@ -24,6 +24,7 @@ const translations = {
     copyText: "Copier le texte",
     clearText: "Effacer le texte",
     saveToSection: "Sauvegarder dans la section",
+    returnToSection: "Retourner à la section",
     backToForm: "Retour au formulaire",
     selectSectionFirst: "Veuillez d'abord sélectionner une section",
     textCopied: "Texte copié dans le presse-papiers",
@@ -74,6 +75,7 @@ const translations = {
     copyText: "Copy Text",
     clearText: "Clear Text",
     saveToSection: "Save to Section",
+    returnToSection: "Return to Section",
     backToForm: "Back to Form",
     selectSectionFirst: "Please select a section first",
     textCopied: "Text copied to clipboard",
@@ -413,6 +415,31 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     setIsEditing(false);
   };
 
+  const handleReturnToSection = () => {
+    if (!selectedSection) {
+      toast({
+        title: "Erreur",
+        description: t.selectSectionFirst,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const returnPath = sessionStorage.getItem('dictationReturnPath') || '/forms/cnesst-medical-evaluation';
+    
+    // Get the target section for navigation
+    const targetSection = getFormSectionFromField(selectedSection);
+    
+    // Store the section to scroll to and highlight
+    sessionStorage.setItem('scrollToSection', targetSection);
+    sessionStorage.setItem('highlightField', selectedSection);
+    
+    // Navigate back to the form with section anchor
+    const finalReturnPath = returnPath + '#' + targetSection;
+    console.log('Returning to section:', finalReturnPath);
+    setLocation(finalReturnPath);
+  };
+
   const handleCancel = () => {
     const returnPath = sessionStorage.getItem('dictationReturnPath') || '/';
 
@@ -670,6 +697,16 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                   >
                     <Save className="w-4 h-4 mr-2" />
                     {t.saveToSection}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={handleReturnToSection}
+                    disabled={!selectedSection}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    {t.returnToSection}
                   </Button>
 
                   <Button
