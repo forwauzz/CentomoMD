@@ -3,7 +3,8 @@ import OpenAI from "openai";
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const ENHANCED_SECTION_7_SAMPLE = `7. Historique de faits et évolution
+// Sample 1: Shoulder/Upper Limb Complex Case
+const ENHANCED_SECTION_7_SAMPLE_1 = `7. Historique de faits et évolution
 
 La fiche de réclamation du travailleur décrit l'événement suivant survenu le 22 octobre 2022.
 
@@ -29,6 +30,45 @@ Le travailleur rencontre le docteur Jimmy Hai Triêu Nguyen, chirurgien orthopé
 Le travailleur revoit le docteur Brodeur, le 21 janvier 2024. Elle suggère fortement une réorientation de carrière. Elle maintient les traitements en physiothérapie, acupuncture, psychologie ainsi que l'arrêt de travail.
 
 Le docteur Brodeur produit un formulaire sur l'évolution des lésions, le 12 mars 2024. Elle juge que la lésion est toujours active qu'il y a une infiltration prévue en fin mars 2024 à la clinique de la douleur. Si cette infiltration est non efficace, elle suggère de consolider le travailleur avec séquelles. Elle note : « cas complexes qui devrait être évaluée au BEM. »`;
+
+// Sample 2: Lower Limb/Calf Injury Case
+const ENHANCED_SECTION_7_SAMPLE_2 = `7. Historique de faits et évolution
+
+La travailleuse et une chauffeuse de taxi adapté. Ses tâches consistent à conduire un taxi de transport adapté, elle accompagne les gens en fauteuil roulant et donc doit monter et descendre des rampes d'accès avec les patients en fauteuil et parfois elle doit transporter des marchandises médicales d'un hôpital à l'autre. Parfois elle doit conduire jusqu'à Montréal.
+
+La fiche de réclamation de la travailleuse décrit l'événement suivant survenu le 12 août 2020 :
+
+« Je montais une pente à l'hôpital de Valleyfield en poussant un chariot avec des glacières dessus et à la fin de la pentente j'ai senti grosse douleur au niveau du mollet droit avec sensation de brûlure… Quand fut le temps de reposer mon pied par terre, j'en étais incapable j'ai tout de suite communiqué avec mon employeur pour lui expliquer ce qui venait de se passer… comme j'étais déjà dans un hôpital, il m'a dit d'aller tout de suite consulter… »
+
+La travailleuse consulte la même journée à l'urgence l'hôpital Barrie Memorial. Elle rencontre le docteur Abdelaziz Balha qui diagnostique une déchirure du mollet droit. Il prescrit des anti-inflammatoires, des relaxants musculaires et un arrêt de travail de 7 jours.
+
+La travailleuse consulte à nouveau à l'urgence de l'hôpital de Barrie Memorial pour une douleur augmentée à son mollet droit, le 19 août 2020. Elle rencontre le docteur Herma Bessaoud qui prescrit un doppler veineux du membre inférieur droit. Celui-ci est réalisé et interprété par le docteur Arnold Radu, radiologiste. Le doppler démontre aucune thrombophlébite au niveau du membre inférieur droit. L'arrêt de travail est prolongé.
+
+La travailleuse revoit le docteur Balha, le 24 août 2020. Il maintient le diagnostic de déchirure du mollet droit. Il prolonge l'arrêt de travail.
+
+La travailleuse revoit le docteur Balha, le 31 août 2020. Il maintient le diagnostic de déchirure du mollet droit. Il prescrit un arrêt de travail de deux semaines et ne compte pas revoir la patiente.
+
+La travailleuse rencontre le docteur Daniel Leblanc, le 3 novembre 2020. Il maintient le diagnostic de déchirure du mollet droit. Il prescrit de la physiothérapie et de l'ergothérapie. Il maintient l'arrêt de travail.
+
+La travailleuse rencontre le docteur Adama-Rabi Youla, le 9 février 2021. Elle maintient le diagnostic de déchirure du mollet droit. Elle maintient les traitements en physiothérapie et ergothérapie. Elle juge la condition clinique stable. Elle prescrit une assignation temporaire à partir du 10 mars 2021.
+
+Le docteur Youla remplit une information complémentaire écrite. Elle mentionne qu'elle ne peut statuer sur l'évolution de la condition de la patiente étant donné qu'elle vient tout juste de la prendre en charge. Elle spécifie que le plan de traitement est orienté vers des interventions en ergothérapie et physiothérapie ainsi qu'une assignation temporaire. Elle prévoit un retour au travail en mai 2021. Elle juge que la patiente n'aura pas d'atteinte permanente.
+
+La travailleuse revoit le docteur Youla, le 17 août 2021. Elle maintient le diagnostic de déchirure du mollet droit. Elle note une condition clinique stable et elle cesse les traitements en physiothérapie et ergothérapie. Elle note un arrêt de travail à la suite du refus de l'assignation temporaire par son employeur.
+
+Le dernier rapport de la physiothérapie, en date du 23 août 2021, rapporte un plateau thérapeutique avec une suggestion d'évaluation et développement des capacités fonctionnelles. Pour ce qui est du rapport en ergothérapie, datant du 24 août 2021, on rapporte une mobilité et une force du membre inférieur droit fonctionnelle et on recommande l'arrêt des traitements.
+
+Une résonance magnétique de la jambe droite est réalisée le 17 septembre 2021. Elle est interprétée par le docteur Paul Bajsarowicz, radiologiste. Celui-ci observe :
+
+« Les tissus mous de la jambe droite ne démontrent pas d'œdème tissulaire sous-cutané avec absence d'un hypersignal STIR, il n'y a pas d'évidence de déchirure focale au niveau des structures musculaires et tendineuses du mollet droit. Le muscle gastrocnémien, soléaire et le tendon d'Achille sont dans les limites de la normale sans évidence d'atteinte post-traumatique aiguë. Pas d'asymétrie significative à signaler au niveau des structures musculaires des membres inférieurs.
+
+Opinion :
+
+IRM de la jambe droite dans les limites de la normale. En particulier, pas d'évidence de déchirure myo-tendineuse, oedème tissulaire sous-cutané ou de contusion osseuse à signaler. »
+
+La travailleuse revoit le docteur Youla, le 23 septembre 2021. Elle constate les résultats de la résonance magnétique avec absence de déchirure musculaire du mollet droit. Elle ajoute un diagnostic de tendinite calcifiée de l'épaule droite. Elle juge la condition clinique stable. Elle considère un retour au travail à compter du 27 septembre 2021.
+
+La travailleuse revoit le docteur Youla, le 24 novembre 2021. Elle rapport un diagnostic de douleur au mollet droit exacerbée. Elle juge la condition clinique stable. Le docteur Youla mentionne un refus de l'employeur de la travailleuse pour un retour au travail en assignation temporaire. Elle maintient un arrêt de travail jusqu'en janvier 2022.`;
 
 export async function enhancedFormatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
@@ -64,8 +104,13 @@ TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
 - Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée
 - Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles
 
-EXEMPLE DE FORMAT AUTHENTIQUE:
-${ENHANCED_SECTION_7_SAMPLE}
+EXEMPLES DE FORMAT AUTHENTIQUE:
+
+Exemple 1 - Cas complexe membre supérieur:
+${ENHANCED_SECTION_7_SAMPLE_1}
+
+Exemple 2 - Cas membre inférieur avec évolution:
+${ENHANCED_SECTION_7_SAMPLE_2}
 
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
       : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards for occupational injuries.
@@ -95,8 +140,13 @@ QUEBEC SPECIALIZED TERMINOLOGY:
 - Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration
 - Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae
 
-AUTHENTIC FORMAT EXAMPLE:
-${ENHANCED_SECTION_7_SAMPLE}
+AUTHENTIC FORMAT EXAMPLES:
+
+Example 1 - Complex Upper Limb Case:
+${ENHANCED_SECTION_7_SAMPLE_1}
+
+Example 2 - Lower Limb Evolution Case:
+${ENHANCED_SECTION_7_SAMPLE_2}
 
 Respond only with the formatted text according to these strict standards, no explanations.`;
 
@@ -149,8 +199,13 @@ CORRECTIONS COMMUNES DE DICTÉE:
 - Dates au format québécois
 - Terminologie anatomique précise
 
-EXEMPLE DE FORMAT:
-${ENHANCED_SECTION_7_SAMPLE}
+EXEMPLES DE FORMAT:
+
+Exemple 1 - Cas complexe membre supérieur:
+${ENHANCED_SECTION_7_SAMPLE_1}
+
+Exemple 2 - Cas membre inférieur avec évolution:
+${ENHANCED_SECTION_7_SAMPLE_2}
 
 Retourne le texte amélioré et formaté.`
       : `You are a medical assistant that helps improve dictation for Quebec CNESST medical reports.
@@ -170,8 +225,13 @@ COMMON DICTATION CORRECTIONS:
 - Quebec date format
 - Precise anatomical terminology
 
-FORMAT EXAMPLE:
-${ENHANCED_SECTION_7_SAMPLE}
+FORMAT EXAMPLES:
+
+Example 1 - Complex Upper Limb Case:
+${ENHANCED_SECTION_7_SAMPLE_1}
+
+Example 2 - Lower Limb Evolution Case:
+${ENHANCED_SECTION_7_SAMPLE_2}
 
 Return the improved and formatted text.`;
 
