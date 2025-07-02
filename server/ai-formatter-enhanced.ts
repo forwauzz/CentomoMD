@@ -70,6 +70,37 @@ La travailleuse revoit le docteur Youla, le 23 septembre 2021. Elle constate les
 
 La travailleuse revoit le docteur Youla, le 24 novembre 2021. Elle rapport un diagnostic de douleur au mollet droit exacerbée. Elle juge la condition clinique stable. Le docteur Youla mentionne un refus de l'employeur de la travailleuse pour un retour au travail en assignation temporaire. Elle maintient un arrêt de travail jusqu'en janvier 2022.`;
 
+// Sample 3: Knee Injury with Arthritis Activation Case
+const ENHANCED_SECTION_7_SAMPLE_3 = `7. Historique de faits et évolution
+
+La fiche de réclamation du travailleur décrit l'événement suivant survenu le 5 mars 2021 :
+
+« Lors de la vérification du statut de mon véhicule j'ai monté sur le marché pieds et fait une rotation du genou. »
+
+Le travailleur rencontre le docteur Martine Dupuis, le 5 mars 2021. Elle diagnostique une entorse du genou droit. Elle prescrit de la physiothérapie. Elle suggère un arrêt de travail.
+
+Une radiographie du genou droit sera réalisée le 5 mars 2021. Cette dernière démontre :
+
+« Pas de fracture grossière identifiée. Pincement sclérose et ostéophytose volumineuse en fémorotibial interne et externe ainsi que fémoropatellaire. Score à KL 4. »
+
+Le docteur Martine Dupuis remplit une assignation temporaire de travail avec horaire progressif du 8 mars 2021 au 16 mars 2021.
+
+Le travailleur revoit le docteur Dupuis, le 16 mars 2021. Elle maintient le diagnostic d'entorse du genou droit. Elle constate les résultats de la radiographie où il n'y a pas de fracture notée. Elle note une nette amélioration. Elle maintient les travaux légers ainsi que les traitements en physiothérapie.
+
+Le travailleur rencontre le docteur Stéphanie Lavoie-Lennon, le 19 avril 2021. Elle diagnostique une entorse du genou droit avec activation d'arthrose (ancienne blessure de CNESST de plusieurs années). Synovite aiguë secondaire à entorse genou droit aigu. Elle maintient les traitements en physiothérapie. Elle suggère de cesser le TRP. Elle suggère une infiltration de visco-supplémentation. Elle maintient les travaux légers.
+
+Le travailleur revoit le docteur Lavoie-Lennon, le 17 mai 2021. Elle maintient un diagnostic d'entorse du genou droit avec activation d'arthrose. Synovite aiguë secondaire à l'entorse du genou droit. Elle maintient les traitements de physiothérapie et suggère l'infiltration de visco-supplémentation et procède à l'infiltration de Synvisc, procédure qui sera bien tolérée.
+
+Le travailleur obtient une radiographie de son genou droit, le 21 mai 2021. Celle-ci démontre :
+
+« Gonarthrose tricompartimentale prédominante en fémorotibiale médiale et fémoropatellaire. L'atteinte est modérée. »
+
+Le travailleur revoit le docteur Lavoie-Lennon, le 16 août 2021. Elle maintient les diagnostics d'entorse genou droit, synovite genou droit et gonarthrose droite. Elle juge la condition clinique stable. Elle maintient les traitements en physiothérapie et ajoute des traitements en ergothérapie. Elle prescrit une orthèse d'extension nocturne étant donné le flexum au genou droit. Elle note peu d'amélioration avec l'infiltration de visco-supplémentation et que le travailleur demeure symptomatique.
+
+Le travailleur revoit le docteur Lavoie-Lennon, le 4 octobre 2021. Elle maintient les diagnostics d'entorse genou droit, synovite genou droit et gonarthrose droite. Elle maintient les traitements en physiothérapie. Elle note une évolution lente mais favorable avec le port de l'orthèse d'extension. Elle suggère un retour au travail régulier à partir du 18 octobre 2021.
+
+Le travailleur revoit le docteur Lavoie-Lennon, le 17 janvier 2022. Elle maintient le diagnostic d'entorse genou droit, synovite genou droit et gonarthrose droite. Elle consolide le patient avec atteinte permanente à l'intégrité physique et limitations fonctionnelles. Elle réitère fortement la suggestion d'une orthèse d'extension à tourillon nocturne pour le flexum persistant et une orthèse de stabilisation pour le jour du genou droit.`;
+
 export async function enhancedFormatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured');
@@ -98,11 +129,11 @@ INSTRUCTIONS SPÉCIALISÉES:
 - Infiltrations et examens d'imagerie
 
 TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
-- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale
-- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7
-- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux
-- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée
-- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles
+- Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale, entorse genou, synovite, gonarthrose
+- Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7, fémorotibial, fémoropatellaire, gastrocnémien, soléaire
+- Examens: IRM, échographie, radiographie, arthro-IRM, EMG, doppler veineux, score KL, hypersignal STIR
+- Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension
+- Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant
 
 EXEMPLES DE FORMAT AUTHENTIQUE:
 
@@ -111,6 +142,9 @@ ${ENHANCED_SECTION_7_SAMPLE_1}
 
 Exemple 2 - Cas membre inférieur avec évolution:
 ${ENHANCED_SECTION_7_SAMPLE_2}
+
+Exemple 3 - Cas genou avec activation d'arthrose:
+${ENHANCED_SECTION_7_SAMPLE_3}
 
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
       : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards for occupational injuries.
@@ -134,11 +168,11 @@ CRITICAL ELEMENTS TO PRESERVE:
 - Infiltrations and imaging examinations
 
 QUEBEC SPECIALIZED TERMINOLOGY:
-- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy
-- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7
-- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler
-- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration
-- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae
+- Injuries: tendinitis, muscle elongation, partial tear, cervical sprain, brachial plexopathy, knee sprain, synovitis, gonarthrosis
+- Anatomy: supraspinatus, trapezius, pectoralis major, cervical spine, brachial plexus, C5-C7, femorotibial, femoropatellar, gastrocnemius, soleus
+- Examinations: MRI, ultrasound, radiography, arthro-MRI, EMG, venous doppler, KL score, STIR hypersignal
+- Treatments: physiotherapy, occupational therapy, acupuncture, corticosteroid infiltration, visco-supplementation, Synvisc, extension orthosis
+- Evolution: improved/stable/deteriorated condition, therapeutic plateau, consolidation with sequelae, permanent impairment, persistent flexum
 
 AUTHENTIC FORMAT EXAMPLES:
 
@@ -147,6 +181,9 @@ ${ENHANCED_SECTION_7_SAMPLE_1}
 
 Example 2 - Lower Limb Evolution Case:
 ${ENHANCED_SECTION_7_SAMPLE_2}
+
+Example 3 - Knee Injury with Arthritis Activation:
+${ENHANCED_SECTION_7_SAMPLE_3}
 
 Respond only with the formatted text according to these strict standards, no explanations.`;
 
@@ -207,6 +244,9 @@ ${ENHANCED_SECTION_7_SAMPLE_1}
 Exemple 2 - Cas membre inférieur avec évolution:
 ${ENHANCED_SECTION_7_SAMPLE_2}
 
+Exemple 3 - Cas genou avec activation d'arthrose:
+${ENHANCED_SECTION_7_SAMPLE_3}
+
 Retourne le texte amélioré et formaté.`
       : `You are a medical assistant that helps improve dictation for Quebec CNESST medical reports.
 
@@ -232,6 +272,9 @@ ${ENHANCED_SECTION_7_SAMPLE_1}
 
 Example 2 - Lower Limb Evolution Case:
 ${ENHANCED_SECTION_7_SAMPLE_2}
+
+Example 3 - Knee Injury with Arthritis Activation:
+${ENHANCED_SECTION_7_SAMPLE_3}
 
 Return the improved and formatted text.`;
 
