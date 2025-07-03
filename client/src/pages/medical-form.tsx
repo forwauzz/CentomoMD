@@ -1146,6 +1146,17 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         // Force form to recognize the change and trigger re-render
         form.trigger(dictationField as any);
         
+        // CRITICAL FIX: Immediately save the updated form data to localStorage
+        // This prevents the auto-save debounce from overwriting with stale data
+        setTimeout(() => {
+          const currentFormData = form.getValues();
+          saveData(currentFormData);
+          console.log('Immediately saved form data to prevent auto-save overwrite:', {
+            fieldName: dictationField,
+            fieldValue: currentFormData[dictationField as keyof typeof currentFormData]?.toString().substring(0, 100) + '...'
+          });
+        }, 50);
+        
         // Additional verification that the field was set
         setTimeout(() => {
           const verifiedValue = form.getValues(dictationField as any);
@@ -1176,6 +1187,12 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
                 const result = await response.json();
                 if (result.enhancedText) {
                   form.setValue('historiqueEvolution', result.enhancedText);
+                  // Immediately save after AI enhancement to prevent overwrite
+                  setTimeout(() => {
+                    const currentFormData = form.getValues();
+                    saveData(currentFormData);
+                    console.log('Saved form data after Section 7 AI enhancement');
+                  }, 50);
                   toast({
                     title: language === 'fr' ? "Section 7 améliorée" : "Section 7 enhanced",
                     description: language === 'fr' ? "Dictée formatée automatiquement" : "Dictation formatted automatically",
@@ -1212,6 +1229,13 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
                     if (result.sections.plaintes) form.setValue('plaintesproblemes', result.sections.plaintes);
                     if (result.sections.impact) form.setValue('impactAvq', result.sections.impact);
                     
+                    // Immediately save after AI distribution to prevent overwrite
+                    setTimeout(() => {
+                      const currentFormData = form.getValues();
+                      saveData(currentFormData);
+                      console.log('Saved form data after Section 8 AI distribution');
+                    }, 50);
+                    
                     toast({
                       title: language === 'fr' ? "Section 8 distribuée" : "Section 8 distributed",
                       description: language === 'fr' ? "Dictée distribuée et formatée automatiquement" : "Dictation distributed and formatted automatically",
@@ -1235,6 +1259,12 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
                   const result = await response.json();
                   if (result.enhancedText) {
                     form.setValue(dictationField as any, result.enhancedText);
+                    // Immediately save after AI enhancement to prevent overwrite
+                    setTimeout(() => {
+                      const currentFormData = form.getValues();
+                      saveData(currentFormData);
+                      console.log('Saved form data after Section 8 AI enhancement');
+                    }, 50);
                     toast({
                       title: language === 'fr' ? "Section 8 améliorée" : "Section 8 enhanced",
                       description: language === 'fr' ? "Dictée formatée automatiquement" : "Dictation formatted automatically",
