@@ -1049,11 +1049,16 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       localStorage.removeItem('centMD_formData');
       localStorage.removeItem('medical-form-data');
       localStorage.removeItem('medical-form-autosave');
-      // Clear any session storage that might interfere with new visit
-      sessionStorage.removeItem('dictationResult');
-      sessionStorage.removeItem('dictationField');
-      sessionStorage.removeItem('scrollToSection');
-      sessionStorage.removeItem('highlightField');
+      
+      // CRITICAL FIX: Only clear dictation data if there's no pending dictation result
+      // This prevents clearing dictation data when returning from dictation page
+      const hasPendingDictation = sessionStorage.getItem('dictationResult') && sessionStorage.getItem('dictationField');
+      if (!hasPendingDictation) {
+        sessionStorage.removeItem('dictationResult');
+        sessionStorage.removeItem('dictationField');
+        sessionStorage.removeItem('scrollToSection');
+        sessionStorage.removeItem('highlightField');
+      }
       
       form.reset(); // Reset to completely blank form
       
@@ -1407,39 +1412,8 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         });
       }, 100);
       
-      // Trigger AI formatting for sections 7 and 8 after dictation
-      if (dictationField === 'historiqueEvolution') {
-        // Auto-trigger AI enhancement for Section 7
-        setTimeout(async () => {
-          try {
-            console.log('Auto-formatting Section 7 text after dictation:', newValue.substring(0, 100) + '...');
-            
-            const response = await fetch('/api/ai/enhance-section7-dictation', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ 
-                transcript: newValue,
-                language: language 
-              })
-            });
-            
-            if (response.ok) {
-              const result = await response.json();
-              if (result.enhancedText) {
-                form.setValue('historiqueEvolution', result.enhancedText);
-                toast({
-                  title: language === 'fr' ? "Section 7 améliorée" : "Section 7 enhanced",
-                  description: language === 'fr' ? "Dictée formatée automatiquement" : "Dictation formatted automatically",
-                });
-                console.log('Section 7 auto-enhanced successfully');
-              }
-            }
-          } catch (error) {
-            console.error('Auto-format Section 7 error:', error);
-          }
-        }, 500);
-      } else if (dictationField === 'section8Input' || ['appreciationEvolution', 'plaintesproblemes', 'impactAvq'].includes(dictationField)) {
+      // Note: AI formatting is handled in the first block above to prevent duplication
+      if (dictationField === 'section8Input' || ['appreciationEvolution', 'plaintesproblemes', 'impactAvq'].includes(dictationField)) {
         // Auto-trigger AI enhancement for Section 8
         setTimeout(async () => {
           try {
