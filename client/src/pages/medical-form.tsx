@@ -1094,8 +1094,8 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
   useEffect(() => {
     const checkDictationResults = () => {
       console.log('Checking for dictation results on component mount/update');
-      const dictationResult = sessionStorage.getItem('dictationResult');
-      const dictationField = sessionStorage.getItem('dictationField');
+      let dictationResult = sessionStorage.getItem('dictationResult');
+      let dictationField = sessionStorage.getItem('dictationField');
       const scrollToSection = sessionStorage.getItem('scrollToSection');
       const highlightField = sessionStorage.getItem('highlightField');
       
@@ -1105,6 +1105,31 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         dictationField,
         resultLength: dictationResult?.length
       });
+
+      // PRODUCTION FIX: Check backup storage if primary method fails
+      if (!dictationResult || !dictationField) {
+        const backup = localStorage.getItem('dictationBackup');
+        if (backup) {
+          try {
+            const backupData = JSON.parse(backup);
+            console.log('Found dictation backup data:', {
+              field: backupData.field,
+              resultLength: backupData.result?.length,
+              timestamp: backupData.timestamp
+            });
+            
+            // Use backup data if it's recent (within last 5 minutes)
+            const now = Date.now();
+            if (backupData.timestamp && (now - backupData.timestamp) < 300000) {
+              dictationResult = backupData.result;
+              dictationField = backupData.field;
+              console.log('Using backup dictation data');
+            }
+          } catch (error) {
+            console.error('Error parsing backup dictation data:', error);
+          }
+        }
+      }
 
       if (dictationResult && dictationField) {
         console.log('Processing dictation result:', { 
@@ -1293,6 +1318,10 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         // Clear the dictation session storage AFTER ensuring persistence
         sessionStorage.removeItem('dictationResult');
         sessionStorage.removeItem('dictationField');
+        sessionStorage.removeItem('dictationTimestamp');
+        
+        // Clean up backup storage after successful processing
+        localStorage.removeItem('dictationBackup');
         
         // Show success message with toast
         toast({

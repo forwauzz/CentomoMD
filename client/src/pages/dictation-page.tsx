@@ -368,11 +368,22 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     // Store dictation result and field for the medical form to pick up
     sessionStorage.setItem('dictationResult', textToSave);
     sessionStorage.setItem('dictationField', selectedSection);
+    
+    // PRODUCTION FIX: Add multiple redundant storage mechanisms
+    // Store with timestamp for debugging production issues
+    const timestamp = Date.now();
+    sessionStorage.setItem('dictationTimestamp', timestamp.toString());
+    localStorage.setItem('dictationBackup', JSON.stringify({
+      result: textToSave,
+      field: selectedSection,
+      timestamp: timestamp
+    }));
 
     console.log('Stored in sessionStorage:', { 
       dictationField: selectedSection, 
       resultLength: textToSave.length,
-      preview: textToSave.substring(0, 100) + '...'
+      preview: textToSave.substring(0, 100) + '...',
+      timestamp: timestamp
     });
 
     // Store the target section for navigation and auto-scroll
