@@ -3,6 +3,141 @@ import OpenAI from "openai";
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// ===== NEW: VOICE RECOGNITION ERROR CORRECTION =====
+// This fixes common voice recognition errors BEFORE sending to ChatGPT
+function fixVoiceRecognitionErrors(text: string): string {
+  const corrections: { [key: string]: string } = {
+    // Medical professionals (most critical for Quebec standards)
+    docter: "docteur",
+    docktor: "docteur",
+    docteure: "docteur",
+    "dr ": "docteur ",
+    "dr.": "docteur",
+
+    // Patient terminology (CRITICAL for Quebec CNESST compliance)
+    "le patient": "le travailleur",
+    "la patient": "la travailleuse",
+    "la patiente": "la travailleuse",
+    "du patient": "du travailleur",
+    "de la patiente": "de la travailleuse",
+    "au patient": "au travailleur",
+    "à la patiente": "à la travailleuse",
+
+    // Medical terminology corrections
+    "supra épineu": "supra-épineux",
+    "supra épineux": "supra-épineux",
+    "supra-épineu": "supra-épineux",
+    écographie: "échographie",
+    "écho-graphie": "échographie",
+    échograpie: "échographie",
+
+    // Treatment terminology
+    "infiltration cortisone": "infiltration cortisonée",
+    "infiltration de cortisone": "infiltration cortisonée",
+    "infiltration cortizone": "infiltration cortisonée",
+    "physio-thérapie": "physiothérapie",
+    "physio thérapie": "physiothérapie",
+    "ergo-thérapie": "ergothérapie",
+    "ergo thérapie": "ergothérapie",
+    "accu-puncture": "acupuncture",
+    "acu-puncture": "acupuncture",
+
+    // Anatomy corrections
+    plexopathy: "plexopathie",
+    "plexopathy brachial": "plexopathie brachiale",
+    "plexo-pathie": "plexopathie",
+    "rachis cervicals": "rachis cervical",
+    trapèze: "trapèze",
+    "grand pectoral": "grand pectoral",
+
+    // Examination terminology
+    "I.R.M": "IRM",
+    "I R M": "IRM",
+    irm: "IRM",
+    "E.M.G": "EMG",
+    "E M G": "EMG",
+    emg: "EMG",
+    "arthro IRM": "arthro-IRM",
+    "doppler veineux": "doppler veineux",
+    "dopler veineux": "doppler veineux",
+
+    // Medical conditions
+    tendinite: "tendinite",
+    "élongation musculaire": "élongation musculaire",
+    "déchirure partielle": "déchirure partielle",
+    "entorse cervicale": "entorse cervicale",
+
+    // Evolution terms (important for medical accuracy)
+    améliorer: "améliorée",
+    amélioré: "améliorée",
+    stable: "stable",
+    détériorer: "détériorée",
+    détérioré: "détériorée",
+    "plateau thérapeutiques": "plateau thérapeutique",
+    "consolidation avec séquelle": "consolidation avec séquelles",
+
+    // Date corrections (common voice recognition issues)
+    "le premier": "le 1er",
+    "le deux": "le 2",
+    "le trois": "le 3",
+    "le quatre": "le 4",
+    "le cinq": "le 5",
+    "le six": "le 6",
+    "le sept": "le 7",
+    "le huit": "le 8",
+    "le neuf": "le 9",
+    "le dix": "le 10",
+  };
+
+  let corrected = text;
+  Object.entries(corrections).forEach(([error, correction]) => {
+    // Use word boundaries to avoid partial replacements
+    const regex = new RegExp(`\\b${error}\\b`, "gi");
+    corrected = corrected.replace(regex, correction);
+  });
+
+  return corrected;
+}
+
+// ===== NEW: ENHANCED VOICE PROCESSING WITH LOGGING =====
+// This function processes voice input and shows what was fixed
+export function enhanceVoiceInput(transcript: string): {
+  original: string;
+  enhanced: string;
+  corrections: string[];
+} {
+  const original = transcript;
+  const enhanced = fixVoiceRecognitionErrors(transcript);
+
+  const corrections: string[] = [];
+  if (enhanced !== original) {
+    // Log what changed for debugging/validation
+    if (enhanced.includes("docteur") && original.includes("docter")) {
+      corrections.push('Fixed "docteur" spelling');
+    }
+    if (enhanced.includes("travailleur") && original.includes("patient")) {
+      corrections.push("Applied Quebec worker terminology");
+    }
+    if (
+      enhanced.includes("supra-épineux") &&
+      original.includes("supra épineu")
+    ) {
+      corrections.push("Corrected medical terminology");
+    }
+    if (
+      enhanced.includes("infiltration cortisonée") &&
+      original.includes("infiltration cortisone")
+    ) {
+      corrections.push("Fixed treatment terminology");
+    }
+    if (corrections.length === 0) {
+      corrections.push("Applied medical terminology corrections");
+    }
+  }
+
+  return { original, enhanced, corrections };
+}
+
 const SECTION_7_SAMPLE = `7. Historique de faits et évolution
 
 La travailleuse et une chauffeuse de taxi adapté. Ses tâches consistent à conduire un taxi de transport adapté, elle accompagne les gens en fauteuil roulant et donc doit monter et descendre des rampes d'accès avec les patients en fauteuil et parfois elle doit transporter des marchandises médicales d'un hôpital à l'autre. Parfois elle doit conduire jusqu'à Montréal.
@@ -100,14 +235,22 @@ Le travailleur revoit le docteur Brodeur, le 21 janvier 2024. Elle suggère fort
 
 Le docteur Brodeur produit un formulaire sur l'évolution des lésions, le 12 mars 2024. Elle juge que la lésion est toujours active qu'il y a une infiltration prévue en fin mars 2024 à la clinique de la douleur. Si cette infiltration est non efficace, elle suggère de consolider le travailleur avec séquelles. Elle note : « cas complexes qui devrait être évaluée au BEM. »`;
 
-export async function formatSection7Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
+// ===== ENHANCED: Section 7 with voice correction preprocessing =====
+export async function formatSection7Text(
+  rawText: string,
+  language: "fr" | "en" = "fr",
+): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key is not configured');
+    throw new Error("OpenAI API key is not configured");
   }
 
   try {
-    const systemPrompt = language === 'fr' 
-      ? `Tu es un assistant médical expert qui formate les textes de rapports médicaux selon les standards professionnels québécois pour les lésions professionnelles CNESST.
+    // ✨ NEW: Pre-process text to fix voice recognition errors
+    const voiceEnhanced = fixVoiceRecognitionErrors(rawText);
+
+    const systemPrompt =
+      language === "fr"
+        ? `Tu es un assistant médical expert qui formate les textes de rapports médicaux selon les standards professionnels québécois pour les lésions professionnelles CNESST.
 
 INSTRUCTIONS SPÉCIALISÉES:
 - Formate le texte brut fourni selon le style de la Section 7 "Historique de faits et évolution"
@@ -138,7 +281,7 @@ EXEMPLES DE FORMAT AUTHENTIQUE:
 ${SECTION_7_SAMPLE}
 
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
-      : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards.
+        : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards.
 
 INSTRUCTIONS:
 - Format the provided raw text according to Section 7 "Historical Facts and Evolution" style
@@ -160,12 +303,12 @@ Respond only with the formatted text, no explanations.`;
       messages: [
         {
           role: "system",
-          content: systemPrompt
+          content: systemPrompt,
         },
         {
           role: "user",
-          content: `Formate ce texte médical brut:\n\n${rawText}`
-        }
+          content: `Formate ce texte médical brut:\n\n${voiceEnhanced}`, // ✨ Now using voice-enhanced text
+        },
       ],
       temperature: 0.3,
       max_tokens: 2000,
@@ -173,19 +316,28 @@ Respond only with the formatted text, no explanations.`;
 
     return response.choices[0].message.content || rawText;
   } catch (error) {
-    console.error('Error formatting Section 7 text:', error);
+    console.error("Error formatting Section 7 text:", error);
     // Return original text if formatting fails
     return rawText;
   }
 }
 
-export async function enhanceSection7Dictation(transcript: string, language: 'fr' | 'en' = 'fr'): Promise<{
+// ===== ENHANCED: Section 7 dictation with voice preprocessing =====
+export async function enhanceSection7Dictation(
+  transcript: string,
+  language: "fr" | "en" = "fr",
+): Promise<{
   formatted: string;
   suggestions?: string[];
+  voiceCorrections?: string[];
 }> {
   try {
-    const systemPrompt = language === 'fr'
-      ? `Tu es un assistant médical qui aide à améliorer la dictée pour les rapports médicaux.
+    // ✨ NEW: First, fix voice recognition errors and log what was fixed
+    const voiceResult = enhanceVoiceInput(transcript);
+
+    const systemPrompt =
+      language === "fr"
+        ? `Tu es un assistant médical qui aide à améliorer la dictée pour les rapports médicaux.
 
 INSTRUCTIONS:
 - Améliore et formate le texte dicté pour la Section 7 "Historique de faits et évolution"
@@ -201,7 +353,7 @@ Réponds en JSON avec:
   "formatted": "texte formaté",
   "suggestions": ["suggestion 1", "suggestion 2"]
 }`
-      : `You are a medical assistant that helps improve dictation for medical reports.
+        : `You are a medical assistant that helps improve dictation for medical reports.
 
 INSTRUCTIONS:
 - Improve and format dictated text for Section 7 "Historical Facts and Evolution"
@@ -223,28 +375,30 @@ Respond in JSON with:
       messages: [
         {
           role: "system",
-          content: systemPrompt
+          content: systemPrompt,
         },
         {
           role: "user",
-          content: transcript
-        }
+          content: voiceResult.enhanced, // ✨ Using voice-enhanced text
+        },
       ],
       response_format: { type: "json_object" },
       temperature: 0.2,
       max_tokens: 2000,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const result = JSON.parse(response.choices[0].message.content || "{}");
     return {
       formatted: result.formatted || transcript,
-      suggestions: result.suggestions || []
+      suggestions: result.suggestions || [],
+      voiceCorrections: voiceResult.corrections, // ✨ NEW: Return what voice corrections were made
     };
   } catch (error) {
-    console.error('Error enhancing Section 7 dictation:', error);
+    console.error("Error enhancing Section 7 dictation:", error);
     return {
       formatted: transcript,
-      suggestions: []
+      suggestions: [],
+      voiceCorrections: [],
     };
   }
 }
@@ -261,14 +415,22 @@ Elle ne rapporte pas de douleur nocturne mais éprouve des raideurs matinales au
 
 Impact sur AVQ/AVD : cf feuille en annexe.`;
 
-export async function formatSection8Text(rawText: string, language: 'fr' | 'en' = 'fr'): Promise<string> {
+// ===== ENHANCED: Section 8 with voice correction preprocessing =====
+export async function formatSection8Text(
+  rawText: string,
+  language: "fr" | "en" = "fr",
+): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key is not configured');
+    throw new Error("OpenAI API key is not configured");
   }
 
   try {
-    const systemPrompt = language === 'fr' 
-      ? `Tu es un assistant médical expert qui formate les textes de rapports médicaux selon les standards professionnels québécois.
+    // ✨ NEW: Pre-process text to fix voice recognition errors
+    const voiceEnhanced = fixVoiceRecognitionErrors(rawText);
+
+    const systemPrompt =
+      language === "fr"
+        ? `Tu es un assistant médical expert qui formate les textes de rapports médicaux selon les standards professionnels québécois.
 
 INSTRUCTIONS:
 - Formate le texte brut fourni selon le style de la Section 8 "Questionnaire subjectif et état actuel"
@@ -285,7 +447,7 @@ EXEMPLE DE FORMAT:
 ${SECTION_8_SAMPLE}
 
 Réponds uniquement avec le texte formaté, sans explications.`
-      : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards.
+        : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards.
 
 INSTRUCTIONS:
 - Format the provided raw text according to Section 8 "Subjective questionnaire and current state" style
@@ -308,12 +470,12 @@ Respond only with the formatted text, no explanations.`;
       messages: [
         {
           role: "system",
-          content: systemPrompt
+          content: systemPrompt,
         },
         {
           role: "user",
-          content: `Formate ce texte médical brut:\n\n${rawText}`
-        }
+          content: `Formate ce texte médical brut:\n\n${voiceEnhanced}`, // ✨ Now using voice-enhanced text
+        },
       ],
       temperature: 0.3,
       max_tokens: 2000,
@@ -321,19 +483,28 @@ Respond only with the formatted text, no explanations.`;
 
     return response.choices[0].message.content || rawText;
   } catch (error) {
-    console.error('Error formatting Section 8 text:', error);
+    console.error("Error formatting Section 8 text:", error);
     // Return original text if formatting fails
     return rawText;
   }
 }
 
-export async function enhanceSection8Dictation(transcript: string, language: 'fr' | 'en' = 'fr'): Promise<{
+// ===== ENHANCED: Section 8 dictation with voice preprocessing =====
+export async function enhanceSection8Dictation(
+  transcript: string,
+  language: "fr" | "en" = "fr",
+): Promise<{
   formatted: string;
   suggestions?: string[];
+  voiceCorrections?: string[];
 }> {
   try {
-    const systemPrompt = language === 'fr'
-      ? `Tu es un assistant médical qui aide à améliorer la dictée pour les rapports médicaux.
+    // ✨ NEW: First, fix voice recognition errors and log what was fixed
+    const voiceResult = enhanceVoiceInput(transcript);
+
+    const systemPrompt =
+      language === "fr"
+        ? `Tu es un assistant médical qui aide à améliorer la dictée pour les rapports médicaux.
 
 INSTRUCTIONS:
 - Améliore et formate le texte dicté pour la Section 8 "Questionnaire subjectif et état actuel"
@@ -349,7 +520,7 @@ Réponds en JSON avec:
   "formatted": "texte formaté",
   "suggestions": ["suggestion 1", "suggestion 2"]
 }`
-      : `You are a medical assistant that helps improve dictation for medical reports.
+        : `You are a medical assistant that helps improve dictation for medical reports.
 
 INSTRUCTIONS:
 - Improve and format dictated text for Section 8 "Subjective questionnaire and current state"
@@ -371,33 +542,39 @@ Respond in JSON with:
       messages: [
         {
           role: "system",
-          content: systemPrompt
+          content: systemPrompt,
         },
         {
           role: "user",
-          content: transcript
-        }
+          content: voiceResult.enhanced, // ✨ Using voice-enhanced text
+        },
       ],
       response_format: { type: "json_object" },
       temperature: 0.2,
       max_tokens: 2000,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const result = JSON.parse(response.choices[0].message.content || "{}");
     return {
       formatted: result.formatted || transcript,
-      suggestions: result.suggestions || []
+      suggestions: result.suggestions || [],
+      voiceCorrections: voiceResult.corrections, // ✨ NEW: Return what voice corrections were made
     };
   } catch (error) {
-    console.error('Error enhancing Section 8 dictation:', error);
+    console.error("Error enhancing Section 8 dictation:", error);
     return {
       formatted: transcript,
-      suggestions: []
+      suggestions: [],
+      voiceCorrections: [],
     };
   }
 }
 
-export async function generateSection11Conclusion(formData: any, language: 'fr' | 'en' = 'fr'): Promise<{
+// ===== ENHANCED: Section 11 (keeping original functionality) =====
+export async function generateSection11Conclusion(
+  formData: any,
+  language: "fr" | "en" = "fr",
+): Promise<{
   resume: string;
   diagnostic: string;
   dateConsolidation: string;
@@ -407,17 +584,18 @@ export async function generateSection11Conclusion(formData: any, language: 'fr' 
   evaluationLimitations: string;
 }> {
   try {
-    const medicalHistory = formData.antecedentsMedicaux || '';
-    const surgicalHistory = formData.antecedentsChirurgicaux || '';
-    const medication = formData.medicationActuelle || '';
-    const historyEvolution = formData.historiqueEvolution || '';
-    const subjectiveAssessment = formData.appreciationEvolution || '';
-    const complaintsProblems = formData.plaintesproblemes || '';
-    const impactADL = formData.impactAvq || '';
-    const physicalExam = formData.observationGenerale || '';
-    
-    const prompt = language === 'fr' 
-      ? `Tu es Dr. Centomo, expert en évaluations médicales CNESST. Génère une conclusion complète basée sur les données médicales suivantes:
+    const medicalHistory = formData.antecedentsMedicaux || "";
+    const surgicalHistory = formData.antecedentsChirurgicaux || "";
+    const medication = formData.medicationActuelle || "";
+    const historyEvolution = formData.historiqueEvolution || "";
+    const subjectiveAssessment = formData.appreciationEvolution || "";
+    const complaintsProblems = formData.plaintesproblemes || "";
+    const impactADL = formData.impactAvq || "";
+    const physicalExam = formData.observationGenerale || "";
+
+    const prompt =
+      language === "fr"
+        ? `Tu es Dr. Centomo, expert en évaluations médicales CNESST. Génère une conclusion complète basée sur les données médicales suivantes:
 
 ANTÉCÉDENTS MÉDICAUX: ${medicalHistory}
 ANTÉCÉDENTS CHIRURGICAUX: ${surgicalHistory}
@@ -518,7 +696,7 @@ Réponds en JSON:
   "limitationsFonctionnelles": "...",
   "evaluationLimitations": "..."
 }`
-      : `You are Dr. Centomo, expert in CNESST medical evaluations. Generate a complete conclusion based on the following medical data:
+        : `You are Dr. Centomo, expert in CNESST medical evaluations. Generate a complete conclusion based on the following medical data:
 
 MEDICAL HISTORY: ${medicalHistory}
 SURGICAL HISTORY: ${surgicalHistory}
@@ -547,39 +725,40 @@ Respond in JSON format:
       messages: [
         {
           role: "system",
-          content: "Tu es un médecin expert en évaluations CNESST québécoises. Réponds toujours en JSON valide."
+          content:
+            "Tu es un médecin expert en évaluations CNESST québécoises. Réponds toujours en JSON valide.",
         },
         {
           role: "user",
-          content: prompt
-        }
+          content: prompt,
+        },
       ],
       response_format: { type: "json_object" },
       temperature: 0.3,
-      max_tokens: 2500
+      max_tokens: 2500,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+
     return {
-      resume: result.resume || '',
-      diagnostic: result.diagnostic || '',
-      dateConsolidation: result.dateConsolidation || '',
-      soinsTraitements: result.soinsTraitements || '',
-      atteintePermanente: result.atteintePermanente || '',
-      limitationsFonctionnelles: result.limitationsFonctionnelles || '',
-      evaluationLimitations: result.evaluationLimitations || ''
+      resume: result.resume || "",
+      diagnostic: result.diagnostic || "",
+      dateConsolidation: result.dateConsolidation || "",
+      soinsTraitements: result.soinsTraitements || "",
+      atteintePermanente: result.atteintePermanente || "",
+      limitationsFonctionnelles: result.limitationsFonctionnelles || "",
+      evaluationLimitations: result.evaluationLimitations || "",
     };
   } catch (error) {
-    console.error('Error generating section 11 conclusion:', error);
+    console.error("Error generating section 11 conclusion:", error);
     return {
-      resume: '',
-      diagnostic: '',
-      dateConsolidation: '',
-      soinsTraitements: '',
-      atteintePermanente: '',
-      limitationsFonctionnelles: '',
-      evaluationLimitations: ''
+      resume: "",
+      diagnostic: "",
+      dateConsolidation: "",
+      soinsTraitements: "",
+      atteintePermanente: "",
+      limitationsFonctionnelles: "",
+      evaluationLimitations: "",
     };
   }
 }

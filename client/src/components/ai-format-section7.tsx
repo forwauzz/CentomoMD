@@ -165,6 +165,7 @@ export function AIFormatSection7({ value, onValueChange, language }: AIFormatSec
       <div className="flex gap-2 justify-end">
         {originalText && (
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={handleUndo}
@@ -175,6 +176,7 @@ export function AIFormatSection7({ value, onValueChange, language }: AIFormatSec
           </Button>
         )}
         <Button
+          type="button"
           variant="outline"
           size="sm"
           onClick={handleCopy}
