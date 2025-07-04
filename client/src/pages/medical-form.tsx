@@ -1284,7 +1284,13 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
           }, 500);
         }
         
-        // Clear the dictation session storage
+        // CRITICAL: Ensure data is persisted before clearing sessionStorage
+        // This extra save prevents race conditions in production environment
+        const finalFormData = form.getValues();
+        saveData(finalFormData);
+        console.log('Final save before clearing sessionStorage to prevent production race condition');
+        
+        // Clear the dictation session storage AFTER ensuring persistence
         sessionStorage.removeItem('dictationResult');
         sessionStorage.removeItem('dictationField');
         
