@@ -56,6 +56,8 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
   const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const chunkTimerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const pauseTimeRef = useRef<number>(0);
+  const totalPausedTimeRef = useRef<number>(0);
 
   const {
     language = 'auto',
@@ -302,9 +304,13 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
       mediaRecorder.start();
       startTimeRef.current = Date.now();
       
+      // Reset pause counters
+      pauseTimeRef.current = 0;
+      totalPausedTimeRef.current = 0;
+      
       // Setup timers
       durationTimerRef.current = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const elapsed = Math.floor((Date.now() - startTimeRef.current - totalPausedTimeRef.current) / 1000);
         updateState({ recordingDuration: elapsed });
       }, 1000);
       
@@ -371,6 +377,9 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
         mediaRecorderRef.current.pause();
       }
       
+      // Store pause time to freeze the duration
+      pauseTimeRef.current = Date.now();
+      
       // Pause timers
       if (durationTimerRef.current) {
         clearInterval(durationTimerRef.current);
@@ -402,9 +411,15 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
         mediaRecorderRef.current.resume();
       }
       
-      // Resume timers
+      // Calculate total paused time
+      if (pauseTimeRef.current > 0) {
+        totalPausedTimeRef.current += Date.now() - pauseTimeRef.current;
+        pauseTimeRef.current = 0;
+      }
+      
+      // Resume timers with pause time correction
       durationTimerRef.current = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const elapsed = Math.floor((Date.now() - startTimeRef.current - totalPausedTimeRef.current) / 1000);
         updateState({ recordingDuration: elapsed });
       }, 1000);
       
@@ -431,6 +446,10 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     if (state.isRecording) {
       stopRecording();
     }
+    
+    // Reset pause time counters
+    pauseTimeRef.current = 0;
+    totalPausedTimeRef.current = 0;
     
     updateState({
       transcript: '',

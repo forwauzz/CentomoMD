@@ -496,13 +496,13 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
           </Card>
 
           {/* Recording Controls */}
-          <Card>
+          <Card className={isPaused ? "border-orange-300 bg-orange-50/50 dark:border-orange-800 dark:bg-orange-950/20" : ""}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className={`flex items-center gap-2 ${isPaused ? "text-orange-800 dark:text-orange-200" : ""}`}>
                 {getStatusIcon()}
                 {getStatusText()}
               </CardTitle>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className={`flex items-center gap-4 text-sm ${isPaused ? "text-orange-700 dark:text-orange-300" : "text-muted-foreground"}`}>
                 <span>{t.accuracy}: 95%</span>
                 <span>{t.recordingTime}: {formatDuration(recordingDuration)}</span>
                 {chunkCount > 0 && <span>{t.chunks}: {chunkCount}</span>}
