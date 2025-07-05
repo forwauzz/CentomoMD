@@ -3,6 +3,7 @@ import {
   users, 
   savedForms, 
   genericForms,
+  recentPatients,
   type MedicalForm, 
   type InsertMedicalForm, 
   type User, 
@@ -10,7 +11,9 @@ import {
   type SavedForm, 
   type InsertSavedForm,
   type GenericForm,
-  type InsertGenericForm
+  type InsertGenericForm,
+  type RecentPatient,
+  type InsertRecentPatient
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, lt, and, desc } from "drizzle-orm";
@@ -49,6 +52,13 @@ export interface IStorage {
   updateGenericForm(id: number, form: Partial<InsertGenericForm>): Promise<GenericForm | undefined>;
   deleteGenericForm(id: number): Promise<boolean>;
   deleteExpiredGenericForms(): Promise<number>;
+
+  // Recent patients management
+  getRecentPatientsByUserId(userId: string, limit?: number): Promise<RecentPatient[]>;
+  createRecentPatient(patient: InsertRecentPatient): Promise<RecentPatient>;
+  updateRecentPatientAccess(userId: string, patientName: string): Promise<void>;
+  deleteRecentPatient(id: number): Promise<boolean>;
+  cleanupOldRecentPatients(userId: string, keepCount?: number): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -347,6 +357,84 @@ export class DatabaseStorage implements IStorage {
   async cleanupExpiredForms() {
     const now = new Date();
     await db.delete(savedForms).where(lt(savedForms.expiresAt, now));
+  }
+
+  // Recent patients management
+  async getRecentPatientsByUserId(userId: string, limit: number = 10): Promise<RecentPatient[]> {
+    try {
+      const patients = await db.select()
+        .from(recentPatients)
+        .where(eq(recentPatients.userId, userId))
+        .orderBy(desc(recentPatients.lastAccessedAt))
+        .limit(limit);
+      
+      return patients;
+    } catch (error) {
+      console.error('Error fetching recent patients:', error);
+      return [];
+    }
+  }
+
+  async createRecentPatient(patient: InsertRecentPatient): Promise<RecentPatient> {
+    const [newPatient] = await db.insert(recentPatients).values(patient).returning();
+    return newPatient;
+  }
+
+  async updateRecentPatientAccess(userId: string, patientName: string): Promise<void> {
+    try {
+      // Update existing patient's last accessed time or create new entry
+      const existingPatients = await db.select()
+        .from(recentPatients)
+        .where(and(
+          eq(recentPatients.userId, userId),
+          eq(recentPatients.patientName, patientName)
+        ))
+        .limit(1);
+
+      if (existingPatients.length > 0) {
+        // Update existing patient
+        await db.update(recentPatients)
+          .set({ lastAccessedAt: new Date() })
+          .where(eq(recentPatients.id, existingPatients[0].id));
+      }
+      // If patient doesn't exist, it will be created when form is saved
+    } catch (error) {
+      console.error('Error updating recent patient access:', error);
+    }
+  }
+
+  async deleteRecentPatient(id: number): Promise<boolean> {
+    try {
+      await db.delete(recentPatients).where(eq(recentPatients.id, id));
+      return true;
+    } catch (error) {
+      console.error('Error deleting recent patient:', error);
+      return false;
+    }
+  }
+
+  async cleanupOldRecentPatients(userId: string, keepCount: number = 20): Promise<number> {
+    try {
+      // Get patients beyond the keep count
+      const oldPatients = await db.select()
+        .from(recentPatients)
+        .where(eq(recentPatients.userId, userId))
+        .orderBy(desc(recentPatients.lastAccessedAt))
+        .offset(keepCount);
+
+      if (oldPatients.length === 0) return 0;
+
+      const oldPatientIds = oldPatients.map(p => p.id);
+      
+      for (const id of oldPatientIds) {
+        await db.delete(recentPatients).where(eq(recentPatients.id, id));
+      }
+
+      return oldPatients.length;
+    } catch (error) {
+      console.error('Error cleaning up old recent patients:', error);
+      return 0;
+    }
   }
 }
 

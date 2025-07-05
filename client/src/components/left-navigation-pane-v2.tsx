@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RecentPatients } from "./recent-patients";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -11,7 +12,8 @@ import {
   FolderOpen, 
   FileText,
   Menu,
-  Navigation
+  Navigation,
+  Clock
 } from "lucide-react";
 
 interface NavigationSection {
@@ -58,6 +60,7 @@ const translations = {
     navigation: "Navigation",
     formActions: "Actions formulaire",
     formManagement: "Gestion formulaires",
+    recentPatients: "Patients récents",
     save: "Sauvegarder",
     saveAs: "Sauvegarder copie",
     print: "Imprimer",
@@ -72,6 +75,7 @@ const translations = {
     navigation: "Navigation",
     formActions: "Form Actions",
     formManagement: "Form Management",
+    recentPatients: "Recent Patients",
     save: "Save",
     saveAs: "Save Copy",
     print: "Print",
@@ -103,6 +107,7 @@ export function LeftNavigationPane({
   const [sectionsCollapsed, setSectionsCollapsed] = useState({
     formActions: false,
     formManagement: false,
+    recentPatients: false,
     navigation: true
   });
   const t = translations[language];
@@ -241,6 +246,44 @@ export function LeftNavigationPane({
                   </Badge>
                 )}
               </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Recent Patients Section */}
+        <div className="border-b border-gray-100">
+          {!isCollapsed && (
+            <button
+              onClick={() => toggleSection('recentPatients')}
+              className="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                <Clock className="h-4 w-4 mr-2" />
+                {t.recentPatients}
+              </h3>
+              {sectionsCollapsed.recentPatients ? (
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              ) : (
+                <ChevronUp className="h-4 w-4 text-gray-500" />
+              )}
+            </button>
+          )}
+
+          {!isCollapsed && !sectionsCollapsed.recentPatients && (
+            <div className="px-3 pb-3">
+              <RecentPatients 
+                language={language} 
+                collapsed={false}
+              />
+            </div>
+          )}
+
+          {isCollapsed && (
+            <div className="px-2 py-1">
+              <RecentPatients 
+                language={language} 
+                collapsed={true}
+              />
             </div>
           )}
         </div>

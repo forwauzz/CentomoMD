@@ -87,11 +87,42 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async (savedForm) => {
       // Invalidate queries to update counts
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms"] });
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "draft"] });
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "copy"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/recent-patients"] });
+
+      // Create recent patient entry
+      const patientName = formData.patientName || title;
+      if (patientName) {
+        try {
+          await fetch("/api/recent-patients", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              patientName,
+              visitType: formType === 'draft' ? 'draft' : 'new',
+              formType: 'cnesst-medical',
+              formData: {
+                age: formData.age,
+                gender: formData.gender,
+                dateEvaluation: formData.dateEvaluation,
+                patientName: formData.patientName
+              },
+              savedFormId: savedForm.id,
+              patientAge: formData.age,
+              patientGender: formData.gender,
+              diagnosis: formData.diagnosticsCnesst
+            })
+          });
+        } catch (error) {
+          console.error('Failed to create recent patient entry:', error);
+          // Don't show error to user as this is a background operation
+        }
+      }
 
       const successMessage = formType === 'draft' ? t.successDraft : t.successCopy;
       toast({

@@ -341,3 +341,31 @@ export const insertGenericFormSchema = createInsertSchema(genericForms).omit({
 
 export type InsertGenericForm = z.infer<typeof insertGenericFormSchema>;
 export type GenericForm = typeof genericForms.$inferSelect;
+
+// Recent Patients/Visits tracking
+export const recentPatients = pgTable("recent_patients", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  patientName: varchar("patient_name").notNull(),
+  visitType: varchar("visit_type").notNull(), // "new", "follow-up", "draft"
+  formType: varchar("form_type").notNull().default("cnesst-medical"),
+  formData: jsonb("form_data"), // Store basic patient info for quick access
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  
+  // Link to saved forms if exists
+  savedFormId: integer("saved_form_id").references(() => savedForms.id),
+  
+  // Patient identification info for quick display
+  patientAge: varchar("patient_age"),
+  patientGender: varchar("patient_gender"),
+  diagnosis: varchar("diagnosis"),
+});
+
+export const insertRecentPatientSchema = createInsertSchema(recentPatients).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRecentPatient = z.infer<typeof insertRecentPatientSchema>;
+export type RecentPatient = typeof recentPatients.$inferSelect;

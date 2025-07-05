@@ -381,6 +381,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recent patients routes (authentication required)
+  
+  // Get recent patients for the authenticated user
+  app.get("/api/recent-patients", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 10;
+      const recentPatients = await storage.getRecentPatientsByUserId(userId, limit);
+      
+      res.json(recentPatients);
+    } catch (error) {
+      console.error('Get recent patients error:', error);
+      res.status(500).json({ message: "Failed to fetch recent patients" });
+    }
+  });
+
+  // Create or update a recent patient entry
+  app.post("/api/recent-patients", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { patientName, visitType, formType, formData, savedFormId, patientAge, patientGender, diagnosis } = req.body;
+
+      if (!patientName || !visitType) {
+        return res.status(400).json({ message: "Patient name and visit type are required" });
+      }
+
+      const recentPatient = await storage.createRecentPatient({
+        userId,
+        patientName,
+        visitType,
+        formType: formType || 'cnesst-medical',
+        formData,
+        savedFormId,
+        patientAge,
+        patientGender,
+        diagnosis,
+        lastAccessedAt: new Date()
+      });
+
+      // Cleanup old entries to maintain reasonable list size
+      await storage.cleanupOldRecentPatients(userId, 20);
+
+      res.status(201).json(recentPatient);
+    } catch (error) {
+      console.error('Create recent patient error:', error);
+      res.status(500).json({ message: "Failed to create recent patient entry" });
+    }
+  });
+
+  // Update last accessed time for a patient
+  app.patch("/api/recent-patients/access", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { patientName } = req.body;
+      if (!patientName) {
+        return res.status(400).json({ message: "Patient name is required" });
+      }
+
+      await storage.updateRecentPatientAccess(userId, patientName);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Update recent patient access error:', error);
+      res.status(500).json({ message: "Failed to update patient access" });
+    }
+  });
+
+  // Delete a recent patient entry
+  app.delete("/api/recent-patients/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid patient ID" });
+      }
+
+      const deleted = await storage.deleteRecentPatient(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Recent patient not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error('Delete recent patient error:', error);
+      res.status(500).json({ message: "Failed to delete recent patient" });
+    }
+  });
+
   // AI formatting for Section 7
   app.post("/api/format-section7", async (req, res) => {
     try {
