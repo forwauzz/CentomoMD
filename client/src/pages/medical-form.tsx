@@ -1334,6 +1334,41 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         console.log(`Dictation result saved to field: ${dictationField}`, { newValue: newValue.substring(0, 100) + '...' });
       }
 
+      // Handle distributed Section 8 content
+      const isSection8Distributed = sessionStorage.getItem('section8_distributed') === 'true';
+      if (isSection8Distributed) {
+        const distributedFields = [
+          { key: 'dictationResult_appreciationEvolution', field: 'appreciationEvolution' },
+          { key: 'dictationResult_plaintesproblemes', field: 'plaintesproblemes' },
+          { key: 'dictationResult_impactAvq', field: 'impactAvq' }
+        ];
+
+        distributedFields.forEach(({ key, field }) => {
+          const content = sessionStorage.getItem(key);
+          if (content) {
+            const currentValue = form.getValues(field as any) || '';
+            const newValue = currentValue ? currentValue + '\n' + content : content;
+            form.setValue(field as any, newValue);
+            
+            // Clean up
+            sessionStorage.removeItem(key);
+            sessionStorage.removeItem(`dictationField_${field}`);
+            
+            console.log(`Distributed content saved to field: ${field}`, { content: content.substring(0, 100) + '...' });
+          }
+        });
+
+        // Clean up distribution marker
+        sessionStorage.removeItem('section8_distributed');
+        
+        toast({
+          title: language === 'fr' ? "Section 8 distribuée" : "Section 8 distributed",
+          description: language === 'fr' 
+            ? "Contenu distribué vers les sous-sections"
+            : "Content distributed to subsections",
+        });
+      }
+
       // Handle section navigation after dictation
       if (scrollToSection) {
         setTimeout(() => {

@@ -682,8 +682,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced Section 8 distribution endpoint
+  // Section 8 medical history distribution endpoint  
   app.post("/api/ai/distribute-section8", async (req, res) => {
+    try {
+      const { text, language = 'fr' } = req.body;
+
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING"
+        });
+      }
+
+      // Import the AI formatter function
+      const { distributeSection8MedicalHistory } = await import('./ai-formatter-v2');
+      
+      const result = await distributeSection8MedicalHistory(text, language);
+      
+      if (result.success) {
+        // Map the distributions to the correct field names
+        const mappedDistributions = {
+          appreciation: result.distributions.appreciation || '',
+          plaintes: result.distributions.plaintes || '',
+          impact: result.distributions.impact || ''
+        };
+        
+        res.json({
+          success: true,
+          ...mappedDistributions
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to distribute Section 8 content"
+        });
+      }
+    } catch (error) {
+      console.error('Section 8 distribution error:', error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error during Section 8 distribution"
+      });
+    }
+  });
+
+  // Enhanced physical examination distribution endpoint
+  app.post("/api/ai/distribute-physical-exam", async (req, res) => {
     try {
       const { text, language = 'fr', contextData = {} } = req.body;
 

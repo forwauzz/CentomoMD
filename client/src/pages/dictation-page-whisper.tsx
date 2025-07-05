@@ -232,7 +232,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     }
   };
 
-  const handleSaveToSection = () => {
+  const handleSaveToSection = async () => {
     if (!editableText.trim()) {
       toast({
         title: currentLanguage === "fr" ? "Aucun texte" : "No text",
@@ -242,9 +242,92 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
       return;
     }
 
-    // Save to sessionStorage for the medical form
-    const key = `dictation_${selectedSection}`;
-    sessionStorage.setItem(key, editableText.trim());
+    // Map section to field name for consistent storage
+    const sectionToFieldMap: { [key: string]: string } = {
+      'section7': 'historiqueEvolution',
+      'section8': 'section8Input',
+      'section11': 'conclusionResume'
+    };
+
+    const fieldName = sectionToFieldMap[selectedSection] || selectedSection;
+    let finalText = editableText.trim();
+    
+    // Handle Section 8 special case - distribute to subfields
+    if (selectedSection === 'section8') {
+      try {
+        toast({
+          title: currentLanguage === "fr" ? "Distribution Section 8" : "Distributing Section 8",
+          description: currentLanguage === "fr" 
+            ? "Distribution du texte vers les sous-sections..."
+            : "Distributing text to subsections...",
+          variant: "default",
+        });
+
+        // Call the AI distribution API
+        const response = await fetch('/api/ai/distribute-section8', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: finalText,
+            language: currentLanguage
+          }),
+        });
+
+        if (response.ok) {
+          const distributedData = await response.json();
+          
+          // Store distributed content for each subfield
+          if (distributedData.appreciation) {
+            sessionStorage.setItem('dictationResult_appreciationEvolution', distributedData.appreciation);
+            sessionStorage.setItem('dictationField_appreciationEvolution', 'appreciationEvolution');
+          }
+          if (distributedData.plaintes) {
+            sessionStorage.setItem('dictationResult_plaintesproblemes', distributedData.plaintes);
+            sessionStorage.setItem('dictationField_plaintesproblemes', 'plaintesproblemes');
+          }
+          if (distributedData.impact) {
+            sessionStorage.setItem('dictationResult_impactAvq', distributedData.impact);
+            sessionStorage.setItem('dictationField_impactAvq', 'impactAvq');
+          }
+          
+          // Set marker for Section 8 distribution
+          sessionStorage.setItem('section8_distributed', 'true');
+          
+          toast({
+            title: currentLanguage === "fr" ? "Distribution réussie" : "Distribution successful",
+            description: currentLanguage === "fr" 
+              ? "Texte distribué vers les sous-sections de Section 8"
+              : "Text distributed to Section 8 subsections",
+            variant: "default",
+          });
+        }
+      } catch (error) {
+        console.error('Section 8 distribution failed:', error);
+        toast({
+          title: currentLanguage === "fr" ? "Échec de la distribution" : "Distribution failed",
+          description: currentLanguage === "fr" 
+            ? "Utilisation du texte original pour Section 8"
+            : "Using original text for Section 8",
+          variant: "destructive",
+        });
+      }
+    }
+    
+    // Save using the same mechanism as medical form expects
+    sessionStorage.setItem('dictationResult', finalText);
+    sessionStorage.setItem('dictationField', fieldName);
+    sessionStorage.setItem('scrollToSection', selectedSection);
+    sessionStorage.setItem('highlightField', fieldName);
+    
+    // Create backup storage for reliability
+    const backupData = {
+      result: finalText,
+      field: fieldName,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('dictationBackup', JSON.stringify(backupData));
     
     toast({
       title: currentLanguage === "fr" ? "Sauvegardé" : "Saved",
