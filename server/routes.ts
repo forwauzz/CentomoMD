@@ -859,7 +859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Whisper chunk transcription endpoint for long recordings
   app.post("/api/transcribe-whisper-chunk", async (req, res) => {
     try {
-      const { chunkIndex = 0, language = 'auto', enhanceText = true, sessionId, totalChunks } = req.body;
+      const { chunkIndex: rawChunkIndex = 0, language = 'auto', enhanceText = true, sessionId, totalChunks: rawTotalChunks } = req.body;
       
       if (!req.files || !req.files.audio) {
         return res.status(400).json({ message: "Audio chunk is required" });
@@ -872,19 +872,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const audioFile = req.files.audio as UploadedFile;
-      
-      console.log(`🎵 Processing Whisper chunk ${chunkIndex + 1}: ${audioFile.name} (${audioFile.size} bytes)`);
+      // Convert and validate chunk parameters
+      const chunkIndex = parseInt(rawChunkIndex.toString(), 10);
+      const totalChunks = rawTotalChunks ? parseInt(rawTotalChunks.toString(), 10) : undefined;
 
-      // Validate chunk parameters
-      if (typeof chunkIndex !== 'number' || chunkIndex < 0) {
+      if (isNaN(chunkIndex) || chunkIndex < 0) {
         return res.status(400).json({ 
-          message: "Invalid chunk index", 
+          message: `Invalid chunk index: ${rawChunkIndex}`, 
           error: "INVALID_CHUNK_INDEX" 
         });
       }
 
-      if (totalChunks && (typeof totalChunks !== 'number' || totalChunks <= 0 || chunkIndex >= totalChunks)) {
+      const audioFile = req.files.audio as UploadedFile;
+      
+      console.log(`🎵 Processing Whisper chunk ${chunkIndex + 1}: ${audioFile.name} (${audioFile.size} bytes)`);
+
+      if (totalChunks && (isNaN(totalChunks) || totalChunks <= 0 || chunkIndex >= totalChunks)) {
         return res.status(400).json({ 
           message: `Invalid chunk parameters: ${chunkIndex}/${totalChunks}`, 
           error: "INVALID_CHUNK_PARAMS" 
