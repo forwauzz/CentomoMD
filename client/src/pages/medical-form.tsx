@@ -1371,11 +1371,36 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
 
     // Also check on window focus (when returning from dictation page)
     const handleFocus = () => {
+      console.log('Window focus detected, checking dictation results in 100ms');
       setTimeout(checkDictationResults, 100);
     };
 
+    // Also check on route/location changes (when navigating back from dictation)
+    const handleLocationChange = () => {
+      console.log('Location change detected, checking dictation results in 50ms');
+      setTimeout(checkDictationResults, 50);
+    };
+
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    window.addEventListener('hashchange', handleLocationChange);
+    window.addEventListener('popstate', handleLocationChange);
+    
+    // Periodic check for dictation results every 2 seconds
+    const dictationCheckInterval = setInterval(() => {
+      const hasResult = sessionStorage.getItem('dictationResult');
+      const hasBackup = localStorage.getItem('dictationBackup');
+      if (hasResult || hasBackup) {
+        console.log('Periodic check found dictation data, processing...');
+        checkDictationResults();
+      }
+    }, 2000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('hashchange', handleLocationChange);
+      window.removeEventListener('popstate', handleLocationChange);
+      clearInterval(dictationCheckInterval);
+    };
   }, [form, language, toast]);
 
   // Handle dictation results when returning from dictation page

@@ -709,6 +709,27 @@ export default function DictationPage({
       sessionStats: { duration: recordingDuration, chunks: chunkCount + 1 },
     });
 
+    // ADDITIONAL VERIFICATION: Immediately verify storage was successful
+    setTimeout(() => {
+      const verifyResult = sessionStorage.getItem('dictationResult');
+      const verifyField = sessionStorage.getItem('dictationField');
+      const verifyBackup = localStorage.getItem('dictationBackup');
+      
+      console.log('📋 Storage verification:', {
+        sessionStorageOk: !!verifyResult && verifyResult === textToSave,
+        fieldMatches: verifyField === selectedSection,
+        backupExists: !!verifyBackup,
+        verifyResultLength: verifyResult?.length,
+        originalLength: textToSave.length
+      });
+      
+      if (!verifyResult || verifyResult !== textToSave) {
+        console.error('❌ Storage verification failed! Re-attempting save...');
+        sessionStorage.setItem('dictationResult', textToSave);
+        sessionStorage.setItem('dictationField', selectedSection);
+      }
+    }, 100);
+
     const targetSection = getFormSectionFromField(selectedSection);
     sessionStorage.setItem("scrollToSection", targetSection);
     sessionStorage.setItem("highlightField", selectedSection);
@@ -723,11 +744,15 @@ export default function DictationPage({
     setEditableText("");
 
     const finalReturnPath = returnPath || "/forms/cnesst-medical-evaluation";
-    console.log(
-      "🔄 Navigating back to:",
-      finalReturnPath + "#" + targetSection,
-    );
-    setLocation(finalReturnPath + "#" + targetSection);
+    
+    // CRITICAL FIX: Add delay before navigation to ensure all storage operations complete
+    setTimeout(() => {
+      console.log(
+        "🔄 Navigating back to:",
+        finalReturnPath + "#" + targetSection,
+      );
+      setLocation(finalReturnPath + "#" + targetSection);
+    }, 250); // 250ms delay to ensure storage completes
   };
 
   const handleStartEditing = () => {
