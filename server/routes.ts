@@ -859,7 +859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Whisper chunk transcription endpoint for long recordings
   app.post("/api/transcribe-whisper-chunk", async (req, res) => {
     try {
-      const { chunkIndex = 0, language = 'auto', enhanceText = true } = req.body;
+      const { chunkIndex = 0, language = 'auto', enhanceText = true, sessionId, totalChunks } = req.body;
       
       if (!req.files || !req.files.audio) {
         return res.status(400).json({ message: "Audio chunk is required" });
@@ -876,6 +876,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🎵 Processing Whisper chunk ${chunkIndex + 1}: ${audioFile.name} (${audioFile.size} bytes)`);
 
+      // Validate chunk parameters
+      if (typeof chunkIndex !== 'number' || chunkIndex < 0) {
+        return res.status(400).json({ 
+          message: "Invalid chunk index", 
+          error: "INVALID_CHUNK_INDEX" 
+        });
+      }
+
+      if (totalChunks && (typeof totalChunks !== 'number' || totalChunks <= 0 || chunkIndex >= totalChunks)) {
+        return res.status(400).json({ 
+          message: `Invalid chunk parameters: ${chunkIndex}/${totalChunks}`, 
+          error: "INVALID_CHUNK_PARAMS" 
+        });
+      }
+
       // Validate audio file
       if (!audioFile.size || audioFile.size === 0) {
         return res.status(400).json({ 
@@ -891,12 +906,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Log session tracking information
+      if (sessionId) {
+        console.log(`📋 Session ${sessionId}: Processing chunk ${chunkIndex + 1}${totalChunks ? `/${totalChunks}` : ''}`);
+      }
+
       // Convert file data to blob for chunk processing
       const blob = new Blob([audioFile.data], { type: audioFile.mimetype });
       
       const result = await transcribeAudioChunk(blob, chunkIndex, {
         language: language as 'fr' | 'en' | 'auto',
-        enhanceText
+        enhanceText,
+        sessionId,
+        totalChunks
       });
 
       res.json({

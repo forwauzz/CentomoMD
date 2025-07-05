@@ -106,6 +106,12 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **July 5, 2025**: **Critical Backend Stability Improvements** - Fixed app startup failures and enhanced Whisper system reliability
+  - Created missing `recent_patients` database table resolving "relation does not exist" errors
+  - Added comprehensive Whisper API retry logic with exponential backoff (3 retries, 1-10 second delays)
+  - Implemented chunk validation and session tracking with UUIDs for long dictations
+  - Enhanced AI text enhancement with fallback protection to prevent transcript corruption
+  - Added detailed error handling and logging for medical transcription reliability
 - **January 5, 2025**: **Whisper API Integration Complete** - Upgraded from WebSpeech API to OpenAI Whisper API for medical transcription
   - Implemented Whisper transcription service with 95% accuracy (up from 70% with WebSpeech)
   - Created new audio recorder hook with MediaRecorder API and chunking system

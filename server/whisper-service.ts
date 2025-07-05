@@ -4,6 +4,82 @@ import { enhanceVoiceInput } from './ai-formatter';
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Retry configuration for Whisper API
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  baseDelay: 1000, // 1 second
+  maxDelay: 10000, // 10 seconds
+  backoffFactor: 2
+};
+
+// Sleep utility for retry delays
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Calculate exponential backoff delay
+function getRetryDelay(attempt: number): number {
+  const delay = RETRY_CONFIG.baseDelay * Math.pow(RETRY_CONFIG.backoffFactor, attempt - 1);
+  return Math.min(delay, RETRY_CONFIG.maxDelay);
+}
+
+// Check if error is retryable
+function isRetryableError(error: any): boolean {
+  // Rate limit errors
+  if (error.status === 429) return true;
+  
+  // Server errors (5xx)
+  if (error.status >= 500 && error.status < 600) return true;
+  
+  // Network/timeout errors
+  if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') return true;
+  
+  // OpenAI specific retryable errors
+  if (error.type === 'server_error' || error.type === 'rate_limit_exceeded') return true;
+  
+  return false;
+}
+
+// Retry wrapper for Whisper API calls
+async function transcribeWithRetry(params: any): Promise<any> {
+  let lastError: any;
+  
+  for (let attempt = 1; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
+    try {
+      console.log(`🔄 Whisper API attempt ${attempt}/${RETRY_CONFIG.maxRetries}`);
+      
+      const result = await openai.audio.transcriptions.create(params);
+      
+      // Success - return result
+      if (attempt > 1) {
+        console.log(`✅ Whisper API succeeded on attempt ${attempt}`);
+      }
+      return result;
+      
+    } catch (error: any) {
+      lastError = error;
+      
+      // Log the error
+      console.error(`❌ Whisper API attempt ${attempt} failed:`, error.message);
+      
+      // Check if we should retry
+      if (attempt < RETRY_CONFIG.maxRetries && isRetryableError(error)) {
+        const delay = getRetryDelay(attempt);
+        console.log(`⏳ Retrying in ${delay}ms... (${error.status || error.code || 'unknown error'})`);
+        await sleep(delay);
+        continue;
+      }
+      
+      // No more retries or non-retryable error
+      break;
+    }
+  }
+  
+  // All retries exhausted
+  console.error(`💥 All Whisper API retries exhausted. Final error:`, lastError);
+  throw lastError;
+}
+
 export interface WhisperTranscriptionResult {
   text: string;
   confidence?: number;
@@ -19,6 +95,8 @@ export interface WhisperTranscriptionOptions {
   language?: 'fr' | 'en' | 'auto';
   enhanceText?: boolean;
   prompt?: string;
+  sessionId?: string;
+  totalChunks?: number;
 }
 
 export async function transcribeAudioWithWhisper(
@@ -70,7 +148,7 @@ export async function transcribeAudioWithWhisper(
     }
     
     console.log('📤 Sending audio to Whisper API...');
-    const transcription = await openai.audio.transcriptions.create(transcriptionParams);
+    const transcription = await transcribeWithRetry(transcriptionParams);
     
     console.log('✅ Whisper transcription received:', transcription.text.substring(0, 100) + '...');
     
@@ -82,21 +160,35 @@ export async function transcribeAudioWithWhisper(
     
     // Apply medical text enhancement if requested
     if (options.enhanceText) {
-      console.log('🔧 Enhancing medical terminology...');
-      const enhanced = enhanceVoiceInput(transcription.text);
-      result.enhanced = {
-        text: enhanced.enhanced,
-        corrections: enhanced.corrections.map(correction => ({
-          original: enhanced.original,
-          corrected: enhanced.enhanced,
-          reason: correction
-        }))
-      };
-      
-      // Use enhanced text as primary result if improvements were made
-      if (enhanced.corrections.length > 0) {
-        result.text = enhanced.enhanced;
-        console.log(`✨ Applied ${enhanced.corrections.length} medical corrections`);
+      try {
+        console.log('🔧 Enhancing medical terminology...');
+        const enhanced = enhanceVoiceInput(transcription.text);
+        
+        // Validate enhancement output
+        if (enhanced && enhanced.enhanced && typeof enhanced.enhanced === 'string' && enhanced.enhanced.trim().length > 0) {
+          result.enhanced = {
+            text: enhanced.enhanced,
+            corrections: enhanced.corrections.map(correction => ({
+              original: enhanced.original,
+              corrected: enhanced.enhanced,
+              reason: correction
+            }))
+          };
+          
+          // Use enhanced text as primary result if improvements were made
+          if (enhanced.corrections.length > 0) {
+            result.text = enhanced.enhanced;
+            console.log(`✨ Applied ${enhanced.corrections.length} medical corrections`);
+          } else {
+            console.log('📝 No corrections needed - using original transcript');
+          }
+        } else {
+          console.warn('⚠️ Enhancement failed - invalid output, using original transcript');
+        }
+      } catch (error) {
+        console.error('❌ Medical terminology enhancement failed:', error);
+        console.log('📝 Falling back to original Whisper transcript');
+        // Keep original transcript - no enhancement applied
       }
     }
     
