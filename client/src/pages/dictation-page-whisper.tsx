@@ -360,7 +360,21 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
       return t.processingAudio;
     }
     if (isRecording) {
-      return t.recording;
+      const duration = recordingDuration;
+      const minutes = Math.floor(duration / 60);
+      const seconds = duration % 60;
+      
+      if (duration >= 240) { // 4+ minutes
+        return currentLanguage === "fr" 
+          ? `⚠️ Enregistrement long: ${minutes}:${seconds.toString().padStart(2, '0')} - Considérez arrêter bientôt`
+          : `⚠️ Long recording: ${minutes}:${seconds.toString().padStart(2, '0')} - Consider stopping soon`;
+      } else if (duration >= 180) { // 3+ minutes
+        return currentLanguage === "fr" 
+          ? `🔶 ${minutes}:${seconds.toString().padStart(2, '0')} - Bientôt 4 minutes`
+          : `🔶 ${minutes}:${seconds.toString().padStart(2, '0')} - Nearly 4 minutes`;
+      }
+      
+      return `${t.recording} ${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
     return t.ready;
   };

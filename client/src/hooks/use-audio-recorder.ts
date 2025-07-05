@@ -61,6 +61,8 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     enhanceText = true
   } = options;
 
+
+
   // Update state helper
   const updateState = useCallback((updates: Partial<AudioRecorderState>) => {
     setState(prev => ({ ...prev, ...updates }));
@@ -212,37 +214,85 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
           isRecording: false 
         });
         
-        // Process all chunks
-        if (chunks.length > 0) {
-          processAllChunks(chunks);
+        // Validate and process chunks
+        const validChunks = chunks.filter(chunk => chunk.blob.size > 1024); // At least 1KB
+        
+        if (validChunks.length > 0) {
+          console.log(`📋 Processing ${validChunks.length} valid chunks (filtered from ${chunks.length} total)`);
+          processAllChunks(validChunks);
+        } else {
+          console.error(`💥 No valid audio chunks found. All ${chunks.length} chunks were empty or too small.`);
+          updateState({ error: 'Recording failed - no valid audio data captured. Please try recording again.' });
         }
       };
 
-      // Handle chunk creation during recording
+      // Handle chunk creation during recording with session recovery
       const createChunk = () => {
         if (mediaRecorder.state === 'recording') {
+          console.log(`🔄 Creating chunk at ${chunks.length + 1}, current data size: ${currentChunkData.length} blobs`);
+          
+          // Validate we have audio data before stopping
+          if (currentChunkData.length === 0) {
+            console.warn('⚠️ No audio data available for chunk creation, retrying...');
+            return;
+          }
+          
           mediaRecorder.stop();
           
-          // Create the chunk
+          // Create the chunk with validation
           const blob = new Blob(currentChunkData, { type: 'audio/webm' });
           const chunkEndTime = Date.now();
           
-          chunks.push({
+          if (blob.size < 1024) { // Less than 1KB indicates failed recording
+            console.error(`💥 Invalid chunk created: ${blob.size} bytes - audio data lost!`);
+            updateState({ 
+              error: 'Audio recording failed - invalid chunk created. Please stop and restart recording.',
+              isRecording: false 
+            });
+            return;
+          }
+          
+          const newChunk = {
             blob,
             startTime: chunkStartTime,
             endTime: chunkEndTime,
             chunkIndex: chunks.length
-          });
+          };
+          
+          chunks.push(newChunk);
           
           console.log(`📦 Auto-created chunk ${chunks.length}: ${blob.size} bytes`);
+          
+          // Save chunk metadata to session storage for recovery
+          try {
+            const sessionData = {
+              chunkIndex: chunks.length,
+              size: blob.size,
+              startTime: chunkStartTime,
+              endTime: chunkEndTime,
+              timestamp: Date.now()
+            };
+            sessionStorage.setItem(`audioChunk_${chunks.length}`, JSON.stringify(sessionData));
+            console.log(`💾 Saved chunk ${chunks.length} metadata to session storage`);
+          } catch (error) {
+            console.warn('Failed to save chunk to session storage:', error);
+          }
           
           // Reset for next chunk
           currentChunkData = [];
           chunkStartTime = Date.now();
           
-          // Start next chunk
-          mediaRecorder.start();
-          updateState({ chunkCount: chunks.length });
+          // Start next chunk with error handling
+          try {
+            mediaRecorder.start();
+            updateState({ chunkCount: chunks.length });
+          } catch (error) {
+            console.error('Failed to start next chunk:', error);
+            updateState({ 
+              error: 'Failed to continue recording. Please stop and restart.',
+              isRecording: false 
+            });
+          }
         }
       };
 
