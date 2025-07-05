@@ -52,6 +52,8 @@ export function AIFormatSection7({ value, onValueChange, language }: AIFormatSec
     setOriginalText(value);
 
     try {
+      console.log('Starting AI format request with text:', value.substring(0, 100) + '...');
+      
       const response = await fetch('/api/format-section7', {
         method: 'POST',
         headers: {
@@ -63,11 +65,16 @@ export function AIFormatSection7({ value, onValueChange, language }: AIFormatSec
         }),
       });
 
+      console.log('AI format response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to format text');
+        const errorText = await response.text();
+        console.error('AI format error response:', errorText);
+        throw new Error(`Failed to format text: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('AI format success, formatted text length:', data.formatted?.length);
       
       if (data.error === 'API_KEY_MISSING') {
         toast({
@@ -187,6 +194,7 @@ export function AIFormatSection7({ value, onValueChange, language }: AIFormatSec
           {t.copy}
         </Button>
         <Button
+          type="button"
           onClick={handleFormat}
           disabled={!value.trim() || isFormatting}
           className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white"
