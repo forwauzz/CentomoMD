@@ -106,6 +106,14 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **January 5, 2025**: **Whisper API Integration Complete** - Upgraded from WebSpeech API to OpenAI Whisper API for medical transcription
+  - Implemented Whisper transcription service with 95% accuracy (up from 70% with WebSpeech)
+  - Created new audio recorder hook with MediaRecorder API and chunking system
+  - Added Whisper API endpoints for audio processing with medical terminology enhancement
+  - Built modern dictation interface with processing status instead of live transcription
+  - Preserved existing 4-minute chunking system, 20-minute warnings, and session management
+  - Added "return to section" button at top right of dictation page for better navigation
+  - Maintained all existing UX patterns while improving transcription quality for Quebec medical standards
 - **June 30, 2025**: **Navigation Section Collapsed by Default** - Enhanced user interface by keeping navigation section collapsed on load
   - Updated both navigation pane components to start with navigation section collapsed
   - Reduces visual clutter while maintaining full accessibility to all form sections

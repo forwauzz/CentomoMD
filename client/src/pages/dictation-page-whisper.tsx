@@ -323,6 +323,16 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
             {t.whisperPowered}
           </Badge>
         </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setLocation("/medical-form")}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {currentLanguage === "fr" ? "Retour à la section" : "Return to section"}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
