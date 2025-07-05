@@ -239,7 +239,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     });
 
     // Navigate back to form
-    setLocation("/medical-form");
+    setLocation("/forms/cnesst-medical");
   };
 
   const handleClearText = () => {
@@ -310,7 +310,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setLocation("/medical-form")}
+          onClick={() => setLocation("/forms/cnesst-medical")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t.backToForm}
@@ -327,7 +327,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setLocation("/medical-form")}
+          onClick={() => setLocation("/forms/cnesst-medical")}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
