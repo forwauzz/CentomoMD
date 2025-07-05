@@ -26,6 +26,7 @@ interface TranscriptionResult {
 
 interface AudioRecorderState {
   isRecording: boolean;
+  isPaused: boolean;
   isProcessing: boolean;
   transcript: string;
   chunks: AudioChunk[];
@@ -39,6 +40,7 @@ interface AudioRecorderState {
 export function useAudioRecorder(options: AudioRecorderOptions = {}) {
   const [state, setState] = useState<AudioRecorderState>({
     isRecording: false,
+    isPaused: false,
     isProcessing: false,
     transcript: '',
     chunks: [],
@@ -358,6 +360,72 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     mediaRecorderRef.current = null;
   }, []);
 
+  // Pause recording
+  const pauseRecording = useCallback(() => {
+    if (!state.isRecording || state.isPaused) return;
+    
+    console.log('⏸️ Pausing audio recording...');
+    
+    try {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.pause();
+      }
+      
+      // Pause timers
+      if (durationTimerRef.current) {
+        clearInterval(durationTimerRef.current);
+        durationTimerRef.current = null;
+      }
+      if (chunkTimerRef.current) {
+        clearInterval(chunkTimerRef.current);
+        chunkTimerRef.current = null;
+      }
+      
+      updateState({ isPaused: true });
+      console.log('⏸️ Recording paused successfully');
+    } catch (error) {
+      console.error('❌ Failed to pause recording:', error);
+      updateState({ 
+        error: error instanceof Error ? error.message : 'Failed to pause recording'
+      });
+    }
+  }, [state.isRecording, state.isPaused, updateState]);
+
+  // Resume recording
+  const resumeRecording = useCallback(() => {
+    if (!state.isRecording || !state.isPaused) return;
+    
+    console.log('▶️ Resuming audio recording...');
+    
+    try {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'paused') {
+        mediaRecorderRef.current.resume();
+      }
+      
+      // Resume timers
+      durationTimerRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        updateState({ recordingDuration: elapsed });
+      }, 1000);
+      
+      chunkTimerRef.current = setInterval(() => {
+        // Chunk creation logic for resume (simplified)
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+          console.log('🔄 Auto-chunk timer triggered during resume');
+          mediaRecorderRef.current.requestData();
+        }
+      }, chunkDuration * 1000);
+      
+      updateState({ isPaused: false });
+      console.log('▶️ Recording resumed successfully');
+    } catch (error) {
+      console.error('❌ Failed to resume recording:', error);
+      updateState({ 
+        error: error instanceof Error ? error.message : 'Failed to resume recording'
+      });
+    }
+  }, [state.isRecording, state.isPaused, chunkDuration, updateState]);
+
   // Reset state
   const reset = useCallback(() => {
     if (state.isRecording) {
@@ -371,13 +439,15 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
       chunkCount: 0,
       currentChunkIndex: 0,
       error: null,
-      isProcessing: false
+      isProcessing: false,
+      isPaused: false
     });
   }, [state.isRecording, stopRecording, updateState]);
 
   return {
     // State
     isRecording: state.isRecording,
+    isPaused: state.isPaused,
     isProcessing: state.isProcessing,
     transcript: state.transcript,
     chunks: state.chunks,
@@ -390,6 +460,8 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     // Actions
     startRecording,
     stopRecording,
+    pauseRecording,
+    resumeRecording,
     reset: () => {
       console.log('🔄 Resetting audio recorder state');
       updateState({

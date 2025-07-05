@@ -110,6 +110,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
   // Audio recorder hook with Whisper integration
   const {
     isRecording,
+    isPaused,
     isProcessing,
     transcript,
     chunks,
@@ -120,6 +121,8 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     isSupported,
     startRecording,
     stopRecording,
+    pauseRecording,
+    resumeRecording,
     reset,
     formatDuration,
     getProgress
@@ -365,6 +368,12 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
       const minutes = Math.floor(duration / 60);
       const seconds = duration % 60;
       
+      if (isPaused) {
+        return currentLanguage === "fr" 
+          ? `⏸️ En pause: ${minutes}:${seconds.toString().padStart(2, '0')}`
+          : `⏸️ Paused: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }
+      
       if (duration >= 240) { // 4+ minutes
         return currentLanguage === "fr" 
           ? `⚠️ Enregistrement long: ${minutes}:${seconds.toString().padStart(2, '0')} - Considérez arrêter bientôt`
@@ -500,7 +509,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Recording Button */}
+              {/* Recording Controls */}
               <div className="flex gap-2">
                 {!isRecording ? (
                   <Button
@@ -512,14 +521,35 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                     {t.startRecording}
                   </Button>
                 ) : (
-                  <Button
-                    onClick={handleStopRecording}
-                    variant="destructive"
-                    className="flex-1"
-                  >
-                    <MicOff className="h-4 w-4 mr-2" />
-                    {t.stopRecording}
-                  </Button>
+                  <>
+                    {!isPaused ? (
+                      <Button
+                        onClick={pauseRecording}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        <Pause className="h-4 w-4 mr-2" />
+                        {t.pauseRecording}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={resumeRecording}
+                        variant="default"
+                        className="flex-1"
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        {t.resumeRecording}
+                      </Button>
+                    )}
+                    <Button
+                      onClick={handleStopRecording}
+                      variant="destructive"
+                      className="flex-1"
+                    >
+                      <MicOff className="h-4 w-4 mr-2" />
+                      {t.stopRecording}
+                    </Button>
+                  </>
                 )}
               </div>
 
