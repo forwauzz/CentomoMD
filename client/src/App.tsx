@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
 import MedicalForm from "@/pages/medical-form";
-import DictationPage from "@/pages/dictation-page";
+import DictationPageWhisper from "@/pages/dictation-page-whisper";
 import SpeechTestPage from "@/pages/speech-test-page";
 import SimpleAITest from "@/pages/simple-ai-test";
 import LoginPage from "@/pages/login-page";
@@ -44,7 +44,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
-      <Route path="/dictation" component={() => <DictationPage language={language} />} />
+      <Route path="/dictation" component={() => <DictationPageWhisper language={language} />} />
       <Route path="/speech-test" component={() => <SpeechTestPage />} />
       <Route path="/forms" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
       <Route path="/forms/:formType">

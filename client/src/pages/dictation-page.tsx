@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import {
   Mic,
   MicOff,
@@ -161,13 +161,11 @@ export default function DictationPage({
   );
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
-  // Timer state
-  const [recordingDuration, setRecordingDuration] = useState<number>(0);
+  // Timer state (legacy - now handled by audio recorder)
   const [sessionStartTime, setSessionStartTime] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // NEW: Auto-chunking state
-  const [chunkCount, setChunkCount] = useState<number>(0);
+  // NEW: Auto-chunking state (some handled by audio recorder)
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isAutoChunking, setIsAutoChunking] = useState<boolean>(false);
   const [currentChunkStartTime, setCurrentChunkStartTime] = useState<number>(0);
@@ -248,18 +246,24 @@ export default function DictationPage({
   }, []);
 
   const {
-    isListening,
+    isRecording: isListening,
+    isProcessing,
     transcript,
-    interimTranscript,
+    chunks,
+    recordingDuration,
+    chunkCount,
+    currentChunkIndex,
     error,
     isSupported,
-    startListening,
-    stopListening,
-    resetTranscript,
-  } = useSpeechRecognition({
-    language: currentLanguage === "fr" ? "fr-CA" : "en-US",
-    continuous: true,
-    interimResults: true,
+    startRecording: startListening,
+    stopRecording: stopListening,
+    reset: resetTranscript,
+    formatDuration,
+    getProgress
+  } = useAudioRecorder({
+    language: currentLanguage === "fr" ? "fr" : "en",
+    chunkDuration: CHUNK_DURATION,
+    enhanceText: true,
   });
 
   // Timer management for recording duration
@@ -508,12 +512,7 @@ export default function DictationPage({
     isAutoChunking,
   ]);
 
-  // Format duration for display
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  // Note: formatDuration is now provided by the audio recorder hook
 
   const handleStartRecording = () => {
     if (!selectedSection) {

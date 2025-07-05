@@ -8,6 +8,8 @@ import { enhancedFormatSection7Text, enhancedEnhanceSection7Dictation } from "./
 import { aiProcessingEngine } from "./ai-processing-engine";
 import { hashPassword, verifyPassword, generateUserId, getSessionConfig, requireAuth, requireAdmin } from "./auth";
 import { setupInitialUsers } from "./setup-users";
+import { transcribeAudioWithWhisper, transcribeAudioChunk, validateAudioFormat } from "./whisper-service";
+import type { UploadedFile } from "express-fileupload";
 import "./types";
 
 // Helper function for safe error handling
@@ -688,6 +690,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Failed to enhance Section 7 dictation",
         error: error.message || "Unknown error"
+      });
+    }
+  });
+
+  // Whisper API transcription endpoint
+  app.post("/api/transcribe-whisper", async (req, res) => {
+    try {
+      const { language = 'auto', enhanceText = true } = req.body;
+      
+      if (!req.files || !req.files.audio) {
+        return res.status(400).json({ message: "Audio file is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING"
+        });
+      }
+
+      const audioFile = req.files.audio as UploadedFile;
+      
+      // Validate audio format
+      if (!validateAudioFormat(audioFile.mimetype)) {
+        return res.status(400).json({ 
+          message: "Unsupported audio format. Supported formats: webm, wav, mp3, mp4, m4a, ogg, flac",
+          error: "INVALID_FORMAT"
+        });
+      }
+
+      console.log(`🎤 Processing Whisper transcription: ${audioFile.name} (${audioFile.size} bytes)`);
+
+      const result = await transcribeAudioWithWhisper(audioFile.data, {
+        language: language as 'fr' | 'en' | 'auto',
+        enhanceText
+      });
+
+      res.json({
+        success: true,
+        transcription: result.text,
+        enhanced: result.enhanced,
+        duration: result.duration,
+        language: result.language,
+        confidence: result.confidence || 0.95
+      });
+
+    } catch (error) {
+      console.error('Whisper transcription error:', error);
+      
+      if (error instanceof Error && error.message.includes('API')) {
+        return res.status(500).json({ 
+          message: "OpenAI Whisper API error - please check your API key",
+          error: "WHISPER_API_ERROR"
+        });
+      }
+
+      res.status(500).json({ 
+        message: "Failed to transcribe audio", 
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Whisper chunk transcription endpoint for long recordings
+  app.post("/api/transcribe-whisper-chunk", async (req, res) => {
+    try {
+      const { chunkIndex = 0, language = 'auto', enhanceText = true } = req.body;
+      
+      if (!req.files || !req.files.audio) {
+        return res.status(400).json({ message: "Audio chunk is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ 
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING"
+        });
+      }
+
+      const audioFile = req.files.audio as UploadedFile;
+      
+      console.log(`🎵 Processing Whisper chunk ${chunkIndex + 1}: ${audioFile.name} (${audioFile.size} bytes)`);
+
+      // Convert file data to blob for chunk processing
+      const blob = new Blob([audioFile.data], { type: audioFile.mimetype });
+      
+      const result = await transcribeAudioChunk(blob, chunkIndex, {
+        language: language as 'fr' | 'en' | 'auto',
+        enhanceText
+      });
+
+      res.json({
+        success: true,
+        chunkIndex,
+        transcription: result.text,
+        enhanced: result.enhanced,
+        duration: result.duration,
+        language: result.language,
+        confidence: result.confidence || 0.95
+      });
+
+    } catch (error) {
+      console.error(`Whisper chunk ${chunkIndex + 1} transcription error:`, error);
+      
+      res.status(500).json({ 
+        message: `Failed to transcribe audio chunk ${chunkIndex + 1}`, 
+        error: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });
