@@ -1535,10 +1535,6 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         }, 500);
       }
       
-      // Clear the dictation session storage
-      sessionStorage.removeItem('dictationResult');
-      sessionStorage.removeItem('dictationField');
-      
       // Show success message with toast
       toast({
         title: language === 'fr' ? "Dictée sauvegardée" : "Dictation saved",
