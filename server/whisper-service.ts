@@ -33,8 +33,18 @@ export async function transcribeAudioWithWhisper(
       Buffer.from(await audioFile.arrayBuffer()) : 
       audioFile;
     
-    // Create a File-like object for the API
-    const file = new File([audioBuffer], 'audio.webm', { type: 'audio/webm' });
+    // Validate audio buffer size
+    if (audioBuffer.length === 0) {
+      throw new Error('Empty audio buffer received');
+    }
+    
+    if (audioBuffer.length < 1024) { // Less than 1KB is likely empty or corrupted
+      throw new Error(`Audio file too small (${audioBuffer.length} bytes). May be empty or corrupted.`);
+    }
+    
+    // Create a File-like object for the API with proper audio format
+    // Use wav format for better compatibility with Whisper
+    const file = new File([audioBuffer], 'audio.wav', { type: 'audio/wav' });
     
     // Set up transcription parameters
     const transcriptionParams: any = {

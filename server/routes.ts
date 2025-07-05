@@ -876,6 +876,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🎵 Processing Whisper chunk ${chunkIndex + 1}: ${audioFile.name} (${audioFile.size} bytes)`);
 
+      // Validate audio file
+      if (!audioFile.size || audioFile.size === 0) {
+        return res.status(400).json({ 
+          message: "Empty audio file received", 
+          error: "EMPTY_AUDIO_FILE" 
+        });
+      }
+
+      if (audioFile.size < 1024) { // Less than 1KB
+        return res.status(400).json({ 
+          message: `Audio file too small (${audioFile.size} bytes). Recording may have failed.`, 
+          error: "AUDIO_FILE_TOO_SMALL" 
+        });
+      }
+
       // Convert file data to blob for chunk processing
       const blob = new Blob([audioFile.data], { type: audioFile.mimetype });
       
@@ -895,6 +910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
+      const { chunkIndex = 0 } = req.body;
       console.error(`Whisper chunk ${chunkIndex + 1} transcription error:`, error);
       
       res.status(500).json({ 
