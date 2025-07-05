@@ -23,6 +23,7 @@ import {
   Play,
   AlertCircle,
   CheckCircle,
+  X,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -524,12 +525,29 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
 
               {/* Processing Progress */}
               {isProcessing && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span>{t.chunkProgress}</span>
                     <span>{currentChunkIndex}/{chunkCount}</span>
                   </div>
                   <Progress value={getProgress()} className="w-full" />
+                  <Button 
+                    onClick={() => {
+                      console.log('🚫 User cancelled processing');
+                      setTranscript('');
+                      toast({
+                        title: currentLanguage === "fr" ? "Traitement annulé" : "Processing cancelled",
+                        description: currentLanguage === "fr" ? "Vous pouvez recommencer l'enregistrement" : "You can start recording again",
+                        variant: "default",
+                      });
+                    }}
+                    variant="outline" 
+                    size="sm"
+                    className="w-full border-red-200 text-red-600 hover:bg-red-50"
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    {currentLanguage === "fr" ? "Annuler le traitement" : "Cancel Processing"}
+                  </Button>
                 </div>
               )}
             </CardContent>

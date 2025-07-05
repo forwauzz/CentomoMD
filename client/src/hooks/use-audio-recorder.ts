@@ -57,7 +57,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
 
   const {
     language = 'auto',
-    chunkDuration = 4 * 60, // 4 minutes in seconds
+    chunkDuration = 2 * 60, // 2 minutes in seconds for better reliability
     enhanceText = true
   } = options;
 

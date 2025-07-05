@@ -40,15 +40,34 @@ function isRetryableError(error: any): boolean {
   return false;
 }
 
-// Retry wrapper for Whisper API calls
+// Timeout wrapper for API calls
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => 
+      setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+    )
+  ]);
+}
+
+// Retry wrapper for Whisper API calls with timeout
 async function transcribeWithRetry(params: any): Promise<any> {
   let lastError: any;
+  
+  // Determine timeout based on file size
+  const fileSize = params.file.size;
+  const timeoutMs = fileSize > 5 * 1024 * 1024 ? 120000 : 60000; // 2 min for large files, 1 min for smaller
+  
+  console.log(`⏱️ Using ${timeoutMs/1000}s timeout for ${(fileSize/1024/1024).toFixed(1)}MB file`);
   
   for (let attempt = 1; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
     try {
       console.log(`🔄 Whisper API attempt ${attempt}/${RETRY_CONFIG.maxRetries}`);
       
-      const result = await openai.audio.transcriptions.create(params);
+      const result = await withTimeout(
+        openai.audio.transcriptions.create(params),
+        timeoutMs
+      );
       
       // Success - return result
       if (attempt > 1) {
@@ -65,7 +84,7 @@ async function transcribeWithRetry(params: any): Promise<any> {
       // Check if we should retry
       if (attempt < RETRY_CONFIG.maxRetries && isRetryableError(error)) {
         const delay = getRetryDelay(attempt);
-        console.log(`⏳ Retrying in ${delay}ms... (${error.status || error.code || 'unknown error'})`);
+        console.log(`⏳ Retrying in ${delay}ms... (${error.status || error.code || 'timeout'})`);
         await sleep(delay);
         continue;
       }
