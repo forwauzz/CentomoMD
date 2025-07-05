@@ -270,6 +270,19 @@ INSTRUCTIONS SPÉCIALISÉES:
 - Tous les traitements et procédures
 - Infiltrations et examens d'imagerie
 
+VARIATION OBLIGATOIRE - ÉVITE LA RÉPÉTITION MÉCANIQUE:
+- VARIE les verbes de consultation: "consulte", "rencontre", "revoit", "obtient un rendez-vous avec", "se présente chez"
+- ALTERNE les structures de phrases pour créer un flow naturel
+- UTILISE différentes introductions temporelles: "Le [date]", "En date du [date]", "Lors de la consultation du [date]"
+- ÉVITE absolument de répéter la même formulation dans un même document
+- ADAPTE le vocabulaire selon le contexte (première consultation = "consulte", suivi = "revoit")
+
+GESTION DES DONNÉES MANQUANTES:
+- Si un nom de médecin est incomplet ou manquant, utilise "médecin traitant", "professionnel de la santé" ou "médecin de famille"
+- Si des détails sont flous, concentre-toi sur les éléments clairs et vérifiables
+- N'invente JAMAIS d'information qui n'est pas explicitement dans le texte source
+- Pour les noms partiels, utilise le fragment disponible avec le titre approprié
+
 TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
 - Lésions: tendinite, élongation musculaire, déchirure partielle, entorse cervicale, plexopathie brachiale
 - Anatomie: supra-épineux, trapèze, grand pectoral, rachis cervical, plexus brachial, C5-C7

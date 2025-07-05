@@ -377,6 +377,19 @@ TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
 - Traitements: physiothérapie, ergothérapie, acupuncture, infiltration cortisonée, visco-supplémentation, Synvisc, orthèse d'extension, botte de marche, analgésie, orthèse genou, ankylose, antibiotiques par voie intraveineuse, visites quotidiennes au centre hospitalier, réduction ouverte et fixation interne, plaque vis, foam walker, exérèse de matériel orthopédique, mise en charge, suivi post-opératoire, infiltration échoguidée, bloc de la branche médiale, clinique de la douleur, chirurgie orthopédique surspécialisée, neurochirurgie
 - Évolution: condition améliorée/stable/détériorée, plateau thérapeutique, consolidation avec séquelles, atteinte permanente, flexum persistant, syndrome douleur régional complexe, troubles anxiodépressifs secondaires, radiculopathie motrice chronique, expertise 204, infection résolue, bursite réactive, guérison sous optimale, douleurs résiduelles post-infection, intolérance à la position agenouillée, consolidation en cours, assignations temporaires, chirurgie bien tolérée sans complication immédiate, paresthésies légères, parésies associées, multiples sources de douleurs, réorientation de carrière, échec aux multiples traitements, avis au BEM
 
+VARIATION OBLIGATOIRE - ÉVITE LA RÉPÉTITION MÉCANIQUE:
+- VARIE les verbes de consultation: "consulte", "rencontre", "revoit", "obtient un rendez-vous avec", "se présente chez"
+- ALTERNE les structures de phrases pour créer un flow naturel
+- UTILISE différentes introductions temporelles: "Le [date]", "En date du [date]", "Lors de la consultation du [date]"
+- ÉVITE absolument de répéter la même formulation dans un même document
+- ADAPTE le vocabulaire selon le contexte (première consultation = "consulte", suivi = "revoit")
+
+GESTION DES DONNÉES MANQUANTES:
+- Si un nom de médecin est incomplet ou manquant, utilise "médecin traitant", "professionnel de la santé" ou "médecin de famille"
+- Si des détails sont flous, concentre-toi sur les éléments clairs et vérifiables
+- N'invente JAMAIS d'information qui n'est pas explicitement dans le texte source
+- Pour les noms partiels, utilise le fragment disponible avec le titre approprié
+
 EXEMPLES DE FORMAT AUTHENTIQUE:
 
 Exemple 1 - Cas complexe membre supérieur:
