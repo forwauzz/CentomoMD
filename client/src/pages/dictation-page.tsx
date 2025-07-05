@@ -20,6 +20,8 @@ import {
   Save,
   Edit,
   Clock,
+  Pause,
+  Play,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +38,8 @@ const translations = {
     finalText: "Texte Final",
     startRecording: "Commencer l'enregistrement",
     stopRecording: "Arrêter l'enregistrement",
+    pauseRecording: "Pause",
+    resumeRecording: "Reprendre",
     copyText: "Copier le texte",
     clearText: "Effacer le texte",
     saveToSection: "Sauvegarder dans la section",
@@ -45,6 +49,8 @@ const translations = {
     textCopied: "Texte copié dans le presse-papiers",
     textCleared: "Texte effacé",
     textSaved: "Texte sauvegardé dans la section",
+    chunkProcessed: "Segment traité automatiquement",
+    autoChunking: "Chunking automatique",
 
     sections: {
       diagnosticsCnesst: "2. Diagnostics acceptés par la CNESST",
@@ -89,6 +95,8 @@ const translations = {
     finalText: "Final Text",
     startRecording: "Start Recording",
     stopRecording: "Stop Recording",
+    pauseRecording: "Pause",
+    resumeRecording: "Resume",
     copyText: "Copy Text",
     clearText: "Clear Text",
     saveToSection: "Save to Section",
@@ -98,6 +106,8 @@ const translations = {
     textCopied: "Text copied to clipboard",
     textCleared: "Text cleared",
     textSaved: "Text saved to section",
+    chunkProcessed: "Chunk processed automatically",
+    autoChunking: "Auto-chunking",
 
     sections: {
       diagnosticsCnesst: "2. Diagnoses Accepted by CNESST",
@@ -151,14 +161,26 @@ export default function DictationPage({
   );
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
-  // NEW: Timer state
+  // Timer state
   const [recordingDuration, setRecordingDuration] = useState<number>(0);
   const [sessionStartTime, setSessionStartTime] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // NEW: Auto-chunking state
+  const [chunkCount, setChunkCount] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isAutoChunking, setIsAutoChunking] = useState<boolean>(false);
+  const [currentChunkStartTime, setCurrentChunkStartTime] = useState<number>(0);
+  const [lastChunkTime, setLastChunkTime] = useState<number>(0);
+
   const { toast } = useToast();
 
   const t = translations[currentLanguage];
+
+  // Auto-chunking configuration
+  const CHUNK_DURATION = 4 * 60; // 4 minutes per chunk
+  const WARNING_DURATION = 20 * 60; // Warning at 20 minutes
+  const MAX_RECOMMENDED = 30 * 60; // Suggest break at 30 minutes
 
   // Initialize with activeField and language from sessionStorage
   useEffect(() => {
@@ -174,15 +196,12 @@ export default function DictationPage({
     if (activeField) {
       setSelectedSection(activeField);
 
-      // Check if this is a new visit by looking at the return path and URL parameters
       const returnPath = sessionStorage.getItem("dictationReturnPath") || "";
       const currentUrl = window.location.href;
       const isNewVisit =
         returnPath.includes("visit=new") || currentUrl.includes("visit=new");
 
-      // Only load existing text if NOT a new visit
       if (!isNewVisit) {
-        // Try multiple localStorage keys used by the form system
         const savedDataKeys = ["medical-form-draft", "centMD_formData"];
         let formData = null;
 
@@ -205,12 +224,10 @@ export default function DictationPage({
           }
         }
       } else {
-        // For new visits, ensure everything starts blank
         setFinalText("");
         setEditableText("");
         setInterimText("");
 
-        // Comprehensively clear all potential localStorage keys that might contain old form data
         localStorage.removeItem("medical-form-draft");
         localStorage.removeItem("centMD_formData");
         localStorage.removeItem("medical-form-data");
@@ -223,7 +240,6 @@ export default function DictationPage({
       }
     }
 
-    // Simulate initialization delay for speech recognition setup
     const timer = setTimeout(() => {
       setIsInitializing(false);
     }, 1000);
@@ -246,11 +262,15 @@ export default function DictationPage({
     interimResults: true,
   });
 
-  // NEW: Timer management for recording duration
+  // Timer management for recording duration
   useEffect(() => {
-    if (isListening) {
+    if (isListening && !isPaused) {
       const startTime = sessionStartTime || Date.now();
       setSessionStartTime(startTime);
+
+      if (!currentChunkStartTime) {
+        setCurrentChunkStartTime(Date.now());
+      }
 
       timerRef.current = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -269,29 +289,172 @@ export default function DictationPage({
         timerRef.current = null;
       }
     };
-  }, [isListening, sessionStartTime]);
+  }, [isListening, isPaused, sessionStartTime]);
 
-  // Handle transcript updates - ENHANCED VERSION with voice correction
+  // NEW: Auto-chunking logic - triggers every 4 minutes
   useEffect(() => {
-    if (transcript) {
-      console.log("Dictation page received transcript:", transcript);
+    if (!isListening || isPaused || isAutoChunking) return;
 
-      // NEW: Apply voice enhancement before processing
+    const currentChunkDuration = currentChunkStartTime
+      ? Math.floor((Date.now() - currentChunkStartTime) / 1000)
+      : 0;
+
+    // Trigger auto-chunk at 4 minutes
+    if (currentChunkDuration >= CHUNK_DURATION) {
+      console.log(
+        `Auto-chunking triggered at ${currentChunkDuration} seconds for chunk ${chunkCount + 1}`,
+      );
+      handleAutoChunk();
+    }
+
+    // Warnings for long sessions
+    if (recordingDuration === WARNING_DURATION) {
+      toast({
+        title: currentLanguage === "fr" ? "Session longue" : "Long session",
+        description:
+          currentLanguage === "fr"
+            ? "Session de 20 minutes - considérez une pause"
+            : "20-minute session - consider a break",
+        variant: "default",
+      });
+    }
+
+    if (recordingDuration === MAX_RECOMMENDED) {
+      toast({
+        title:
+          currentLanguage === "fr" ? "Pause recommandée" : "Break recommended",
+        description:
+          currentLanguage === "fr"
+            ? "30 minutes - pause fortement recommandée"
+            : "30 minutes - break strongly recommended",
+        variant: "default",
+      });
+    }
+  }, [
+    recordingDuration,
+    isListening,
+    isPaused,
+    isAutoChunking,
+    currentChunkStartTime,
+    chunkCount,
+  ]);
+
+  // NEW: Auto-chunk handler - seamlessly processes chunks
+  const handleAutoChunk = async () => {
+    if (isAutoChunking) return; // Prevent multiple simultaneous chunks
+
+    setIsAutoChunking(true);
+    const chunkNumber = chunkCount + 1;
+
+    console.log(
+      `🔄 Starting auto-chunk ${chunkNumber} at ${recordingDuration}s`,
+    );
+
+    try {
+      // Process any current transcript before chunking
+      if (transcript) {
+        console.log(
+          `📝 Processing chunk ${chunkNumber} transcript:`,
+          transcript.substring(0, 100) + "...",
+        );
+
+        const enhanced = enhanceVoiceInput(transcript);
+        console.log(
+          `✨ Enhanced chunk ${chunkNumber}:`,
+          enhanced.enhanced.substring(0, 100) + "...",
+        );
+
+        // Add enhanced text to final text
+        setFinalText((prev) => {
+          const separator = prev ? " " : "";
+          const newText = prev + separator + enhanced.enhanced;
+          setEditableText(newText);
+          console.log(
+            `📋 Updated final text length: ${newText.length} characters`,
+          );
+          return newText;
+        });
+
+        // Show corrections if any
+        if (enhanced.corrections.length > 0) {
+          console.log(
+            `🔧 Chunk ${chunkNumber} corrections:`,
+            enhanced.corrections,
+          );
+        }
+      }
+
+      // Brief pause to ensure transcript is processed
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Stop current speech recognition
+      console.log(`⏹️ Stopping recognition for chunk ${chunkNumber}`);
+      stopListening();
+      resetTranscript();
+
+      // Brief pause to let speech recognition fully stop
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Restart speech recognition for next chunk
+      console.log(`▶️ Starting new chunk ${chunkNumber + 1}`);
+      startListening();
+
+      // Update chunk tracking
+      setChunkCount((prev) => prev + 1);
+      setCurrentChunkStartTime(Date.now());
+      setLastChunkTime(Date.now());
+
+      // Show subtle notification
+      toast({
+        title: t.chunkProcessed,
+        description: `Chunk ${chunkNumber} → ${chunkNumber + 1}`,
+        variant: "default",
+      });
+
+      console.log(`✅ Auto-chunk ${chunkNumber} completed successfully`);
+    } catch (error) {
+      console.error(`❌ Auto-chunk ${chunkNumber} error:`, error);
+
+      // Show error but try to continue
+      toast({
+        title: "Chunking Error",
+        description:
+          currentLanguage === "fr"
+            ? "Erreur de segmentation, mais enregistrement continue"
+            : "Chunking error, but recording continues",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAutoChunking(false);
+    }
+  };
+
+  // Enhanced transcript handling with voice correction
+  useEffect(() => {
+    if (transcript && !isAutoChunking) {
+      console.log(
+        "📥 Dictation page received transcript:",
+        transcript.substring(0, 100) + "...",
+      );
+
       const enhanced = enhanceVoiceInput(transcript);
-      console.log("Enhanced transcript:", enhanced.enhanced);
-      console.log("Corrections applied:", enhanced.corrections);
+      console.log(
+        "✨ Enhanced transcript:",
+        enhanced.enhanced.substring(0, 100) + "...",
+      );
+      console.log("🔧 Corrections applied:", enhanced.corrections);
 
-      // Use enhanced text instead of raw transcript
       setFinalText((prev) => {
-        const newText = prev
-          ? `${prev} ${enhanced.enhanced}`
-          : enhanced.enhanced;
-        console.log("Updated final text with enhancements:", newText);
-        setEditableText(newText); // Keep editable text in sync
+        const separator = prev ? " " : "";
+        const newText = prev + separator + enhanced.enhanced;
+        console.log(
+          "📋 Updated final text with enhancements, length:",
+          newText.length,
+        );
+        setEditableText(newText);
         return newText;
       });
 
-      // Show corrections if any were applied
       if (enhanced.corrections.length > 0) {
         toast({
           title: currentLanguage === "fr" ? "Texte amélioré" : "Text enhanced",
@@ -302,31 +465,37 @@ export default function DictationPage({
           variant: "default",
         });
 
-        console.log("Voice enhancement corrections:", enhanced.corrections);
+        console.log("🔧 Voice enhancement corrections:", enhanced.corrections);
       }
 
-      // Clear transcript after processing
       setTimeout(() => {
         resetTranscript();
       }, 100);
     }
-  }, [transcript, resetTranscript, currentLanguage, toast]);
+  }, [transcript, resetTranscript, currentLanguage, toast, isAutoChunking]);
 
   // Update interim display for live transcription
   useEffect(() => {
-    console.log("Interim transcript updated:", interimTranscript);
+    console.log(
+      "📝 Interim transcript updated:",
+      interimTranscript.substring(0, 50) + "...",
+    );
     setInterimText(interimTranscript);
   }, [interimTranscript]);
 
   // Debug logging for speech recognition state
   useEffect(() => {
-    console.log("Speech recognition state:", {
+    console.log("🎤 Speech recognition state:", {
       isListening,
       isSupported,
-      transcript,
-      interimTranscript,
+      transcript: transcript ? transcript.substring(0, 50) + "..." : "none",
+      interimTranscript: interimTranscript
+        ? interimTranscript.substring(0, 50) + "..."
+        : "none",
       error,
-      recordingDuration, // NEW: Include duration in debug logs
+      recordingDuration,
+      chunkCount,
+      isAutoChunking,
     });
   }, [
     isListening,
@@ -335,9 +504,11 @@ export default function DictationPage({
     interimTranscript,
     error,
     recordingDuration,
+    chunkCount,
+    isAutoChunking,
   ]);
 
-  // NEW: Format duration for display
+  // Format duration for display
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -354,28 +525,56 @@ export default function DictationPage({
       return;
     }
 
-    console.log("Starting recording with language:", currentLanguage);
+    console.log("🎬 Starting recording with language:", currentLanguage);
 
-    // NEW: Initialize timer
-    setSessionStartTime(Date.now());
+    // Initialize all timers and counters
+    const now = Date.now();
+    setSessionStartTime(now);
+    setCurrentChunkStartTime(now);
     setRecordingDuration(0);
+    setChunkCount(0);
+    setIsPaused(false);
+    setIsAutoChunking(false);
 
     resetTranscript();
     setInterimText("");
-    startListening((newTranscript) => {
-      console.log("Live transcript received:", newTranscript);
-    });
+    startListening();
+
+    console.log("✅ Recording started successfully");
   };
 
   const handleStopRecording = () => {
-    console.log("Stopping recording");
-    stopListening();
+    console.log("🛑 Stopping recording");
 
-    // NEW: Clean up timer
+    stopListening();
+    setIsPaused(false);
+
+    // Clean up all timers
     setSessionStartTime(0);
+    setCurrentChunkStartTime(0);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+
+    console.log(
+      `📊 Final session stats: ${formatDuration(recordingDuration)}, ${chunkCount + 1} chunks`,
+    );
+  };
+
+  // NEW: Pause/Resume functionality
+  const handlePauseResume = () => {
+    if (isPaused) {
+      // Resume
+      console.log("▶️ Resuming recording");
+      setIsPaused(false);
+      setCurrentChunkStartTime(Date.now()); // Reset chunk timer on resume
+      startListening();
+    } else {
+      // Pause
+      console.log("⏸️ Pausing recording");
+      setIsPaused(true);
+      stopListening();
     }
   };
 
@@ -397,9 +596,11 @@ export default function DictationPage({
     setFinalText("");
     setInterimText("");
 
-    // NEW: Reset timer when clearing
+    // Reset all timers and counters
     setRecordingDuration(0);
     setSessionStartTime(0);
+    setCurrentChunkStartTime(0);
+    setChunkCount(0);
 
     resetTranscript();
     toast({
@@ -411,15 +612,11 @@ export default function DictationPage({
   // Mapping of dictation fields to their corresponding form sections for navigation
   const getFormSectionFromField = (fieldKey: string): string => {
     const fieldToSectionMap: { [key: string]: string } = {
-      // Section 2
       diagnosticsCnesst: "section2",
-      // Section 3
       modaliteEntrevue: "section3",
-      // Section 4
       age: "section4",
       dominance: "section4",
       emploi: "section4",
-      // Section 5
       antecedentsMedicaux: "section5",
       antecedentsChirurgicaux: "section5",
       antecedentsLesion: "section5",
@@ -427,23 +624,18 @@ export default function DictationPage({
       antecedentsSaaq: "section5",
       antecedentsAutres: "section5",
       antecedentsAllergie: "section5",
-      // Section 6
       medicationActuelle: "section6",
-      // Section 7
       historiqueEvolution: "section7",
-      // Section 8
       section8Input: "section8",
       appreciationEvolution: "section8",
       plaintesproblemes: "section8",
       impactAvq: "section8",
-      // Section 9
       observationGenerale: "section9",
       rachisPalpation: "section9",
       rachisInspection: "section9",
       hanchesPalpation: "section9",
       hanchesInspection: "section9",
       examensAdditionnels: "section9",
-      // Section 11
       conclusionResume: "section11",
       conclusionDiagnostic: "section11",
       conclusionDateConsolidation: "section11",
@@ -465,35 +657,29 @@ export default function DictationPage({
       return;
     }
 
-    console.log("Saving dictation to section:", {
+    console.log("💾 Saving dictation to section:", {
       selectedSection,
       textLength: textToSave.length,
-      duration: recordingDuration, // NEW: Include duration in save logs
+      duration: recordingDuration,
+      chunks: chunkCount + 1,
     });
 
-    // Check if this is a new visit
     const returnPath = sessionStorage.getItem("dictationReturnPath") || "";
     const isNewVisit = returnPath.includes("visit=new");
 
-    // Save to localStorage for form to pick up
     let formData: Record<string, any> = {};
 
     if (!isNewVisit) {
-      // For existing visits, load and merge with existing data
       const savedData = localStorage.getItem("medical-form-draft");
       formData = savedData ? JSON.parse(savedData) : {};
     }
-    // For new visits, start with empty formData to avoid mixing old data
 
     formData[selectedSection] = textToSave;
     localStorage.setItem("medical-form-draft", JSON.stringify(formData));
 
-    // Store dictation result and field for the medical form to pick up
     sessionStorage.setItem("dictationResult", textToSave);
     sessionStorage.setItem("dictationField", selectedSection);
 
-    // PRODUCTION FIX: Add multiple redundant storage mechanisms
-    // Store with timestamp for debugging production issues
     const timestamp = Date.now();
     sessionStorage.setItem("dictationTimestamp", timestamp.toString());
     localStorage.setItem(
@@ -502,19 +688,27 @@ export default function DictationPage({
         result: textToSave,
         field: selectedSection,
         timestamp: timestamp,
-        duration: recordingDuration, // NEW: Include duration in backup
+        duration: recordingDuration,
+        chunks: chunkCount + 1,
+        sessionStats: {
+          totalDuration: recordingDuration,
+          chunksProcessed: chunkCount,
+          averageChunkLength:
+            chunkCount > 0
+              ? recordingDuration / (chunkCount + 1)
+              : recordingDuration,
+        },
       }),
     );
 
-    console.log("Stored in sessionStorage:", {
+    console.log("💾 Stored in sessionStorage:", {
       dictationField: selectedSection,
       resultLength: textToSave.length,
       preview: textToSave.substring(0, 100) + "...",
       timestamp: timestamp,
-      sessionDuration: recordingDuration, // NEW: Log session duration
+      sessionStats: { duration: recordingDuration, chunks: chunkCount + 1 },
     });
 
-    // Store the target section for navigation and auto-scroll
     const targetSection = getFormSectionFromField(selectedSection);
     sessionStorage.setItem("scrollToSection", targetSection);
     sessionStorage.setItem("highlightField", selectedSection);
@@ -524,16 +718,15 @@ export default function DictationPage({
       description: t.sections[selectedSection as keyof typeof t.sections],
     });
 
-    // Clear the activeField from sessionStorage
     sessionStorage.removeItem("activeField");
-
-    // Reset editing state
     setIsEditing(false);
     setEditableText("");
 
-    // Navigate back to the original form with section anchor for immediate navigation
     const finalReturnPath = returnPath || "/forms/cnesst-medical-evaluation";
-    console.log("Navigating back to:", finalReturnPath + "#" + targetSection);
+    console.log(
+      "🔄 Navigating back to:",
+      finalReturnPath + "#" + targetSection,
+    );
     setLocation(finalReturnPath + "#" + targetSection);
   };
 
@@ -566,23 +759,19 @@ export default function DictationPage({
       sessionStorage.getItem("dictationReturnPath") ||
       "/forms/cnesst-medical-evaluation";
 
-    // Get the target section for navigation
     const targetSection = getFormSectionFromField(selectedSection);
 
-    // Store the section to scroll to and highlight
     sessionStorage.setItem("scrollToSection", targetSection);
     sessionStorage.setItem("highlightField", selectedSection);
 
-    // Navigate back to the form with section anchor
     const finalReturnPath = returnPath + "#" + targetSection;
-    console.log("Returning to section:", finalReturnPath);
+    console.log("🔄 Returning to section:", finalReturnPath);
     setLocation(finalReturnPath);
   };
 
   const handleCancel = () => {
     const returnPath = sessionStorage.getItem("dictationReturnPath") || "/";
 
-    // Clear any stored data
     sessionStorage.removeItem("activeField");
     sessionStorage.removeItem("dictationResult");
     sessionStorage.removeItem("dictationField");
@@ -654,13 +843,24 @@ export default function DictationPage({
                     ) : null;
                   })()}
 
-                  {/* NEW: Recording duration display */}
-                  {(isListening || recordingDuration > 0) && (
+                  {/* Recording duration and chunk display */}
+                  {(isListening || isPaused || recordingDuration > 0) && (
                     <div className="flex items-center gap-2 text-blue-600">
                       <Clock className="w-4 h-4" />
                       <span className="font-mono">
-                        Recording: {formatDuration(recordingDuration)}
+                        {isPaused ? "⏸️ " : ""}Recording:{" "}
+                        {formatDuration(recordingDuration)}
                       </span>
+                      {chunkCount > 0 && (
+                        <span className="text-gray-500 text-xs">
+                          (Chunk {chunkCount + 1})
+                        </span>
+                      )}
+                      {isAutoChunking && (
+                        <span className="text-orange-600 text-xs animate-pulse">
+                          {t.autoChunking}...
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -697,6 +897,11 @@ export default function DictationPage({
               <CardTitle className="text-lg flex items-center gap-2">
                 <Mic className="w-5 h-5" />
                 {t.liveTranscript}
+                {isAutoChunking && (
+                  <span className="text-orange-600 text-sm animate-pulse">
+                    (Processing...)
+                  </span>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 p-6">
@@ -717,10 +922,29 @@ export default function DictationPage({
                     </div>
                   )}
                 </div>
-                {isListening && (
-                  <div className="mt-4 flex items-center text-red-600">
-                    <div className="animate-pulse w-3 h-3 bg-red-600 rounded-full mr-2"></div>
-                    {currentLanguage === "fr" ? "En écoute..." : "Listening..."}
+                {(isListening || isPaused) && (
+                  <div className="mt-4 flex items-center justify-between">
+                    <div
+                      className={`flex items-center ${isPaused ? "text-orange-600" : "text-red-600"}`}
+                    >
+                      <div
+                        className={`w-3 h-3 rounded-full mr-2 ${isPaused ? "bg-orange-600" : "animate-pulse bg-red-600"}`}
+                      ></div>
+                      {isPaused
+                        ? currentLanguage === "fr"
+                          ? "En pause..."
+                          : "Paused..."
+                        : currentLanguage === "fr"
+                          ? "En écoute..."
+                          : "Listening..."}
+                    </div>
+                    {recordingDuration >= 3.5 * 60 && ( // Show chunking indicator after 3.5 minutes
+                      <div className="text-xs text-blue-600">
+                        {currentLanguage === "fr"
+                          ? "Auto-chunking bientôt"
+                          : "Auto-chunking soon"}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -792,20 +1016,21 @@ export default function DictationPage({
                       </Button>
                     )}
 
-                    {/* NEW: Session stats in corner */}
+                    {/* Session stats */}
                     {recordingDuration > 0 && (
                       <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white px-2 py-1 rounded">
                         {formatDuration(recordingDuration)}
+                        {chunkCount > 0 && ` • ${chunkCount + 1} chunks`}
                       </div>
                     )}
                   </div>
                 )}
               </div>
 
-              {/* Controls */}
+              {/* Enhanced recording controls with pause/resume */}
               <div className="space-y-4">
                 <div className="flex gap-3">
-                  {!isListening ? (
+                  {!isListening && !isPaused ? (
                     <Button
                       onClick={handleStartRecording}
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white"
@@ -815,13 +1040,31 @@ export default function DictationPage({
                       {t.startRecording}
                     </Button>
                   ) : (
-                    <Button
-                      onClick={handleStopRecording}
-                      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
-                    >
-                      <MicOff className="w-4 h-4 mr-2" />
-                      {t.stopRecording}
-                    </Button>
+                    <>
+                      <Button
+                        onClick={handleStopRecording}
+                        className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+                      >
+                        <MicOff className="w-4 h-4 mr-2" />
+                        {t.stopRecording}
+                      </Button>
+                      <Button
+                        onClick={handlePauseResume}
+                        className={`flex-1 ${isPaused ? "bg-green-600 hover:bg-green-700" : "bg-orange-600 hover:bg-orange-700"} text-white`}
+                      >
+                        {isPaused ? (
+                          <>
+                            <Play className="w-4 h-4 mr-2" />
+                            {t.resumeRecording}
+                          </>
+                        ) : (
+                          <>
+                            <Pause className="w-4 h-4 mr-2" />
+                            {t.pauseRecording}
+                          </>
+                        )}
+                      </Button>
+                    </>
                   )}
                 </div>
 
@@ -877,7 +1120,7 @@ export default function DictationPage({
                 </div>
               </div>
 
-              {/* Enhanced error display with timer info */}
+              {/* Enhanced error display with auto-chunking context */}
               {error && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                   <div className="text-red-600 text-sm font-medium">
@@ -886,27 +1129,33 @@ export default function DictationPage({
                       : "Speech recognition error:"}
                   </div>
                   <div className="text-red-500 text-sm mt-1">{error}</div>
-                  {recordingDuration > 300 && ( // Show timeout hint after 5 minutes
-                    <div className="text-gray-600 text-xs mt-2">
-                      {currentLanguage === "fr"
-                        ? `Session longue détectée (${formatDuration(recordingDuration)}). Le chunking automatique sera bientôt disponible.`
-                        : `Long session detected (${formatDuration(recordingDuration)}). Auto-chunking will be available soon.`}
-                    </div>
-                  )}
+                  <div className="text-gray-600 text-xs mt-2">
+                    {currentLanguage === "fr"
+                      ? "Le système de chunking automatique devrait éviter ce problème lors d'enregistrements longs."
+                      : "Auto-chunking system should prevent this issue during long recordings."}
+                  </div>
                 </div>
               )}
 
-              {/* NEW: Long session warning */}
-              {recordingDuration > 300 &&
-                !error && ( // Warn after 5 minutes
-                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="text-yellow-700 text-sm">
-                      {currentLanguage === "fr"
-                        ? `Session longue en cours (${formatDuration(recordingDuration)}). Considérez sauvegarder bientôt.`
-                        : `Long session in progress (${formatDuration(recordingDuration)}). Consider saving soon.`}
-                    </div>
+              {/* Long session information */}
+              {recordingDuration > WARNING_DURATION && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="text-yellow-700 text-sm">
+                    {currentLanguage === "fr"
+                      ? `Session longue détectée (${formatDuration(recordingDuration)}, ${chunkCount + 1} segments). Fonctionnement normal.`
+                      : `Long session detected (${formatDuration(recordingDuration)}, ${chunkCount + 1} chunks). Operating normally.`}
                   </div>
-                )}
+                </div>
+              )}
+
+              {/* Auto-chunking status */}
+              {chunkCount > 0 && !isAutoChunking && (
+                <div className="mt-4 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                  {currentLanguage === "fr"
+                    ? `✅ ${chunkCount} segment(s) traité(s) automatiquement`
+                    : `✅ ${chunkCount} chunk(s) processed automatically`}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
