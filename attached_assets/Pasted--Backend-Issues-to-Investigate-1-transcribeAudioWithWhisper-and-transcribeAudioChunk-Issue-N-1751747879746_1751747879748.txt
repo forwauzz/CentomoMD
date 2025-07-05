@@ -1,0 +1,51 @@
+⚠️ Backend Issues to Investigate
+1. transcribeAudioWithWhisper() and transcribeAudioChunk()
+Issue: No confirmation on retry logic for Whisper API rate limits or timeouts.
+
+Risk: If OpenAI's Whisper API fails mid-session or rate-limits, chunks could be dropped silently.
+
+Fix Suggestion: Add exponential backoff + retry logic and surface errors to frontend with user feedback.
+
+2. ai-formatter.ts - enhanceVoiceInput()
+Issue: No mention of fallback if GPT-enhanced formatting fails or returns invalid JSON.
+
+Risk: Could overwrite usable Whisper transcription with unusable AI output.
+
+Fix Suggestion: Validate GPT response format and preserve original if enhancement fails.
+
+3. routes.ts - Chunk Transcription
+Issue: Missing or weak validation for chunk ordering and session management during long dictation.
+
+Risk: Misordered or missing transcript segments for 20-minute dictations.
+
+Fix Suggestion: Implement chunk index validation and session tracking with uuid per dictation stream.
+
+⚠️ Frontend Issues to Investigate
+4. use-audio-recorder.ts
+Issue: Chunk recording is time-based (4 mins) but lacks robust pause/resume or re-record logic.
+
+Risk: Users who stop mid-sentence or switch tabs may lose context or recording.
+
+Fix Suggestion: Add pause/resume support and tab visibility event tracking to warn or stop recording gracefully.
+
+5. dictation-page-whisper.tsx
+Issue: No mention of autosave drafts during long recordings or crashes.
+
+Risk: Losing full session transcript if browser crashes or user closes tab.
+
+Fix Suggestion: Implement localStorage or indexedDB autosave checkpoints for drafts.
+
+6. floating-record-button-whisper.tsx
+Issue: The 2-minute chunking may be too aggressive without visual progress indicator or auto-confirmation.
+
+Risk: Field text may be cut or overwritten if users mis-time the recording.
+
+Fix Suggestion: Add countdown timer UI + review before inserting into form field.
+
+🛠️ Suggested Enhancements
+Session Recovery: Resume a partially recorded session if user is disconnected.
+
+User Feedback Loop: Show real-time warnings like “AI enhancement failed, using original transcript”.
+
+Medical Model Customization: Allow toggling GPT formatting off for users who prefer raw transcripts.
+
