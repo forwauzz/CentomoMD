@@ -390,7 +390,18 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     // Actions
     startRecording,
     stopRecording,
-    reset,
+    reset: () => {
+      console.log('🔄 Resetting audio recorder state');
+      updateState({
+        transcript: '',
+        isProcessing: false,
+        currentChunkIndex: 0,
+        chunkCount: 0,
+        chunks: [],
+        error: null,
+        recordingDuration: 0
+      });
+    },
     
     // Helpers
     formatDuration: (seconds: number) => {

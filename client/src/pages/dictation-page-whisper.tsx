@@ -534,7 +534,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                   <Button 
                     onClick={() => {
                       console.log('🚫 User cancelled processing');
-                      setTranscript('');
+                      reset();
                       toast({
                         title: currentLanguage === "fr" ? "Traitement annulé" : "Processing cancelled",
                         description: currentLanguage === "fr" ? "Vous pouvez recommencer l'enregistrement" : "You can start recording again",
