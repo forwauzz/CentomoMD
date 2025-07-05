@@ -1,16 +1,31 @@
-import { useState, useEffect } from "react";
+import { enhanceVoiceInput } from "../utils/voice-enhancement";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { Mic, MicOff, ArrowLeft, Copy, Trash2, Save, Edit } from "lucide-react";
+import {
+  Mic,
+  MicOff,
+  ArrowLeft,
+  Copy,
+  Trash2,
+  Save,
+  Edit,
+  Clock,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
-
 interface DictationPageProps {
-  language: 'fr' | 'en';
+  language: "fr" | "en";
 }
 
 const translations = {
@@ -61,9 +76,11 @@ const translations = {
       conclusionDateConsolidation: "11. Conclusion - Date de consolidation",
       conclusionSoinsTraitements: "11. Conclusion - Nature des soins",
       conclusionAtteintePermanente: "11. Conclusion - Atteinte permanente",
-      conclusionLimitationsFonctionnelles: "11. Conclusion - Limitations fonctionnelles",
-      conclusionEvaluationLimitations: "11. Conclusion - Évaluation des limitations"
-    }
+      conclusionLimitationsFonctionnelles:
+        "11. Conclusion - Limitations fonctionnelles",
+      conclusionEvaluationLimitations:
+        "11. Conclusion - Évaluation des limitations",
+    },
   },
   en: {
     title: "Voice Dictation",
@@ -112,29 +129,43 @@ const translations = {
       conclusionDateConsolidation: "11. Conclusion - Consolidation Date",
       conclusionSoinsTraitements: "11. Conclusion - Nature of Care",
       conclusionAtteintePermanente: "11. Conclusion - Permanent Impairment",
-      conclusionLimitationsFonctionnelles: "11. Conclusion - Functional Limitations",
-      conclusionEvaluationLimitations: "11. Conclusion - Limitations Assessment"
-    }
-  }
+      conclusionLimitationsFonctionnelles:
+        "11. Conclusion - Functional Limitations",
+      conclusionEvaluationLimitations:
+        "11. Conclusion - Limitations Assessment",
+    },
+  },
 };
 
-export default function DictationPage({ language: propLanguage }: DictationPageProps) {
+export default function DictationPage({
+  language: propLanguage,
+}: DictationPageProps) {
   const [, setLocation] = useLocation();
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [finalText, setFinalText] = useState<string>("");
   const [interimText, setInterimText] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editableText, setEditableText] = useState<string>("");
-  const [currentLanguage, setCurrentLanguage] = useState<'fr' | 'en'>(propLanguage);
+  const [currentLanguage, setCurrentLanguage] = useState<"fr" | "en">(
+    propLanguage,
+  );
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
+
+  // NEW: Timer state
+  const [recordingDuration, setRecordingDuration] = useState<number>(0);
+  const [sessionStartTime, setSessionStartTime] = useState<number>(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   const { toast } = useToast();
 
   const t = translations[currentLanguage];
 
   // Initialize with activeField and language from sessionStorage
   useEffect(() => {
-    const activeField = sessionStorage.getItem('activeField');
-    const storedLanguage = sessionStorage.getItem('dictationLanguage') as 'fr' | 'en';
+    const activeField = sessionStorage.getItem("activeField");
+    const storedLanguage = sessionStorage.getItem("dictationLanguage") as
+      | "fr"
+      | "en";
 
     if (storedLanguage) {
       setCurrentLanguage(storedLanguage);
@@ -142,18 +173,19 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
 
     if (activeField) {
       setSelectedSection(activeField);
-      
+
       // Check if this is a new visit by looking at the return path and URL parameters
-      const returnPath = sessionStorage.getItem('dictationReturnPath') || '';
+      const returnPath = sessionStorage.getItem("dictationReturnPath") || "";
       const currentUrl = window.location.href;
-      const isNewVisit = returnPath.includes('visit=new') || currentUrl.includes('visit=new');
-      
+      const isNewVisit =
+        returnPath.includes("visit=new") || currentUrl.includes("visit=new");
+
       // Only load existing text if NOT a new visit
       if (!isNewVisit) {
         // Try multiple localStorage keys used by the form system
-        const savedDataKeys = ['medical-form-draft', 'centMD_formData'];
+        const savedDataKeys = ["medical-form-draft", "centMD_formData"];
         let formData = null;
-        
+
         for (const key of savedDataKeys) {
           const savedData = localStorage.getItem(key);
           if (savedData) {
@@ -165,7 +197,10 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                 break;
               }
             } catch (error) {
-              console.error(`Error loading saved form data from ${key}:`, error);
+              console.error(
+                `Error loading saved form data from ${key}:`,
+                error,
+              );
             }
           }
         }
@@ -174,14 +209,17 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
         setFinalText("");
         setEditableText("");
         setInterimText("");
-        
+
         // Comprehensively clear all potential localStorage keys that might contain old form data
-        localStorage.removeItem('medical-form-draft');
-        localStorage.removeItem('centMD_formData');
-        localStorage.removeItem('medical-form-data');
-        localStorage.removeItem('medical-form-autosave');
-        
-        console.log('New visit detected - clearing dictation state and localStorage. Return path:', returnPath);
+        localStorage.removeItem("medical-form-draft");
+        localStorage.removeItem("centMD_formData");
+        localStorage.removeItem("medical-form-data");
+        localStorage.removeItem("medical-form-autosave");
+
+        console.log(
+          "New visit detected - clearing dictation state and localStorage. Return path:",
+          returnPath,
+        );
       }
     }
 
@@ -203,47 +241,108 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     stopListening,
     resetTranscript,
   } = useSpeechRecognition({
-    language: currentLanguage === 'fr' ? 'fr-CA' : 'en-US',
+    language: currentLanguage === "fr" ? "fr-CA" : "en-US",
     continuous: true,
     interimResults: true,
   });
 
+  // NEW: Timer management for recording duration
+  useEffect(() => {
+    if (isListening) {
+      const startTime = sessionStartTime || Date.now();
+      setSessionStartTime(startTime);
 
+      timerRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        setRecordingDuration(elapsed);
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
 
-  // Handle transcript updates - capture both interim and final transcripts
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isListening, sessionStartTime]);
+
+  // Handle transcript updates - ENHANCED VERSION with voice correction
   useEffect(() => {
     if (transcript) {
-      console.log('Dictation page received transcript:', transcript);
-      // Append new final transcript to existing text
-      setFinalText(prev => {
-        const newText = prev ? `${prev} ${transcript}` : transcript;
-        console.log('Updated final text:', newText);
+      console.log("Dictation page received transcript:", transcript);
+
+      // NEW: Apply voice enhancement before processing
+      const enhanced = enhanceVoiceInput(transcript);
+      console.log("Enhanced transcript:", enhanced.enhanced);
+      console.log("Corrections applied:", enhanced.corrections);
+
+      // Use enhanced text instead of raw transcript
+      setFinalText((prev) => {
+        const newText = prev
+          ? `${prev} ${enhanced.enhanced}`
+          : enhanced.enhanced;
+        console.log("Updated final text with enhancements:", newText);
         setEditableText(newText); // Keep editable text in sync
         return newText;
       });
-      // Only clear transcript after a short delay to allow display
+
+      // Show corrections if any were applied
+      if (enhanced.corrections.length > 0) {
+        toast({
+          title: currentLanguage === "fr" ? "Texte amélioré" : "Text enhanced",
+          description:
+            currentLanguage === "fr"
+              ? `${enhanced.corrections.length} corrections appliquées`
+              : `${enhanced.corrections.length} corrections applied`,
+          variant: "default",
+        });
+
+        console.log("Voice enhancement corrections:", enhanced.corrections);
+      }
+
+      // Clear transcript after processing
       setTimeout(() => {
         resetTranscript();
       }, 100);
     }
-  }, [transcript, resetTranscript]);
+  }, [transcript, resetTranscript, currentLanguage, toast]);
 
   // Update interim display for live transcription
   useEffect(() => {
-    console.log('Interim transcript updated:', interimTranscript);
+    console.log("Interim transcript updated:", interimTranscript);
     setInterimText(interimTranscript);
   }, [interimTranscript]);
 
   // Debug logging for speech recognition state
   useEffect(() => {
-    console.log('Speech recognition state:', {
+    console.log("Speech recognition state:", {
       isListening,
       isSupported,
       transcript,
       interimTranscript,
-      error
+      error,
+      recordingDuration, // NEW: Include duration in debug logs
     });
-  }, [isListening, isSupported, transcript, interimTranscript, error]);
+  }, [
+    isListening,
+    isSupported,
+    transcript,
+    interimTranscript,
+    error,
+    recordingDuration,
+  ]);
+
+  // NEW: Format duration for display
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const handleStartRecording = () => {
     if (!selectedSection) {
@@ -255,17 +354,29 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
       return;
     }
 
-    console.log('Starting recording with language:', currentLanguage);
+    console.log("Starting recording with language:", currentLanguage);
+
+    // NEW: Initialize timer
+    setSessionStartTime(Date.now());
+    setRecordingDuration(0);
+
     resetTranscript();
     setInterimText("");
     startListening((newTranscript) => {
-      console.log('Live transcript received:', newTranscript);
+      console.log("Live transcript received:", newTranscript);
     });
   };
 
   const handleStopRecording = () => {
-    console.log('Stopping recording');
+    console.log("Stopping recording");
     stopListening();
+
+    // NEW: Clean up timer
+    setSessionStartTime(0);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   };
 
   const handleCopyText = async () => {
@@ -277,7 +388,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
           description: "",
         });
       } catch (err) {
-        console.error('Failed to copy text:', err);
+        console.error("Failed to copy text:", err);
       }
     }
   };
@@ -285,6 +396,11 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const handleClearText = () => {
     setFinalText("");
     setInterimText("");
+
+    // NEW: Reset timer when clearing
+    setRecordingDuration(0);
+    setSessionStartTime(0);
+
     resetTranscript();
     toast({
       title: t.textCleared,
@@ -296,100 +412,112 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
   const getFormSectionFromField = (fieldKey: string): string => {
     const fieldToSectionMap: { [key: string]: string } = {
       // Section 2
-      'diagnosticsCnesst': 'section2',
+      diagnosticsCnesst: "section2",
       // Section 3
-      'modaliteEntrevue': 'section3',
+      modaliteEntrevue: "section3",
       // Section 4
-      'age': 'section4',
-      'dominance': 'section4',
-      'emploi': 'section4',
+      age: "section4",
+      dominance: "section4",
+      emploi: "section4",
       // Section 5
-      'antecedentsMedicaux': 'section5',
-      'antecedentsChirurgicaux': 'section5',
-      'antecedentsLesion': 'section5',
-      'antecedentsCnesst': 'section5',
-      'antecedentsSaaq': 'section5',
-      'antecedentsAutres': 'section5',
-      'antecedentsAllergie': 'section5',
+      antecedentsMedicaux: "section5",
+      antecedentsChirurgicaux: "section5",
+      antecedentsLesion: "section5",
+      antecedentsCnesst: "section5",
+      antecedentsSaaq: "section5",
+      antecedentsAutres: "section5",
+      antecedentsAllergie: "section5",
       // Section 6
-      'medicationActuelle': 'section6',
+      medicationActuelle: "section6",
       // Section 7
-      'historiqueEvolution': 'section7',
+      historiqueEvolution: "section7",
       // Section 8
-      'section8Input': 'section8',
-      'appreciationEvolution': 'section8',
-      'plaintesproblemes': 'section8',
-      'impactAvq': 'section8',
+      section8Input: "section8",
+      appreciationEvolution: "section8",
+      plaintesproblemes: "section8",
+      impactAvq: "section8",
       // Section 9
-      'observationGenerale': 'section9',
-      'rachisPalpation': 'section9',
-      'rachisInspection': 'section9',
-      'hanchesPalpation': 'section9',
-      'hanchesInspection': 'section9',
-      'examensAdditionnels': 'section9',
+      observationGenerale: "section9",
+      rachisPalpation: "section9",
+      rachisInspection: "section9",
+      hanchesPalpation: "section9",
+      hanchesInspection: "section9",
+      examensAdditionnels: "section9",
       // Section 11
-      'conclusionResume': 'section11',
-      'conclusionDiagnostic': 'section11',
-      'conclusionDateConsolidation': 'section11',
-      'conclusionSoinsTraitements': 'section11',
-      'conclusionAtteintePermanente': 'section11',
-      'conclusionLimitationsFonctionnelles': 'section11',
-      'conclusionEvaluationLimitations': 'section11',
+      conclusionResume: "section11",
+      conclusionDiagnostic: "section11",
+      conclusionDateConsolidation: "section11",
+      conclusionSoinsTraitements: "section11",
+      conclusionAtteintePermanente: "section11",
+      conclusionLimitationsFonctionnelles: "section11",
+      conclusionEvaluationLimitations: "section11",
     };
-    return fieldToSectionMap[fieldKey] || 'section1';
+    return fieldToSectionMap[fieldKey] || "section1";
   };
 
   const handleSaveToSection = () => {
     const textToSave = isEditing ? editableText : finalText;
     if (!selectedSection || !textToSave) {
-      console.warn('Cannot save: missing section or text', { selectedSection, hasText: !!textToSave });
+      console.warn("Cannot save: missing section or text", {
+        selectedSection,
+        hasText: !!textToSave,
+      });
       return;
     }
 
-    console.log('Saving dictation to section:', { selectedSection, textLength: textToSave.length });
+    console.log("Saving dictation to section:", {
+      selectedSection,
+      textLength: textToSave.length,
+      duration: recordingDuration, // NEW: Include duration in save logs
+    });
 
     // Check if this is a new visit
-    const returnPath = sessionStorage.getItem('dictationReturnPath') || '';
-    const isNewVisit = returnPath.includes('visit=new');
+    const returnPath = sessionStorage.getItem("dictationReturnPath") || "";
+    const isNewVisit = returnPath.includes("visit=new");
 
     // Save to localStorage for form to pick up
     let formData: Record<string, any> = {};
-    
+
     if (!isNewVisit) {
       // For existing visits, load and merge with existing data
-      const savedData = localStorage.getItem('medical-form-draft');
+      const savedData = localStorage.getItem("medical-form-draft");
       formData = savedData ? JSON.parse(savedData) : {};
     }
     // For new visits, start with empty formData to avoid mixing old data
 
     formData[selectedSection] = textToSave;
-    localStorage.setItem('medical-form-draft', JSON.stringify(formData));
+    localStorage.setItem("medical-form-draft", JSON.stringify(formData));
 
     // Store dictation result and field for the medical form to pick up
-    sessionStorage.setItem('dictationResult', textToSave);
-    sessionStorage.setItem('dictationField', selectedSection);
-    
+    sessionStorage.setItem("dictationResult", textToSave);
+    sessionStorage.setItem("dictationField", selectedSection);
+
     // PRODUCTION FIX: Add multiple redundant storage mechanisms
     // Store with timestamp for debugging production issues
     const timestamp = Date.now();
-    sessionStorage.setItem('dictationTimestamp', timestamp.toString());
-    localStorage.setItem('dictationBackup', JSON.stringify({
-      result: textToSave,
-      field: selectedSection,
-      timestamp: timestamp
-    }));
+    sessionStorage.setItem("dictationTimestamp", timestamp.toString());
+    localStorage.setItem(
+      "dictationBackup",
+      JSON.stringify({
+        result: textToSave,
+        field: selectedSection,
+        timestamp: timestamp,
+        duration: recordingDuration, // NEW: Include duration in backup
+      }),
+    );
 
-    console.log('Stored in sessionStorage:', { 
-      dictationField: selectedSection, 
+    console.log("Stored in sessionStorage:", {
+      dictationField: selectedSection,
       resultLength: textToSave.length,
-      preview: textToSave.substring(0, 100) + '...',
-      timestamp: timestamp
+      preview: textToSave.substring(0, 100) + "...",
+      timestamp: timestamp,
+      sessionDuration: recordingDuration, // NEW: Log session duration
     });
 
     // Store the target section for navigation and auto-scroll
     const targetSection = getFormSectionFromField(selectedSection);
-    sessionStorage.setItem('scrollToSection', targetSection);
-    sessionStorage.setItem('highlightField', selectedSection);
+    sessionStorage.setItem("scrollToSection", targetSection);
+    sessionStorage.setItem("highlightField", selectedSection);
 
     toast({
       title: t.textSaved,
@@ -397,19 +525,17 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
     });
 
     // Clear the activeField from sessionStorage
-    sessionStorage.removeItem('activeField');
+    sessionStorage.removeItem("activeField");
 
     // Reset editing state
     setIsEditing(false);
     setEditableText("");
 
     // Navigate back to the original form with section anchor for immediate navigation
-    const finalReturnPath = returnPath || '/forms/cnesst-medical-evaluation';
-    console.log('Navigating back to:', finalReturnPath + '#' + targetSection);
-    setLocation(finalReturnPath + '#' + targetSection);
+    const finalReturnPath = returnPath || "/forms/cnesst-medical-evaluation";
+    console.log("Navigating back to:", finalReturnPath + "#" + targetSection);
+    setLocation(finalReturnPath + "#" + targetSection);
   };
-
-
 
   const handleStartEditing = () => {
     setEditableText(finalText);
@@ -436,31 +562,32 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
       return;
     }
 
-    const returnPath = sessionStorage.getItem('dictationReturnPath') || '/forms/cnesst-medical-evaluation';
-    
+    const returnPath =
+      sessionStorage.getItem("dictationReturnPath") ||
+      "/forms/cnesst-medical-evaluation";
+
     // Get the target section for navigation
     const targetSection = getFormSectionFromField(selectedSection);
-    
+
     // Store the section to scroll to and highlight
-    sessionStorage.setItem('scrollToSection', targetSection);
-    sessionStorage.setItem('highlightField', selectedSection);
-    
+    sessionStorage.setItem("scrollToSection", targetSection);
+    sessionStorage.setItem("highlightField", selectedSection);
+
     // Navigate back to the form with section anchor
-    const finalReturnPath = returnPath + '#' + targetSection;
-    console.log('Returning to section:', finalReturnPath);
+    const finalReturnPath = returnPath + "#" + targetSection;
+    console.log("Returning to section:", finalReturnPath);
     setLocation(finalReturnPath);
   };
 
   const handleCancel = () => {
-    const returnPath = sessionStorage.getItem('dictationReturnPath') || '/';
+    const returnPath = sessionStorage.getItem("dictationReturnPath") || "/";
 
     // Clear any stored data
-    sessionStorage.removeItem('activeField');
-    sessionStorage.removeItem('dictationResult');
-    sessionStorage.removeItem('dictationField');
-    sessionStorage.removeItem('dictationReturnPath');
+    sessionStorage.removeItem("activeField");
+    sessionStorage.removeItem("dictationResult");
+    sessionStorage.removeItem("dictationField");
+    sessionStorage.removeItem("dictationReturnPath");
 
-    // Navigate back to the original location
     setLocation(returnPath);
   };
 
@@ -471,10 +598,9 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           <div className="text-lg text-gray-600">
-            {currentLanguage === 'fr' 
+            {currentLanguage === "fr"
               ? "Initialisation de la reconnaissance vocale..."
-              : "Initializing speech recognition..."
-            }
+              : "Initializing speech recognition..."}
           </div>
         </div>
       </div>
@@ -487,10 +613,9 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <p className="text-red-600">
-              {currentLanguage === 'fr' 
+              {currentLanguage === "fr"
                 ? "La reconnaissance vocale n'est pas supportée par votre navigateur."
-                : "Speech recognition is not supported by your browser."
-              }
+                : "Speech recognition is not supported by your browser."}
             </p>
           </CardContent>
         </Card>
@@ -507,7 +632,7 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
-                onClick={() => setLocation('/')}
+                onClick={() => setLocation("/")}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -515,26 +640,46 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
               </Button>
               <div>
                 <h1 className="text-2xl font-bold text-blue-600">{t.title}</h1>
-                {(() => {
-                  const returnPath = sessionStorage.getItem('dictationReturnPath') || '';
-                  const isNewVisit = returnPath.includes('visit=new');
-                  return isNewVisit ? (
-                    <p className="text-sm text-green-600 font-medium">
-                      {currentLanguage === 'fr' ? '• Nouvelle visite - formulaire vierge' : '• New visit - blank form'}
-                    </p>
-                  ) : null;
-                })()}
+                <div className="flex items-center gap-4 text-sm">
+                  {(() => {
+                    const returnPath =
+                      sessionStorage.getItem("dictationReturnPath") || "";
+                    const isNewVisit = returnPath.includes("visit=new");
+                    return isNewVisit ? (
+                      <p className="text-green-600 font-medium">
+                        {currentLanguage === "fr"
+                          ? "• Nouvelle visite - formulaire vierge"
+                          : "• New visit - blank form"}
+                      </p>
+                    ) : null;
+                  })()}
+
+                  {/* NEW: Recording duration display */}
+                  {(isListening || recordingDuration > 0) && (
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <Clock className="w-4 h-4" />
+                      <span className="font-mono">
+                        Recording: {formatDuration(recordingDuration)}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
-              <Select value={selectedSection} onValueChange={setSelectedSection}>
+              <Select
+                value={selectedSection}
+                onValueChange={setSelectedSection}
+              >
                 <SelectTrigger className="w-80">
                   <SelectValue placeholder={t.selectSection} />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(t.sections).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -546,7 +691,6 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
-
           {/* Left Panel - Live Transcript */}
           <Card className="flex flex-col">
             <CardHeader className="bg-blue-50 border-b">
@@ -560,28 +704,23 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                 <div className="text-gray-800 whitespace-pre-wrap">
                   {/* Show interim transcript first, then final text while building */}
                   {interimText && (
-                    <div className="text-blue-600 italic">
-                      {interimText}
-                    </div>
+                    <div className="text-blue-600 italic">{interimText}</div>
                   )}
                   {finalText && (
-                    <div className="text-gray-800">
-                      {finalText}
-                    </div>
+                    <div className="text-gray-800">{finalText}</div>
                   )}
                   {!interimText && !finalText && (
                     <div className="text-gray-500">
-                      {currentLanguage === 'fr' 
-                        ? "En attente de la dictée..." 
-                        : "Waiting for dictation..."
-                      }
+                      {currentLanguage === "fr"
+                        ? "En attente de la dictée..."
+                        : "Waiting for dictation..."}
                     </div>
                   )}
                 </div>
                 {isListening && (
                   <div className="mt-4 flex items-center text-red-600">
                     <div className="animate-pulse w-3 h-3 bg-red-600 rounded-full mr-2"></div>
-                    {currentLanguage === 'fr' ? "En écoute..." : "Listening..."}
+                    {currentLanguage === "fr" ? "En écoute..." : "Listening..."}
                   </div>
                 )}
               </div>
@@ -600,7 +739,9 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                   <div className="h-full flex flex-col">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">
-                        {currentLanguage === 'fr' ? 'Modifier le texte :' : 'Edit text:'}
+                        {currentLanguage === "fr"
+                          ? "Modifier le texte :"
+                          : "Edit text:"}
                       </span>
                       <div className="flex gap-2">
                         <Button
@@ -609,14 +750,14 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                           className="bg-green-600 hover:bg-green-700"
                         >
                           <Save className="w-3 h-3 mr-1" />
-                          {currentLanguage === 'fr' ? 'Confirmer' : 'Confirm'}
+                          {currentLanguage === "fr" ? "Confirmer" : "Confirm"}
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={handleCancelEditing}
                         >
-                          {currentLanguage === 'fr' ? 'Annuler' : 'Cancel'}
+                          {currentLanguage === "fr" ? "Annuler" : "Cancel"}
                         </Button>
                       </div>
                     </div>
@@ -624,19 +765,20 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                       value={editableText}
                       onChange={(e) => setEditableText(e.target.value)}
                       className="flex-1 min-h-[300px] resize-none"
-                      placeholder={currentLanguage === 'fr' 
-                        ? "Modifiez le texte ici..." 
-                        : "Edit text here..."
+                      placeholder={
+                        currentLanguage === "fr"
+                          ? "Modifiez le texte ici..."
+                          : "Edit text here..."
                       }
                     />
                   </div>
                 ) : (
                   <div className="h-full bg-gray-50 rounded-lg p-4 overflow-y-auto relative">
                     <div className="text-gray-800 whitespace-pre-wrap">
-                      {finalText || (currentLanguage === 'fr' 
-                        ? "Le texte final apparaîtra ici..." 
-                        : "Final text will appear here..."
-                      )}
+                      {finalText ||
+                        (currentLanguage === "fr"
+                          ? "Le texte final apparaîtra ici..."
+                          : "Final text will appear here...")}
                     </div>
                     {finalText && !isEditing && (
                       <Button
@@ -646,8 +788,15 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                         className="absolute top-2 right-2"
                       >
                         <Edit className="w-3 h-3 mr-1" />
-                        {currentLanguage === 'fr' ? 'Modifier' : 'Edit'}
+                        {currentLanguage === "fr" ? "Modifier" : "Edit"}
                       </Button>
+                    )}
+
+                    {/* NEW: Session stats in corner */}
+                    {recordingDuration > 0 && (
+                      <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white px-2 py-1 rounded">
+                        {formatDuration(recordingDuration)}
+                      </div>
                     )}
                   </div>
                 )}
@@ -675,8 +824,6 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                     </Button>
                   )}
                 </div>
-
-
 
                 <div className="flex gap-2">
                   <Button
@@ -725,16 +872,41 @@ export default function DictationPage({ language: propLanguage }: DictationPageP
                     onClick={handleCancel}
                     className="flex-1"
                   >
-                    {currentLanguage === 'fr' ? 'Annuler' : 'Cancel'}
+                    {currentLanguage === "fr" ? "Annuler" : "Cancel"}
                   </Button>
                 </div>
               </div>
 
+              {/* Enhanced error display with timer info */}
               {error && (
-                <div className="mt-4 text-red-600 text-sm">
-                  {error}
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="text-red-600 text-sm font-medium">
+                    {currentLanguage === "fr"
+                      ? "Erreur de reconnaissance vocale:"
+                      : "Speech recognition error:"}
+                  </div>
+                  <div className="text-red-500 text-sm mt-1">{error}</div>
+                  {recordingDuration > 300 && ( // Show timeout hint after 5 minutes
+                    <div className="text-gray-600 text-xs mt-2">
+                      {currentLanguage === "fr"
+                        ? `Session longue détectée (${formatDuration(recordingDuration)}). Le chunking automatique sera bientôt disponible.`
+                        : `Long session detected (${formatDuration(recordingDuration)}). Auto-chunking will be available soon.`}
+                    </div>
+                  )}
                 </div>
               )}
+
+              {/* NEW: Long session warning */}
+              {recordingDuration > 300 &&
+                !error && ( // Warn after 5 minutes
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="text-yellow-700 text-sm">
+                      {currentLanguage === "fr"
+                        ? `Session longue en cours (${formatDuration(recordingDuration)}). Considérez sauvegarder bientôt.`
+                        : `Long session in progress (${formatDuration(recordingDuration)}). Consider saving soon.`}
+                    </div>
+                  </div>
+                )}
             </CardContent>
           </Card>
         </div>
