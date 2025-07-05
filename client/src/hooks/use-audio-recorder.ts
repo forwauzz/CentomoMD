@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { sessionManager, generateSessionId, isSessionRecoverable } from '@/utils/session-storage';
 
 interface AudioRecorderOptions {
   language?: 'fr' | 'en' | 'auto';
@@ -58,6 +59,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
   const startTimeRef = useRef<number>(0);
   const pauseTimeRef = useRef<number>(0);
   const totalPausedTimeRef = useRef<number>(0);
+  const sessionIdRef = useRef<string>('');
 
   const {
     language = 'auto',

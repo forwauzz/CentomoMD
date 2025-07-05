@@ -390,8 +390,24 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
   };
 
   const getStatusIcon = () => {
-    if (isProcessing) return <AlertCircle className="h-4 w-4 text-orange-500" />;
-    if (isRecording) return <Mic className="h-4 w-4 text-red-500" />;
+    if (isProcessing) {
+      return (
+        <div className="flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-orange-500 animate-pulse" />
+          {chunkCount > 0 && (
+            <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded-full">
+              {currentChunkIndex}/{chunkCount}
+            </span>
+          )}
+        </div>
+      );
+    }
+    if (isRecording) {
+      if (isPaused) {
+        return <Pause className="h-4 w-4 text-orange-500" />;
+      }
+      return <Mic className="h-4 w-4 text-red-500 animate-pulse" />;
+    }
     return <CheckCircle className="h-4 w-4 text-green-500" />;
   };
 
@@ -507,6 +523,21 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                 <span>{t.recordingTime}: {formatDuration(recordingDuration)}</span>
                 {chunkCount > 0 && <span>{t.chunks}: {chunkCount}</span>}
               </div>
+              {/* Subtle Progress Bar for Multi-Chunk Processing */}
+              {isProcessing && chunkCount > 1 && (
+                <div className="mt-2">
+                  <Progress 
+                    value={(currentChunkIndex / chunkCount) * 100} 
+                    className="h-1 w-full"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {currentLanguage === "fr" 
+                      ? `Traitement du segment ${currentChunkIndex} sur ${chunkCount}`
+                      : `Processing chunk ${currentChunkIndex} of ${chunkCount}`
+                    }
+                  </p>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Recording Controls */}
