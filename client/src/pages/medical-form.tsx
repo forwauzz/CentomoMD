@@ -1611,6 +1611,27 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
     const currentPath = window.location.pathname + window.location.search;
     sessionStorage.setItem('dictationReturnPath', currentPath);
     
+    // Map field names to section identifiers for return navigation
+    const fieldToSectionMap: { [key: string]: string } = {
+      'historiqueEvolution': 'section7',
+      'section8Input': 'section8',
+      'appreciationEvolution': 'section8',
+      'plaintesproblemes': 'section8',
+      'impactAvq': 'section8',
+      'conclusionResume': 'section11',
+      'conclusionDiagnostic': 'section11',
+      'medicationActuelle': 'section6',
+      'antecedentsMedicaux': 'section5',
+      'antecedentsChirurgicaux': 'section5',
+      'antecedentsLesion': 'section5'
+    };
+    
+    // Store the section for return navigation
+    const section = fieldToSectionMap[fieldName];
+    if (section) {
+      sessionStorage.setItem('dictation_return_section', section);
+    }
+    
     // Navigate to the dedicated dictation page using router
     setLocation('/dictation');
   };

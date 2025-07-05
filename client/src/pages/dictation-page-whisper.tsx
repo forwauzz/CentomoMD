@@ -101,6 +101,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
   const [editableText, setEditableText] = useState<string>("");
   const [currentLanguage, setCurrentLanguage] = useState<"fr" | "en">(propLanguage);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [returnToSection, setReturnToSection] = useState<string | null>(null);
 
   const { toast } = useToast();
   const t = translations[currentLanguage];
@@ -127,8 +128,23 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     enhanceText: true,
   });
 
-  // Initialize component
+  // Initialize component and check for return section
   useEffect(() => {
+    // Check URL parameters for return section
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get('section');
+    
+    // Check sessionStorage for return section
+    const savedSection = sessionStorage.getItem('dictation_return_section');
+    
+    if (section) {
+      setReturnToSection(section);
+      setSelectedSection(section);
+    } else if (savedSection) {
+      setReturnToSection(savedSection);
+      setSelectedSection(savedSection);
+    }
+    
     const timer = setTimeout(() => {
       setIsInitializing(false);
     }, 1000);
@@ -239,7 +255,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     });
 
     // Navigate back to form
-    setLocation("/forms/cnesst-medical");
+    handleReturnToSection();
   };
 
   const handleClearText = () => {
@@ -270,6 +286,19 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     if (isProcessing) return <AlertCircle className="h-4 w-4 text-orange-500" />;
     if (isRecording) return <Mic className="h-4 w-4 text-red-500" />;
     return <CheckCircle className="h-4 w-4 text-green-500" />;
+  };
+
+  const handleReturnToSection = () => {
+    // Clean up session storage
+    sessionStorage.removeItem('dictation_return_section');
+    
+    if (returnToSection) {
+      // Return to specific section with hash anchor
+      setLocation(`/forms/cnesst-medical#${returnToSection}`);
+    } else {
+      // Return to general form
+      setLocation("/forms/cnesst-medical");
+    }
   };
 
   if (isInitializing) {
@@ -310,7 +339,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setLocation("/forms/cnesst-medical")}
+          onClick={handleReturnToSection}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t.backToForm}
@@ -327,7 +356,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setLocation("/forms/cnesst-medical")}
+          onClick={handleReturnToSection}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -107,6 +107,27 @@ export function FloatingRecordButton({ language, onDirectDictation }: FloatingRe
       // Navigate to dedicated dictation page with proper language persistence
       if (activeField) {
         sessionStorage.setItem('activeField', activeField);
+        
+        // Map field names to section identifiers for return navigation
+        const fieldToSectionMap: { [key: string]: string } = {
+          'historiqueEvolution': 'section7',
+          'section8Input': 'section8',
+          'appreciationEvolution': 'section8',
+          'plaintesproblemes': 'section8',
+          'impactAvq': 'section8',
+          'conclusionResume': 'section11',
+          'conclusionDiagnostic': 'section11',
+          'medicationActuelle': 'section6',
+          'antecedentsMedicaux': 'section5',
+          'antecedentsChirurgicaux': 'section5',
+          'antecedentsLesion': 'section5'
+        };
+        
+        // Store the section for return navigation
+        const section = fieldToSectionMap[activeField];
+        if (section) {
+          sessionStorage.setItem('dictation_return_section', section);
+        }
       }
       // Always store current language for persistence
       sessionStorage.setItem('dictationLanguage', language);
