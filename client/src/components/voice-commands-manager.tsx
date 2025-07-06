@@ -210,7 +210,7 @@ export function VoiceCommandsManager({ language }: VoiceCommandsManagerProps) {
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mic2 className="h-5 w-5" />
@@ -294,7 +294,7 @@ export function VoiceCommandsManager({ language }: VoiceCommandsManagerProps) {
           </div>
           
           {/* Add/Edit Form */}
-          <div className="space-y-4">
+          <div className="space-y-4 flex flex-col h-full">
             <h3 className="font-medium">
               {editingIndex !== null ? t.edit : t.addNew}
             </h3>
@@ -325,7 +325,8 @@ export function VoiceCommandsManager({ language }: VoiceCommandsManagerProps) {
                   value={newCommand.replacement}
                   onChange={(e) => setNewCommand({ ...newCommand, replacement: e.target.value })}
                   placeholder={t.replacementPlaceholder}
-                  rows={6}
+                  rows={4}
+                  className="resize-none"
                 />
               </div>
               
@@ -339,7 +340,7 @@ export function VoiceCommandsManager({ language }: VoiceCommandsManagerProps) {
                 />
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-4 mt-4 border-t bg-background sticky bottom-0">
                 <Button onClick={handleSaveCommand} className="flex-1">
                   <Plus className="h-4 w-4 mr-1" />
                   {t.save}
