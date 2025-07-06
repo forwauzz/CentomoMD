@@ -478,39 +478,42 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReturnToSection}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {t.backToForm}
-        </Button>
-        
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">{t.title}</h1>
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <CheckCircle className="h-3 w-3" />
-            {t.whisperPowered}
-          </Badge>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 max-w-4xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReturnToSection}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {t.backToForm}
+            </Button>
+            
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold">{t.title}</h1>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                {t.whisperPowered}
+              </Badge>
+            </div>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReturnToSection}
+            className="flex items-center gap-2 hidden sm:flex"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {currentLanguage === "fr" ? "Retour à la section" : "Return to section"}
+          </Button>
         </div>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReturnToSection}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {currentLanguage === "fr" ? "Retour à la section" : "Return to section"}
-        </Button>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Left Column - Controls */}
-        <div className="space-y-6">
+        <div className="space-y-4 lg:space-y-6">
           {/* Section Selection */}
           <Card>
             <CardHeader>
@@ -562,7 +565,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Recording Controls */}
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 {!isRecording ? (
                   <Button
                     onClick={handleStartRecording}
@@ -658,12 +661,12 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
         </div>
 
         {/* Right Column - Text Area */}
-        <div className="space-y-6">
+        <div className="space-y-4 lg:space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 {t.finalText}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <VoiceCommandsManager language={currentLanguage} />
                   <Button
                     variant="outline"
@@ -695,7 +698,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                     ? "Le texte transcrit apparaîtra ici après traitement..."
                     : "Transcribed text will appear here after processing..."
                 }
-                className="min-h-[400px] resize-none font-mono text-sm"
+                className="min-h-[300px] max-h-[60vh] resize-none font-mono text-sm overflow-y-auto"
                 disabled={isProcessing}
               />
               
@@ -713,6 +716,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );
