@@ -1,17 +1,67 @@
+// Add this with your other imports at the top
+import { randomUUID } from "crypto";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
 import { insertMedicalFormSchema } from "@shared/schema";
-import { formatSection7Text, enhanceSection7Dictation, formatSection8Text, enhanceSection8Dictation, generateSection11Conclusion } from "./ai-formatter";
-import { enhancedFormatSection7Text, enhancedEnhanceSection7Dictation } from "./ai-formatter-enhanced";
+import {
+  formatSection7Text,
+  enhanceSection7Dictation,
+  formatSection8Text,
+  enhanceSection8Dictation,
+  generateSection11Conclusion,
+} from "./ai-formatter";
+import {
+  enhancedFormatSection7Text,
+  enhancedEnhanceSection7Dictation,
+} from "./ai-formatter-enhanced";
 import { aiProcessingEngine } from "./ai-processing-engine";
-import { hashPassword, verifyPassword, generateUserId, getSessionConfig, requireAuth, requireAdmin } from "./auth";
+import {
+  hashPassword,
+  verifyPassword,
+  generateUserId,
+  getSessionConfig,
+  requireAuth,
+  requireAdmin,
+} from "./auth";
 import { setupInitialUsers } from "./setup-users";
-import { transcribeAudioWithWhisper, transcribeAudioChunk, validateAudioFormat } from "./whisper-service";
+import {
+  transcribeAudioWithWhisper,
+  transcribeAudioChunk,
+  validateAudioFormat,
+} from "./whisper-service";
 import type { UploadedFile } from "express-fileupload";
 import "./types";
+// Add this after your existing imports, around line 10
+async function backupSessionToLocal(sessionData: any) {
+  console.log("🔍 DEBUG: Attempting backup...", sessionData.id);
 
+  try {
+    console.log("🔍 DEBUG: Sending to localhost:4444...");
+
+    const response = await fetch(
+      "http://localhost:4444/save-complete-session",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sessionData),
+        signal: AbortSignal.timeout(5000),
+      },
+    );
+
+    console.log("🔍 DEBUG: Response status:", response.status);
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log(`💾 Backup successful: ${result.sessionId}`);
+    } else {
+      console.warn("Backup server responded with error:", response.status);
+    }
+  } catch (error) {
+    console.warn("🔍 DEBUG: Backup failed:", error.message);
+  }
+}
 // Helper function for safe error handling
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -21,7 +71,6 @@ function getErrorMessage(error: unknown): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-
   // Setup initial users
   await setupInitialUsers();
 
@@ -34,7 +83,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, password } = req.body;
 
       if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
+        return res
+          .status(400)
+          .json({ message: "Username and password are required" });
       }
 
       const user = await storage.getUserByUsername(username);
@@ -54,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { passwordHash, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
@@ -79,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { passwordHash, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      console.error('Get current user error:', error);
+      console.error("Get current user error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
@@ -121,9 +172,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(newForm);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Validation error", 
-          errors: error.errors 
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors,
         });
       }
       res.status(500).json({ message: "Failed to create medical form" });
@@ -148,9 +199,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedForm);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Validation error", 
-          errors: error.errors 
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors,
         });
       }
       res.status(500).json({ message: "Failed to update medical form" });
@@ -188,21 +239,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { formType } = req.query;
 
       let savedForms;
-      if (formType && (formType === 'draft' || formType === 'copy')) {
-        savedForms = await storage.getSavedFormsByType(userId, formType as 'draft' | 'copy');
+      if (formType && (formType === "draft" || formType === "copy")) {
+        savedForms = await storage.getSavedFormsByType(
+          userId,
+          formType as "draft" | "copy",
+        );
       } else {
         savedForms = await storage.getSavedFormsByUserId(userId);
       }
 
       // Ensure consistent data format
-      const processedForms = savedForms.map(form => ({
+      const processedForms = savedForms.map((form) => ({
         ...form,
-        formData: typeof form.formData === 'string' ? JSON.parse(form.formData) : form.formData
+        formData:
+          typeof form.formData === "string"
+            ? JSON.parse(form.formData)
+            : form.formData,
       }));
 
       res.json(processedForms);
     } catch (error) {
-      console.error('Get saved forms error:', error);
+      console.error("Get saved forms error:", error);
       res.status(500).json({ message: "Failed to fetch saved forms" });
     }
   });
@@ -214,24 +271,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      const { title, formData, retentionDays = 7, formType = 'draft' } = req.body;
+      const {
+        title,
+        formData,
+        retentionDays = 7,
+        formType = "draft",
+      } = req.body;
 
       if (!title || !formData) {
-        return res.status(400).json({ message: "Title and form data are required" });
+        return res
+          .status(400)
+          .json({ message: "Title and form data are required" });
       }
 
       if (retentionDays < 1 || retentionDays > 365) {
-        return res.status(400).json({ message: "Retention days must be between 1 and 365" });
+        return res
+          .status(400)
+          .json({ message: "Retention days must be between 1 and 365" });
       }
 
-      if (!['draft', 'copy'].includes(formType)) {
-        return res.status(400).json({ message: "Form type must be 'draft' or 'copy'" });
+      if (!["draft", "copy"].includes(formType)) {
+        return res
+          .status(400)
+          .json({ message: "Form type must be 'draft' or 'copy'" });
       }
 
-      const savedForm = await storage.saveForm(userId, title, formData, retentionDays, formType);
+      const savedForm = await storage.saveForm(
+        userId,
+        title,
+        formData,
+        retentionDays,
+        formType,
+      );
       res.status(201).json(savedForm);
     } catch (error) {
-      console.error('Save form error:', error);
+      console.error("Save form error:", error);
       res.status(500).json({ message: "Failed to save form" });
     }
   });
@@ -256,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(savedForm);
     } catch (error) {
-      console.error('Get saved form error:', error);
+      console.error("Get saved form error:", error);
       res.status(500).json({ message: "Failed to fetch saved form" });
     }
   });
@@ -282,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteSavedForm(id);
       res.status(204).end();
     } catch (error) {
-      console.error('Delete saved form error:', error);
+      console.error("Delete saved form error:", error);
       res.status(500).json({ message: "Failed to delete saved form" });
     }
   });
@@ -293,12 +367,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.cleanupExpiredForms();
       res.json({ message: "Cleanup completed" });
     } catch (error) {
-      console.error('Cleanup error:', error);
+      console.error("Cleanup error:", error);
       res.status(500).json({ message: "Failed to cleanup expired forms" });
     }
   });
-
-
 
   // Update a saved form
   app.put("/api/saved-forms/:id", requireAuth, async (req, res) => {
@@ -311,7 +383,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { title, formData, retentionDays = 7 } = req.body;
 
       if (!title || !formData) {
-        return res.status(400).json({ message: "Title and form data are required" });
+        return res
+          .status(400)
+          .json({ message: "Title and form data are required" });
       }
 
       // Check if the form exists and belongs to the user
@@ -325,9 +399,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate retention days (1-30 days)
-      const validRetentionDays = Math.min(Math.max(parseInt(retentionDays) || 7, 1), 30);
+      const validRetentionDays = Math.min(
+        Math.max(parseInt(retentionDays) || 7, 1),
+        30,
+      );
 
-      const updatedForm = await storage.updateSavedForm(id, title, formData, validRetentionDays);
+      const updatedForm = await storage.updateSavedForm(
+        id,
+        title,
+        formData,
+        validRetentionDays,
+      );
 
       if (!updatedForm) {
         return res.status(404).json({ message: "Form not found" });
@@ -335,7 +417,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(updatedForm);
     } catch (error) {
-      console.error('Update saved form error:', error);
+      console.error("Update saved form error:", error);
       res.status(500).json({ message: "Failed to update saved form" });
     }
   });
@@ -365,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(204).send();
     } catch (error) {
-      console.error('Delete saved form error:', error);
+      console.error("Delete saved form error:", error);
       res.status(500).json({ message: "Failed to delete saved form" });
     }
   });
@@ -376,13 +458,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deletedCount = await storage.deleteExpiredForms();
       res.json({ deletedCount });
     } catch (error) {
-      console.error('Cleanup expired forms error:', error);
+      console.error("Cleanup expired forms error:", error);
       res.status(500).json({ message: "Failed to cleanup expired forms" });
     }
   });
 
   // Recent patients routes (authentication required)
-  
+
   // Get recent patients for the authenticated user
   app.get("/api/recent-patients", requireAuth, async (req, res) => {
     try {
@@ -392,11 +474,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const limit = parseInt(req.query.limit as string) || 10;
-      const recentPatients = await storage.getRecentPatientsByUserId(userId, limit);
-      
+      const recentPatients = await storage.getRecentPatientsByUserId(
+        userId,
+        limit,
+      );
+
       res.json(recentPatients);
     } catch (error) {
-      console.error('Get recent patients error:', error);
+      console.error("Get recent patients error:", error);
       res.status(500).json({ message: "Failed to fetch recent patients" });
     }
   });
@@ -409,23 +494,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const { patientName, visitType, formType, formData, savedFormId, patientAge, patientGender, diagnosis } = req.body;
+      const {
+        patientName,
+        visitType,
+        formType,
+        formData,
+        savedFormId,
+        patientAge,
+        patientGender,
+        diagnosis,
+      } = req.body;
 
       if (!patientName || !visitType) {
-        return res.status(400).json({ message: "Patient name and visit type are required" });
+        return res
+          .status(400)
+          .json({ message: "Patient name and visit type are required" });
       }
 
       const recentPatient = await storage.createRecentPatient({
         userId,
         patientName,
         visitType,
-        formType: formType || 'cnesst-medical',
+        formType: formType || "cnesst-medical",
         formData,
         savedFormId,
         patientAge,
         patientGender,
         diagnosis,
-        lastAccessedAt: new Date()
+        lastAccessedAt: new Date(),
       });
 
       // Cleanup old entries to maintain reasonable list size
@@ -433,8 +529,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(recentPatient);
     } catch (error) {
-      console.error('Create recent patient error:', error);
-      res.status(500).json({ message: "Failed to create recent patient entry" });
+      console.error("Create recent patient error:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to create recent patient entry" });
     }
   });
 
@@ -454,7 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateRecentPatientAccess(userId, patientName);
       res.status(204).send();
     } catch (error) {
-      console.error('Update recent patient access error:', error);
+      console.error("Update recent patient access error:", error);
       res.status(500).json({ message: "Failed to update patient access" });
     }
   });
@@ -479,7 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(204).send();
     } catch (error) {
-      console.error('Delete recent patient error:', error);
+      console.error("Delete recent patient error:", error);
       res.status(500).json({ message: "Failed to delete recent patient" });
     }
   });
@@ -487,35 +585,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI formatting for Section 7
   app.post("/api/format-section7", async (req, res) => {
     try {
-      const { text, language = 'fr' } = req.body;
+      const { text, language = "fr" } = req.body;
 
       if (!text) {
         return res.status(400).json({ message: "Text is required" });
       }
 
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           message: "OpenAI API key not configured",
-          error: "API_KEY_MISSING"
+          error: "API_KEY_MISSING",
         });
       }
 
       const formattedText = await formatSection7Text(text, language);
       res.json({ formatted: formattedText });
     } catch (error) {
-      console.error('Format Section 7 error:', error);
+      console.error("Format Section 7 error:", error);
 
       // Check if it's an OpenAI API error
-      if (error instanceof Error && error.message.includes('API')) {
-        return res.status(500).json({ 
+      if (error instanceof Error && error.message.includes("API")) {
+        return res.status(500).json({
           message: "OpenAI API error - please check your API key",
-          error: "API_ERROR"
+          error: "API_ERROR",
         });
       }
 
-      res.status(500).json({ 
-        message: "Failed to format text", 
-        error: error.message || "Unknown error"
+      res.status(500).json({
+        message: "Failed to format text",
+        error: error.message || "Unknown error",
       });
     }
   });
@@ -523,7 +621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI enhancement for Section 7 dictation
   app.post("/api/enhance-section7-dictation", async (req, res) => {
     try {
-      const { transcript, language = 'fr' } = req.body;
+      const { transcript, language = "fr" } = req.body;
 
       if (!transcript) {
         return res.status(400).json({ message: "Transcript is required" });
@@ -532,7 +630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enhanced = await enhanceSection7Dictation(transcript, language);
       res.json(enhanced);
     } catch (error) {
-      console.error('Enhance Section 7 dictation error:', error);
+      console.error("Enhance Section 7 dictation error:", error);
       res.status(500).json({ message: "Failed to enhance dictation" });
     }
   });
@@ -540,35 +638,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI formatting for Section 8
   app.post("/api/format-section8", async (req, res) => {
     try {
-      const { text, language = 'fr' } = req.body;
+      const { text, language = "fr" } = req.body;
 
       if (!text) {
         return res.status(400).json({ message: "Text is required" });
       }
 
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           message: "OpenAI API key not configured",
-          error: "API_KEY_MISSING"
+          error: "API_KEY_MISSING",
         });
       }
 
       const formattedText = await formatSection8Text(text, language);
       res.json({ formatted: formattedText });
     } catch (error) {
-      console.error('Format Section 8 error:', error);
+      console.error("Format Section 8 error:", error);
 
       // Check if it's an OpenAI API error
-      if (error.message && error.message.includes('API')) {
-        return res.status(500).json({ 
+      if (error.message && error.message.includes("API")) {
+        return res.status(500).json({
           message: "OpenAI API error - please check your API key",
-          error: "API_ERROR"
+          error: "API_ERROR",
         });
       }
 
-      res.status(500).json({ 
-        message: "Failed to format text", 
-        error: error.message || "Unknown error"
+      res.status(500).json({
+        message: "Failed to format text",
+        error: error.message || "Unknown error",
       });
     }
   });
@@ -576,7 +674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI enhancement for Section 8 dictation
   app.post("/api/enhance-section8-dictation", async (req, res) => {
     try {
-      const { transcript, language = 'fr' } = req.body;
+      const { transcript, language = "fr" } = req.body;
 
       if (!transcript) {
         return res.status(400).json({ message: "Transcript is required" });
@@ -585,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enhanced = await enhanceSection8Dictation(transcript, language);
       res.json(enhanced);
     } catch (error) {
-      console.error('Enhance Section 8 dictation error:', error);
+      console.error("Enhance Section 8 dictation error:", error);
       res.status(500).json({ message: "Failed to enhance dictation" });
     }
   });
@@ -593,30 +691,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Legacy AI generation for Section 11 - redirects to modular endpoint
   app.post("/api/generate-section11", async (req, res) => {
     try {
-      const { formData, language = 'fr' } = req.body;
+      const { formData, language = "fr" } = req.body;
 
       // Redirect to modular AI processing endpoint
-      const response = await fetch(`${req.protocol}://${req.get('host')}/api/ai/process-field`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${req.protocol}://${req.get("host")}/api/ai/process-field`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fieldId: "section11",
+            processingType: "generate",
+            formType: "cnesst-medical-evaluation",
+            formData,
+            language,
+          }),
         },
-        body: JSON.stringify({
-          fieldId: 'section11',
-          processingType: 'generate',
-          formType: 'cnesst-medical-evaluation',
-          formData,
-          language,
-        }),
-      });
+      );
 
       const result = await response.json();
       res.json(result);
     } catch (error) {
-      console.error('Generate Section 11 error:', error);
-      res.status(500).json({ 
-        message: "Failed to generate conclusion", 
-        error: error.message || "Unknown error"
+      console.error("Generate Section 11 error:", error);
+      res.status(500).json({
+        message: "Failed to generate conclusion",
+        error: error.message || "Unknown error",
       });
     }
   });
@@ -624,16 +725,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // New modular AI processing endpoint
   app.post("/api/ai/process-field", async (req, res) => {
     try {
-      const { fieldId, processingType, formType, formData, language = 'fr', contextFields, targetFields, prompt } = req.body;
+      const {
+        fieldId,
+        processingType,
+        formType,
+        formData,
+        language = "fr",
+        contextFields,
+        targetFields,
+        prompt,
+      } = req.body;
 
       if (!fieldId || !processingType || !formType || !formData) {
         return res.status(400).json({ message: "Missing required parameters" });
       }
 
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           message: "OpenAI API key not configured",
-          error: "API_KEY_MISSING"
+          error: "API_KEY_MISSING",
         });
       }
 
@@ -643,89 +753,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
         language,
         contextFields,
         targetFields,
-        prompt
+        prompt,
       };
 
       const context = {
         formData,
         formType,
-        language
+        language,
       };
 
       const result = await aiProcessingEngine.processField(rule, context);
 
       if (result.success) {
-        res.json({ 
-          success: true, 
-          processedData: result.processedData 
+        res.json({
+          success: true,
+          processedData: result.processedData,
         });
       } else {
-        res.status(400).json({ 
-          success: false, 
-          error: result.error || "Processing failed" 
+        res.status(400).json({
+          success: false,
+          error: result.error || "Processing failed",
         });
       }
     } catch (error) {
-      console.error('AI processing error:', error);
+      console.error("AI processing error:", error);
 
-      if (error.message && error.message.includes('API')) {
-        return res.status(500).json({ 
+      if (error.message && error.message.includes("API")) {
+        return res.status(500).json({
           message: "OpenAI API error - please check your API key",
-          error: "API_ERROR"
+          error: "API_ERROR",
         });
       }
 
-      res.status(500).json({ 
-        message: "Failed to process field with AI", 
-        error: error.message || "Unknown error"
+      res.status(500).json({
+        message: "Failed to process field with AI",
+        error: error.message || "Unknown error",
       });
     }
   });
 
-  // Section 8 medical history distribution endpoint  
+  // Section 8 medical history distribution endpoint
   app.post("/api/ai/distribute-section8", async (req, res) => {
     try {
-      const { text, language = 'fr' } = req.body;
+      const { text, language = "fr" } = req.body;
 
       if (!text) {
         return res.status(400).json({ message: "Text is required" });
       }
 
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           message: "OpenAI API key not configured",
-          error: "API_KEY_MISSING"
+          error: "API_KEY_MISSING",
         });
       }
 
       // Import the AI formatter function
-      const { distributeSection8MedicalHistory } = await import('./ai-formatter-v2');
-      
+      const { distributeSection8MedicalHistory } = await import(
+        "./ai-formatter-v2"
+      );
+
       const result = await distributeSection8MedicalHistory(text, language);
-      
+
       if (result.success) {
         // Map the distributions to the correct field names
         const mappedDistributions = {
-          appreciation: result.distributions.appreciation || '',
-          plaintes: result.distributions.plaintes || '',
-          impact: result.distributions.impact || ''
+          appreciation: result.distributions.appreciation || "",
+          plaintes: result.distributions.plaintes || "",
+          impact: result.distributions.impact || "",
         };
-        
+
         res.json({
           success: true,
-          ...mappedDistributions
+          ...mappedDistributions,
         });
       } else {
         res.status(500).json({
           success: false,
-          message: "Failed to distribute Section 8 content"
+          message: "Failed to distribute Section 8 content",
         });
       }
     } catch (error) {
-      console.error('Section 8 distribution error:', error);
+      console.error("Section 8 distribution error:", error);
       res.status(500).json({
         success: false,
-        message: "Internal server error during Section 8 distribution"
+        message: "Internal server error during Section 8 distribution",
       });
     }
   });
@@ -733,71 +845,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced physical examination distribution endpoint
   app.post("/api/ai/distribute-physical-exam", async (req, res) => {
     try {
-      const { text, language = 'fr', contextData = {} } = req.body;
+      const { text, language = "fr", contextData = {} } = req.body;
 
       if (!text) {
         return res.status(400).json({ message: "Text is required" });
       }
 
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           message: "OpenAI API key not configured",
-          error: "API_KEY_MISSING"
+          error: "API_KEY_MISSING",
         });
       }
 
       const rule = {
-        fieldId: 'examen_physique_input',
-        processingType: 'distribute' as const,
-        language: language as 'fr' | 'en',
+        fieldId: "examen_physique_input",
+        processingType: "distribute" as const,
+        language: language as "fr" | "en",
         targetFields: [
-          'examen_attitude_marche',
-          'examen_inspection_palpation',
-          'examen_amplitudes_articulaires',
-          'examen_force_musculaire',
-          'examen_reflexes',
-          'examen_tests_speciaux',
-          'examen_membre_sain'
+          "examen_attitude_marche",
+          "examen_inspection_palpation",
+          "examen_amplitudes_articulaires",
+          "examen_force_musculaire",
+          "examen_reflexes",
+          "examen_tests_speciaux",
+          "examen_membre_sain",
         ],
-        contextFields: ['diagnostic_principal', 'histoire_evolution'],
-        prompt: 'Distribute this physical examination description into the appropriate subsections. Analyze the text and place relevant content in each category.'
+        contextFields: ["diagnostic_principal", "histoire_evolution"],
+        prompt:
+          "Distribute this physical examination description into the appropriate subsections. Analyze the text and place relevant content in each category.",
       };
 
       const context = {
-        formData: { 
-          'examen_physique_input': text,
-          ...contextData
+        formData: {
+          examen_physique_input: text,
+          ...contextData,
         },
-        formType: 'cnesst-medical',
-        language: language as 'fr' | 'en'
+        formType: "cnesst-medical",
+        language: language as "fr" | "en",
       };
 
       const result = await aiProcessingEngine.processField(rule, context);
 
       if (result.success) {
-        res.json({ 
-          success: true, 
-          distributions: result.processedData || {}
+        res.json({
+          success: true,
+          distributions: result.processedData || {},
         });
       } else {
-        res.status(400).json({ 
-          success: false, 
-          error: result.error || "Distribution failed"
+        res.status(400).json({
+          success: false,
+          error: result.error || "Distribution failed",
         });
       }
     } catch (error) {
-      console.error('Section 8 distribution error:', error);
+      console.error("Section 8 distribution error:", error);
 
-      if (error.message && error.message.includes('API')) {
-        return res.status(500).json({ 
+      if (error.message && error.message.includes("API")) {
+        return res.status(500).json({
           message: "OpenAI API error - please check your API key",
-          error: "API_ERROR"
+          error: "API_ERROR",
         });
       }
 
-      res.status(500).json({ 
-        message: "Failed to distribute Section 8 content", 
-        error: error.message || "Unknown error"
+      res.status(500).json({
+        message: "Failed to distribute Section 8 content",
+        error: error.message || "Unknown error",
       });
     }
   });
@@ -805,8 +918,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced Section 7 formatting with Quebec medical training
   app.post("/api/ai/enhanced-format-section7", async (req, res) => {
     try {
-      const { text, language = 'fr' } = req.body;
-      
+      const { text, language = "fr" } = req.body;
+
       if (!text) {
         return res.status(400).json({ message: "Text is required" });
       }
@@ -814,10 +927,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const formattedText = await enhancedFormatSection7Text(text, language);
       res.json({ formattedText });
     } catch (error: any) {
-      console.error('Enhanced Section 7 formatting error:', error);
-      res.status(500).json({ 
+      console.error("Enhanced Section 7 formatting error:", error);
+      res.status(500).json({
         message: "Failed to format Section 7 text",
-        error: error.message || "Unknown error"
+        error: error.message || "Unknown error",
       });
     }
   });
@@ -825,152 +938,276 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced Section 7 dictation improvement with Quebec standards
   app.post("/api/ai/enhanced-enhance-section7-dictation", async (req, res) => {
     try {
-      const { transcript, language = 'fr' } = req.body;
-      
+      const { transcript, language = "fr" } = req.body;
+
       if (!transcript) {
         return res.status(400).json({ message: "Transcript is required" });
       }
 
-      const result = await enhancedEnhanceSection7Dictation(transcript, language);
-      res.json({ 
+      const result = await enhancedEnhanceSection7Dictation(
+        transcript,
+        language,
+      );
+      res.json({
         enhancedText: result.formatted,
-        suggestions: result.suggestions 
+        suggestions: result.suggestions,
       });
     } catch (error: any) {
-      console.error('Enhanced Section 7 dictation enhancement error:', error);
-      res.status(500).json({ 
+      console.error("Enhanced Section 7 dictation enhancement error:", error);
+      res.status(500).json({
         message: "Failed to enhance Section 7 dictation",
-        error: error.message || "Unknown error"
+        error: error.message || "Unknown error",
       });
     }
   });
 
-  // Whisper API transcription endpoint
+  // Whisper API transcription endpoint with backup
   app.post("/api/transcribe-whisper", async (req, res) => {
+    const startTime = Date.now();
+
     try {
-      const { language = 'auto', enhanceText = true } = req.body;
-      
+      const {
+        language = "auto",
+        enhanceText = true,
+        section,
+        fieldName,
+        formData,
+      } = req.body;
+
       if (!req.files || !req.files.audio) {
         return res.status(400).json({ message: "Audio file is required" });
       }
 
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           message: "OpenAI API key not configured",
-          error: "API_KEY_MISSING"
+          error: "API_KEY_MISSING",
         });
       }
 
       const audioFile = req.files.audio as UploadedFile;
-      
+
       // Validate audio format
       if (!validateAudioFormat(audioFile.mimetype)) {
-        return res.status(400).json({ 
-          message: "Unsupported audio format. Supported formats: webm, wav, mp3, mp4, m4a, ogg, flac",
-          error: "INVALID_FORMAT"
+        return res.status(400).json({
+          message:
+            "Unsupported audio format. Supported formats: webm, wav, mp3, mp4, m4a, ogg, flac",
+          error: "INVALID_FORMAT",
         });
       }
 
-      console.log(`🎤 Processing Whisper transcription: ${audioFile.name} (${audioFile.size} bytes)`);
+      console.log(
+        `🎤 Processing Whisper transcription: ${audioFile.name} (${audioFile.size} bytes)`,
+      );
 
+      // Your existing transcription logic
       const result = await transcribeAudioWithWhisper(audioFile.data, {
-        language: language as 'fr' | 'en' | 'auto',
-        enhanceText
+        language: language as "fr" | "en" | "auto",
+        enhanceText,
       });
 
+      // 🆕 BACKUP SESSION DATA
+      const sessionData = {
+        id: crypto.randomUUID(), // You'll need to import crypto at the top
+        timestamp: new Date().toISOString(),
+        userId: req.session?.userId || "anonymous",
+
+        // Audio data
+        audio: {
+          data: audioFile.data.toString("base64"),
+          duration: result.duration,
+          fileSize: audioFile.size,
+          originalName: audioFile.name,
+        },
+
+        // Transcription chain
+        transcription: {
+          raw: result.text,
+          enhanced: result.enhanced,
+          confidence: result.confidence || 0.95,
+        },
+
+        // Form context
+        form: {
+          section: section,
+          fieldName: fieldName,
+          currentData: formData,
+        },
+
+        // Performance metrics
+        performance: {
+          transcriptionTime: Date.now() - startTime,
+          totalTime: Date.now() - startTime,
+        },
+
+        // Session info
+        session: {
+          sessionId: req.sessionID,
+          language: language,
+          enhanceText: enhanceText,
+        },
+      };
+
+      // Send to backup server (non-blocking)
+      backupSessionToLocal(sessionData).catch(console.warn);
+
+      // Your existing response
       res.json({
         success: true,
         transcription: result.text,
         enhanced: result.enhanced,
         duration: result.duration,
         language: result.language,
-        confidence: result.confidence || 0.95
+        confidence: result.confidence || 0.95,
       });
-
     } catch (error) {
-      console.error('Whisper transcription error:', error);
-      
-      if (error instanceof Error && error.message.includes('API')) {
-        return res.status(500).json({ 
+      // Backup error info too
+      const errorData = {
+        id: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        userId: req.session?.userId || "anonymous",
+        error: {
+          message: error.message,
+          type: "transcription_error",
+          processingTime: Date.now() - startTime,
+        },
+        form: {
+          section: req.body.section,
+          fieldName: req.body.fieldName,
+        },
+      };
+
+      backupSessionToLocal(errorData).catch(console.warn);
+
+      console.error("Whisper transcription error:", error);
+
+      if (error instanceof Error && error.message.includes("API")) {
+        return res.status(500).json({
           message: "OpenAI Whisper API error - please check your API key",
-          error: "WHISPER_API_ERROR"
+          error: "WHISPER_API_ERROR",
         });
       }
 
-      res.status(500).json({ 
-        message: "Failed to transcribe audio", 
-        error: error instanceof Error ? error.message : "Unknown error"
+      res.status(500).json({
+        message: "Failed to transcribe audio",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
   // Whisper chunk transcription endpoint for long recordings
+  // Whisper chunk transcription endpoint for long recordings
   app.post("/api/transcribe-whisper-chunk", async (req, res) => {
     try {
-      const { chunkIndex: rawChunkIndex = 0, language = 'auto', enhanceText = true, sessionId, totalChunks: rawTotalChunks } = req.body;
-      
+      const {
+        chunkIndex: rawChunkIndex = 0,
+        language = "auto",
+        enhanceText = true,
+        sessionId,
+        totalChunks: rawTotalChunks,
+      } = req.body;
+
       if (!req.files || !req.files.audio) {
         return res.status(400).json({ message: "Audio chunk is required" });
       }
 
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           message: "OpenAI API key not configured",
-          error: "API_KEY_MISSING"
+          error: "API_KEY_MISSING",
         });
       }
 
       // Convert and validate chunk parameters
       const chunkIndex = parseInt(rawChunkIndex.toString(), 10);
-      const totalChunks = rawTotalChunks ? parseInt(rawTotalChunks.toString(), 10) : undefined;
+      const totalChunks = rawTotalChunks
+        ? parseInt(rawTotalChunks.toString(), 10)
+        : undefined;
 
       if (isNaN(chunkIndex) || chunkIndex < 0) {
-        return res.status(400).json({ 
-          message: `Invalid chunk index: ${rawChunkIndex}`, 
-          error: "INVALID_CHUNK_INDEX" 
+        return res.status(400).json({
+          message: `Invalid chunk index: ${rawChunkIndex}`,
+          error: "INVALID_CHUNK_INDEX",
         });
       }
 
       const audioFile = req.files.audio as UploadedFile;
-      
-      console.log(`🎵 Processing Whisper chunk ${chunkIndex + 1}: ${audioFile.name} (${audioFile.size} bytes)`);
 
-      if (totalChunks && (isNaN(totalChunks) || totalChunks <= 0 || chunkIndex >= totalChunks)) {
-        return res.status(400).json({ 
-          message: `Invalid chunk parameters: ${chunkIndex}/${totalChunks}`, 
-          error: "INVALID_CHUNK_PARAMS" 
+      console.log(
+        `🎵 Processing Whisper chunk ${chunkIndex + 1}: ${audioFile.name} (${audioFile.size} bytes)`,
+      );
+
+      if (
+        totalChunks &&
+        (isNaN(totalChunks) || totalChunks <= 0 || chunkIndex >= totalChunks)
+      ) {
+        return res.status(400).json({
+          message: `Invalid chunk parameters: ${chunkIndex}/${totalChunks}`,
+          error: "INVALID_CHUNK_PARAMS",
         });
       }
 
       // Validate audio file
       if (!audioFile.size || audioFile.size === 0) {
-        return res.status(400).json({ 
-          message: "Empty audio file received", 
-          error: "EMPTY_AUDIO_FILE" 
+        return res.status(400).json({
+          message: "Empty audio file received",
+          error: "EMPTY_AUDIO_FILE",
         });
       }
 
-      if (audioFile.size < 1024) { // Less than 1KB
-        return res.status(400).json({ 
-          message: `Audio file too small (${audioFile.size} bytes). Recording may have failed.`, 
-          error: "AUDIO_FILE_TOO_SMALL" 
+      if (audioFile.size < 1024) {
+        // Less than 1KB
+        return res.status(400).json({
+          message: `Audio file too small (${audioFile.size} bytes). Recording may have failed.`,
+          error: "AUDIO_FILE_TOO_SMALL",
         });
       }
 
       // Log session tracking information
       if (sessionId) {
-        console.log(`📋 Session ${sessionId}: Processing chunk ${chunkIndex + 1}${totalChunks ? `/${totalChunks}` : ''}`);
+        console.log(
+          `📋 Session ${sessionId}: Processing chunk ${chunkIndex + 1}${totalChunks ? `/${totalChunks}` : ""}`,
+        );
       }
 
       // Convert file data to blob for chunk processing
       const blob = new Blob([audioFile.data], { type: audioFile.mimetype });
-      
+
       const result = await transcribeAudioChunk(blob, chunkIndex, {
-        language: language as 'fr' | 'en' | 'auto',
+        language: language as "fr" | "en" | "auto",
         enhanceText,
         sessionId,
-        totalChunks
+        totalChunks,
       });
+
+      // 🆕 BACKUP CHUNK DATA
+      const sessionData = {
+        id: randomUUID(),
+        timestamp: new Date().toISOString(),
+        userId: req.session?.userId || "anonymous",
+
+        audio: {
+          data: audioFile.data.toString("base64"),
+          duration: result.duration,
+          fileSize: audioFile.size,
+          chunkIndex: chunkIndex,
+        },
+
+        transcription: {
+          raw: result.text,
+          enhanced: result.enhanced,
+          confidence: result.confidence || 0.95,
+        },
+
+        form: {
+          section: "chunk-processing",
+          chunkIndex: chunkIndex,
+          sessionId: sessionId,
+        },
+      };
+
+      // Send to backup server (non-blocking)
+      backupSessionToLocal(sessionData).catch(console.warn);
 
       res.json({
         success: true,
@@ -979,16 +1216,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         enhanced: result.enhanced,
         duration: result.duration,
         language: result.language,
-        confidence: result.confidence || 0.95
+        confidence: result.confidence || 0.95,
       });
-
     } catch (error) {
       const { chunkIndex = 0 } = req.body;
-      console.error(`Whisper chunk ${chunkIndex + 1} transcription error:`, error);
-      
-      res.status(500).json({ 
-        message: `Failed to transcribe audio chunk ${chunkIndex + 1}`, 
-        error: error instanceof Error ? error.message : "Unknown error"
+      console.error(
+        `Whisper chunk ${chunkIndex + 1} transcription error:`,
+        error,
+      );
+
+      res.status(500).json({
+        message: `Failed to transcribe audio chunk ${chunkIndex + 1}`,
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
