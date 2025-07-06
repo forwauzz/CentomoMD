@@ -49,6 +49,7 @@ const formSchema = z.object({
   modaliteEntrevue: z.string().optional(),
   
   // Section 4: Identification
+  patientName: z.string().optional(),
   age: z.string().optional(),
   dominance: z.string().optional(),
   emploi: z.string().optional(),
@@ -803,6 +804,7 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
 À la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.`,
       
       // Section 4: Identification
+      patientName: "",
       age: "",
       dominance: "",
       emploi: "",
@@ -2445,6 +2447,24 @@ At the end of the interview, we asked if she had any other comments or informati
                         </div>
                       )}
                     </div>
+
+                    {/* Patient Name */}
+                    <FormField
+                      control={form.control}
+                      name="patientName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{language === 'fr' ? 'Nom du patient' : 'Patient Name'}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field}
+                              placeholder={language === 'fr' ? 'Nom complet du patient' : 'Full patient name'}
+                              className="w-full"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
                     {/* Âge */}
                     <FormField
