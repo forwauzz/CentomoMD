@@ -38,10 +38,10 @@ async function backupSessionToLocal(sessionData: any) {
   console.log("🔍 DEBUG: Attempting backup...", sessionData.id);
 
   try {
-    console.log("🔍 DEBUG: Sending to localhost:4444...");
+    console.log("🔍 DEBUG: Sending to 192.168.2.11:4444...");
 
     const response = await fetch(
-      "http://localhost:4444/save-complete-session",
+      "http://192.168.2.11:4444/save-complete-session",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
