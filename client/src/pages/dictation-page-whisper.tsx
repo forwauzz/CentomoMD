@@ -28,6 +28,8 @@ import {
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
+import { processTranscriptWithCommands } from "@/utils/medical-context";
+import { VoiceCommandsManager } from "@/components/voice-commands-manager";
 import { Badge } from "@/components/ui/badge";
 
 interface DictationPageProps {
@@ -156,12 +158,31 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     return () => clearTimeout(timer);
   }, []);
 
-  // Update editable text when transcript changes
+  // Update editable text when transcript changes - with voice commands and medical enhancement
   useEffect(() => {
     if (transcript && !isProcessing) {
-      setEditableText(transcript);
+      try {
+        // Process transcript with voice commands and medical enhancement
+        const result = processTranscriptWithCommands(transcript, currentLanguage);
+        setEditableText(result.finalText);
+        
+        // Show feedback if commands were used
+        if (result.commandsUsed.length > 0) {
+          toast({
+            title: currentLanguage === "fr" ? "Commandes vocales appliquées" : "Voice commands applied",
+            description: currentLanguage === "fr" 
+              ? `${result.commandsUsed.length} commande(s) traitée(s): ${result.commandsUsed.join(', ')}`
+              : `${result.commandsUsed.length} command(s) processed: ${result.commandsUsed.join(', ')}`,
+            variant: "default",
+          });
+        }
+      } catch (error) {
+        console.error('Error processing transcript with commands:', error);
+        // Fallback to original transcript if processing fails
+        setEditableText(transcript);
+      }
     }
-  }, [transcript, isProcessing]);
+  }, [transcript, isProcessing, currentLanguage, toast]);
 
   // Session warnings
   useEffect(() => {
@@ -643,6 +664,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
               <CardTitle className="flex items-center justify-between">
                 {t.finalText}
                 <div className="flex gap-2">
+                  <VoiceCommandsManager language={currentLanguage} />
                   <Button
                     variant="outline"
                     size="sm"

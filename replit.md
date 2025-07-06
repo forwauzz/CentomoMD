@@ -123,6 +123,10 @@ The application follows a full-stack TypeScript architecture with a modular form
   - Implemented crash-resistant session storage with IndexedDB for long dictation recovery
   - Added subtle progress indicators for multi-chunk processing without UI clutter
   - Enhanced medical terminology processing with Quebec healthcare context
+  - **VOICE COMMANDS SYSTEM** - Implemented comprehensive voice commands with position-preserving AI enhancement
+  - Added voice commands manager for creating/editing custom medical templates
+  - Integrated command-first processing pipeline to prevent AI modification of inserted templates
+  - Created localStorage-based storage for single-user simplicity with import/export functionality
 - **January 5, 2025**: **Whisper API Integration Complete** - Upgraded from WebSpeech API to OpenAI Whisper API for medical transcription
   - Implemented Whisper transcription service with 95% accuracy (up from 70% with WebSpeech)
   - Created new audio recorder hook with MediaRecorder API and chunking system

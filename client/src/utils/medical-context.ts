@@ -1,5 +1,14 @@
 // Enhanced medical context processing for Quebec healthcare
 // Provides medical abbreviation expansion and terminology correction
+// Integrated with voice commands processing for comprehensive text enhancement
+
+import { 
+  processVoiceCommands, 
+  separateProtectedRegions, 
+  unmarkTemplates,
+  hasProtectedRegions,
+  type CommandProcessingResult 
+} from './voice-commands';
 
 interface MedicalCorrection {
   pattern: RegExp;
@@ -131,4 +140,59 @@ export function calculateTranscriptConfidence(
   const correctionPenalty = corrections / originalLength; // Too many corrections = lower confidence
   
   return Math.max(0.5, lengthScore - correctionPenalty * 0.3);
+}
+
+// Comprehensive text processing: Voice Commands → Medical Enhancement
+export function processTranscriptWithCommands(
+  transcript: string,
+  language: 'fr' | 'en' = 'fr'
+): {
+  finalText: string;
+  commandsUsed: string[];
+  medicalCorrections: number;
+  confidence: number;
+} {
+  if (!transcript.trim()) {
+    return {
+      finalText: transcript,
+      commandsUsed: [],
+      medicalCorrections: 0,
+      confidence: 0
+    };
+  }
+
+  // Step 1: Process voice commands first (preserves positioning)
+  const commandResult = processVoiceCommands(transcript);
+  
+  // Step 2: Separate protected (template) and unprotected (user) regions
+  const { regions } = separateProtectedRegions(commandResult.processedText);
+  
+  // Step 3: Apply medical enhancement only to unprotected regions
+  let finalText = '';
+  let totalCorrections = 0;
+  
+  for (const region of regions) {
+    if (region.isProtected) {
+      // Template regions: keep exactly as-is
+      finalText += region.text;
+    } else {
+      // User dictated regions: enhance medically
+      const { enhanced, corrections } = enhanceMedicalTranscript(region.text, language);
+      finalText += enhanced;
+      totalCorrections += corrections;
+    }
+  }
+  
+  // Step 4: Remove template markers to get clean final text
+  const cleanText = unmarkTemplates(finalText);
+  
+  // Step 5: Calculate confidence
+  const confidence = calculateTranscriptConfidence(transcript, cleanText, totalCorrections);
+  
+  return {
+    finalText: cleanText,
+    commandsUsed: commandResult.commandsUsed,
+    medicalCorrections: totalCorrections,
+    confidence
+  };
 }
