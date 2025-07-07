@@ -128,7 +128,13 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     resumeRecording,
     reset,
     formatDuration,
-    getProgress
+    getProgress,
+    getStorageUsage,
+    getStorageWarning,
+    failedChunks,
+    retryCount,
+    retryFailedChunks,
+    hasFailedChunks
   } = useAudioRecorder({
     language: currentLanguage === "fr" ? "fr" : "en",
     chunkDuration: CHUNK_DURATION,
@@ -655,7 +661,84 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                     <div className="text-muted-foreground">{t.chunks}</div>
                     <div className="font-mono">{chunkCount}</div>
                   </div>
+                  {/* Storage Usage Monitor */}
+                  <div className="col-span-2 mt-2">
+                    <div className="text-muted-foreground text-xs mb-1">
+                      {currentLanguage === "fr" ? "Stockage utilisé" : "Storage used"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Progress 
+                        value={getStorageUsage().percentage} 
+                        className={`flex-1 h-2 ${
+                          getStorageWarning() === 'critical' ? 'bg-red-100' :
+                          getStorageWarning() === 'warning' ? 'bg-yellow-100' : 'bg-green-100'
+                        }`}
+                      />
+                      <span className={`text-xs font-mono ${
+                        getStorageWarning() === 'critical' ? 'text-red-600' :
+                        getStorageWarning() === 'warning' ? 'text-yellow-600' : 'text-green-600'
+                      }`}>
+                        {getStorageUsage().percentage.toFixed(0)}%
+                      </span>
+                    </div>
+                    {getStorageWarning() !== 'normal' && (
+                      <div className={`text-xs mt-1 ${
+                        getStorageWarning() === 'critical' ? 'text-red-600' : 'text-yellow-600'
+                      }`}>
+                        {currentLanguage === "fr" 
+                          ? (getStorageWarning() === 'critical' 
+                              ? "⚠️ Stockage critique - sauvegardez bientôt" 
+                              : "🔶 Stockage élevé") 
+                          : (getStorageWarning() === 'critical' 
+                              ? "⚠️ Critical storage - save soon" 
+                              : "🔶 High storage usage")
+                        }
+                      </div>
+                    )}
+                  </div>
                 </div>
+                
+                {/* Failed Chunks Retry Section */}
+                {hasFailedChunks() && (
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-yellow-600" />
+                        <span className="text-sm text-yellow-700">
+                          {currentLanguage === "fr" 
+                            ? `${failedChunks.length} chunks échoués` 
+                            : `${failedChunks.length} chunks failed`}
+                        </span>
+                      </div>
+                      <Button
+                        onClick={retryFailedChunks}
+                        disabled={isProcessing}
+                        variant="outline"
+                        size="sm"
+                        className="text-yellow-700 border-yellow-300 hover:bg-yellow-100"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Clock className="w-3 h-3 mr-1 animate-spin" />
+                            {currentLanguage === "fr" ? "Retry..." : "Retry..."}
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            {currentLanguage === "fr" ? "Réessayer" : "Retry"}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    {retryCount > 0 && (
+                      <div className="text-xs text-yellow-600 mt-1">
+                        {currentLanguage === "fr" 
+                          ? `Tentatives: ${retryCount}` 
+                          : `Attempts: ${retryCount}`}
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

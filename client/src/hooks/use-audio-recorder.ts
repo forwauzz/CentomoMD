@@ -36,6 +36,8 @@ interface AudioRecorderState {
   currentChunkIndex: number;
   error: string | null;
   isSupported: boolean;
+  failedChunks: number[];
+  retryCount: number;
 }
 
 export function useAudioRecorder(options: AudioRecorderOptions = {}) {
@@ -50,6 +52,8 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     currentChunkIndex: 0,
     error: null,
     isSupported: typeof navigator !== 'undefined' && 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,
+    failedChunks: [],
+    retryCount: 0,
   });
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -74,9 +78,9 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  // Process audio chunk with Whisper API
-  const processAudioChunk = useCallback(async (chunk: AudioChunk): Promise<TranscriptionResult> => {
-    console.log(`🎵 Processing audio chunk ${chunk.chunkIndex + 1}...`);
+  // Process audio chunk with Whisper API with retry logic
+  const processAudioChunk = useCallback(async (chunk: AudioChunk, retryAttempt: number = 0): Promise<TranscriptionResult> => {
+    console.log(`🎵 Processing audio chunk ${chunk.chunkIndex + 1}... (attempt ${retryAttempt + 1})`);
     
     const formData = new FormData();
     formData.append('audio', chunk.blob, `chunk-${chunk.chunkIndex}.webm`);
@@ -106,10 +110,59 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
         confidence: result.confidence
       };
     } catch (error) {
-      console.error(`❌ Chunk ${chunk.chunkIndex + 1} processing failed:`, error);
+      console.error(`❌ Chunk ${chunk.chunkIndex + 1} processing failed (attempt ${retryAttempt + 1}):`, error);
+      
+      // Retry logic with exponential backoff
+      if (retryAttempt < 2) { // Max 3 attempts
+        const delay = Math.min(1000 * Math.pow(2, retryAttempt), 5000); // 1s, 2s, 4s max
+        console.log(`⏳ Retrying chunk ${chunk.chunkIndex + 1} in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return processAudioChunk(chunk, retryAttempt + 1);
+      }
+      
       throw error;
     }
   }, [language, enhanceText]);
+
+  // Storage usage monitoring
+  const getStorageUsage = useCallback(() => {
+    try {
+      const localStorageSize = JSON.stringify(localStorage).length;
+      const sessionStorageSize = JSON.stringify(sessionStorage).length;
+      const totalUsed = localStorageSize + sessionStorageSize;
+      const estimatedLimit = 10 * 1024 * 1024; // 10MB conservative estimate
+      
+      return {
+        used: totalUsed,
+        limit: estimatedLimit,
+        percentage: (totalUsed / estimatedLimit) * 100,
+        localStorageSize,
+        sessionStorageSize
+      };
+    } catch (error) {
+      console.warn('Could not calculate storage usage:', error);
+      return { used: 0, limit: 10 * 1024 * 1024, percentage: 0, localStorageSize: 0, sessionStorageSize: 0 };
+    }
+  }, []);
+
+  // Cleanup processed chunk to free memory
+  const cleanupProcessedChunk = useCallback((chunkIndex: number, chunks: AudioChunk[]) => {
+    try {
+      // Clear the audio blob from memory
+      if (chunks[chunkIndex]?.blob) {
+        // Set to null to release memory (garbage collection will handle it)
+        chunks[chunkIndex] = { ...chunks[chunkIndex], blob: null as any };
+      }
+      
+      // Clear chunk-specific session storage
+      sessionStorage.removeItem(`chunk_backup_${chunkIndex}`);
+      sessionStorage.removeItem(`chunk_metadata_${chunkIndex}`);
+      
+      console.log(`🧹 Cleaned up chunk ${chunkIndex + 1} from memory`);
+    } catch (error) {
+      console.warn(`Failed to cleanup chunk ${chunkIndex}:`, error);
+    }
+  }, []);
 
   // Process all chunks and combine results
   const processAllChunks = useCallback(async (chunks: AudioChunk[]) => {
@@ -117,13 +170,66 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     
     try {
       const results: TranscriptionResult[] = [];
+      const storageUsage = getStorageUsage();
+      
+      // Warn if storage is getting full
+      if (storageUsage.percentage > 70) {
+        console.warn(`⚠️ Storage usage at ${storageUsage.percentage.toFixed(1)}% - consider saving session`);
+      }
+      
+      // Auto-cleanup if approaching critical storage levels
+      if (storageUsage.percentage > 85) {
+        console.log('🧹 Auto-cleanup triggered due to high storage usage');
+        try {
+          // Remove old backup entries
+          const keysToRemove = ['dictation_backup_old', 'dictation_emergency_backup_old'];
+          keysToRemove.forEach(key => {
+            sessionStorage.removeItem(key);
+            localStorage.removeItem(key);
+          });
+          
+          // Clean up chunk metadata for processed chunks
+          for (let i = 0; i < chunks.length - 2; i++) { // Keep last 2 chunks
+            sessionStorage.removeItem(`chunk_backup_${i}`);
+            sessionStorage.removeItem(`chunk_metadata_${i}`);
+          }
+          
+          console.log('✅ Auto-cleanup completed');
+        } catch (error) {
+          console.warn('Auto-cleanup failed:', error);
+        }
+      }
       
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
         console.log(`📤 Processing chunk ${i + 1} of ${chunks.length}...`);
         
-        const result = await processAudioChunk(chunk);
-        results.push(result);
+        updateState({ currentChunkIndex: i + 1 });
+        
+        try {
+          const result = await processAudioChunk(chunk);
+          results.push(result);
+          
+          // Cleanup processed chunk immediately to free memory
+          cleanupProcessedChunk(i, chunks);
+        } catch (error) {
+          console.error(`⚠️ Failed to process chunk ${chunk.chunkIndex + 1} after retries:`, error);
+          
+          // Add to failed chunks list
+          updateState(prev => ({
+            ...prev,
+            failedChunks: [...prev.failedChunks, chunk.chunkIndex]
+          }));
+          
+          // Add empty result to maintain order
+          results.push({
+            text: `[CHUNK ${chunk.chunkIndex + 1} FAILED - RETRY AVAILABLE]`,
+            enhanced: undefined,
+            duration: 0,
+            language: language,
+            confidence: 0
+          });
+        }
         
         // Create progressive transcript and save backup
         const progressiveTranscript = results.map(r => r.text).join(' ').trim();
@@ -242,15 +348,30 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
           isRecording: false 
         });
         
-        // Validate and process chunks
-        const validChunks = chunks.filter(chunk => chunk.blob.size > 1024); // At least 1KB
+        // Enhanced chunk validation before processing
+        const minValidSize = 2048; // 2KB minimum
+        const validChunks = chunks.filter(chunk => {
+          const isValid = chunk.blob && chunk.blob.size > minValidSize;
+          if (!isValid) {
+            console.warn(`🗑️ Filtering out invalid chunk: ${chunk.blob?.size || 0} bytes`);
+          }
+          return isValid;
+        });
+        
+        console.log(`📋 Chunk validation: ${validChunks.length}/${chunks.length} chunks valid`);
         
         if (validChunks.length > 0) {
-          console.log(`📋 Processing ${validChunks.length} valid chunks (filtered from ${chunks.length} total)`);
+          console.log(`🎬 Processing ${validChunks.length} valid chunks...`);
           processAllChunks(validChunks);
         } else {
-          console.error(`💥 No valid audio chunks found. All ${chunks.length} chunks were empty or too small.`);
-          updateState({ error: 'Recording failed - no valid audio data captured. Please try recording again.' });
+          console.error(`💥 No valid audio chunks found from ${chunks.length} total chunks`);
+          updateState({ 
+            error: currentLanguage === "fr"
+              ? 'Enregistrement échoué - aucune donnée audio valide. Réessayez l\'enregistrement.'
+              : 'Recording failed - no valid audio data captured. Please try recording again.',
+            isRecording: false,
+            isProcessing: false
+          });
         }
       };
 
@@ -271,13 +392,23 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
           const blob = new Blob(currentChunkData, { type: 'audio/webm' });
           const chunkEndTime = Date.now();
           
-          if (blob.size < 1024) { // Less than 1KB indicates failed recording
-            console.error(`💥 Invalid chunk created: ${blob.size} bytes - audio data lost!`);
+          // Enhanced chunk validation
+          const minValidSize = 2048; // 2KB minimum for valid audio
+          const maxExpectedSize = 5 * 1024 * 1024; // 5MB max for 2-minute chunk
+          
+          if (blob.size < minValidSize) {
+            console.error(`💥 Invalid chunk created: ${blob.size} bytes (min: ${minValidSize})`);
             updateState({ 
-              error: 'Audio recording failed - invalid chunk created. Please stop and restart recording.',
+              error: currentLanguage === "fr" 
+                ? 'Enregistrement échoué - chunk audio invalide. Redémarrez l\'enregistrement.'
+                : 'Recording failed - invalid audio chunk. Please restart recording.',
               isRecording: false 
             });
             return;
+          }
+          
+          if (blob.size > maxExpectedSize) {
+            console.warn(`⚠️ Large chunk detected: ${(blob.size / 1024 / 1024).toFixed(1)}MB - may cause issues`);
           }
           
           const newChunk = {
@@ -533,6 +664,54 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     console.log('🔄 Reset completed with backup preserved');
   }, [state.isRecording, state.transcript, state.chunks, state.recordingDuration, language, stopRecording, updateState]);
 
+  // Retry failed chunks
+  const retryFailedChunks = useCallback(async () => {
+    if (state.failedChunks.length === 0) return;
+    
+    console.log(`🔄 Retrying ${state.failedChunks.length} failed chunks...`);
+    updateState({ isProcessing: true, retryCount: state.retryCount + 1 });
+    
+    try {
+      const failedChunkIndices = [...state.failedChunks];
+      const retryResults: TranscriptionResult[] = [];
+      
+      for (const chunkIndex of failedChunkIndices) {
+        const chunk = state.chunks[chunkIndex];
+        if (chunk && chunk.blob) {
+          try {
+            const result = await processAudioChunk(chunk);
+            retryResults.push(result);
+            
+            // Remove from failed chunks
+            updateState(prev => ({
+              ...prev,
+              failedChunks: prev.failedChunks.filter(idx => idx !== chunkIndex)
+            }));
+            
+            console.log(`✅ Retry successful for chunk ${chunkIndex + 1}`);
+          } catch (error) {
+            console.error(`❌ Retry failed for chunk ${chunkIndex + 1}:`, error);
+          }
+        }
+      }
+      
+      // Update transcript with retry results
+      if (retryResults.length > 0) {
+        const newTranscript = retryResults.map(r => r.text).join(' ').trim();
+        updateState(prev => ({
+          ...prev,
+          transcript: prev.transcript + ' ' + newTranscript
+        }));
+      }
+      
+    } catch (error) {
+      console.error('Retry process failed:', error);
+      updateState({ error: 'Failed to retry chunks. Please try again.' });
+    } finally {
+      updateState({ isProcessing: false });
+    }
+  }, [state.failedChunks, state.chunks, state.retryCount, state.transcript, processAudioChunk, updateState]);
+
   return {
     // State
     isRecording: state.isRecording,
@@ -574,6 +753,24 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     getProgress: () => {
       if (!state.isProcessing || state.chunkCount === 0) return 0;
       return (state.currentChunkIndex / state.chunkCount) * 100;
-    }
+    },
+    
+    getStorageUsage,
+    
+    // Storage warning levels
+    getStorageWarning: () => {
+      const usage = getStorageUsage();
+      if (usage.percentage > 90) return 'critical';
+      if (usage.percentage > 70) return 'warning';
+      return 'normal';
+    },
+
+    // Failed chunks and retry functionality
+    failedChunks: state.failedChunks,
+    retryCount: state.retryCount,
+    retryFailedChunks,
+    
+    // Utility functions
+    hasFailedChunks: () => state.failedChunks.length > 0
   };
 }
