@@ -94,34 +94,37 @@ export function SaveFormDialog({ open, onClose, formData, language, defaultTitle
       queryClient.invalidateQueries({ queryKey: ["/api/saved-forms", "copy"] });
       queryClient.invalidateQueries({ queryKey: ["/api/recent-patients"] });
 
-      // Create recent patient entry
-      const patientName = formData.patientName || title;
-      if (patientName) {
-        try {
-          await fetch("/api/recent-patients", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-              patientName,
-              visitType: formType === 'draft' ? 'draft' : 'new',
-              formType: 'cnesst-medical',
-              formData: {
-                age: formData.age,
-                gender: formData.gender,
-                dateEvaluation: formData.dateEvaluation,
-                patientName: formData.patientName
-              },
-              savedFormId: savedForm.id,
-              patientAge: formData.age,
-              patientGender: formData.gender,
-              diagnosis: formData.diagnosticsCnesst
-            })
-          });
-        } catch (error) {
-          console.error('Failed to create recent patient entry:', error);
-          // Don't show error to user as this is a background operation
+      // Create recent patient entry using modular service
+      try {
+        const { extractPatientData, createRecentPatientPayload, validatePatientData, generatePatientTitle } = await import('@/lib/patient-service');
+        
+        const patientData = extractPatientData(formData, formType);
+        if (patientData) {
+          const validation = validatePatientData(patientData);
+          if (validation.isValid) {
+            const payload = createRecentPatientPayload(patientData, savedForm.id, formData);
+            
+            const response = await fetch("/api/recent-patients", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Patient creation failed: ${response.status}`);
+            }
+            
+            console.log('Recent patient created successfully for:', patientData.patientName);
+          } else {
+            console.warn('Patient data validation failed:', validation.errors);
+          }
+        } else {
+          console.warn('Could not extract patient data from form');
         }
+      } catch (error) {
+        console.error('Failed to create recent patient entry:', error);
+        // Don't show error to user as this is a background operation
       }
 
       const successMessage = formType === 'draft' ? t.successDraft : t.successCopy;

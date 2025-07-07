@@ -51,6 +51,8 @@ const formSchema = z.object({
   // Section 4: Identification
   patientName: z.string().optional(),
   age: z.string().optional(),
+  dateEvaluation: z.string().optional(),
+  patientGender: z.string().optional(),
   dominance: z.string().optional(),
   emploi: z.string().optional(),
   
@@ -804,8 +806,10 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
 À la fin de l'entrevue, nous avons demandé́ à si elle avait d'autres commentaires ou informations à nous divulguer. Cette dernière nous a répondu par la négative.`,
       
       // Section 4: Identification
-      patientName: "",
+      patientName: visitName || "",
       age: "",
+      dateEvaluation: new Date().toLocaleDateString('fr-CA'),
+      patientGender: "",
       dominance: "",
       emploi: "",
       
@@ -2461,6 +2465,52 @@ At the end of the interview, we asked if she had any other comments or informati
                               placeholder={language === 'fr' ? 'Nom complet du patient' : 'Full patient name'}
                               className="w-full"
                             />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Date d'évaluation */}
+                    <FormField
+                      control={form.control}
+                      name="dateEvaluation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{language === 'fr' ? 'Date d\'évaluation' : 'Evaluation Date'}</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field}
+                              type="date"
+                              className="w-full"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Genre du patient */}
+                    <FormField
+                      control={form.control}
+                      name="patientGender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{language === 'fr' ? 'Genre' : 'Gender'}</FormLabel>
+                          <FormControl>
+                            <Select 
+                              value={field.value} 
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setSelectedGender(value as 'male' | 'female');
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={language === 'fr' ? 'Sélectionner le genre' : 'Select gender'} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="male">{language === 'fr' ? 'Masculin' : 'Male'}</SelectItem>
+                                <SelectItem value="female">{language === 'fr' ? 'Féminin' : 'Female'}</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </FormControl>
                         </FormItem>
                       )}

@@ -21,7 +21,10 @@ export const medicalForms = pgTable("medical_forms", {
   modaliteEntrevue: text("modalite_entrevue"),
 
   // Section 4: Identification
+  patientName: text("patient_name"),
   age: text("age"),
+  dateEvaluation: text("date_evaluation"),
+  patientGender: text("patient_gender"),
   dominance: text("dominance"),
   emploi: text("emploi"),
 
