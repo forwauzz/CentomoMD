@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -147,9 +147,9 @@ export function VisitSelectionModal({
           <DialogTitle className="text-xl font-semibold text-gray-900">
             {showNameInput ? t.nameVisit : t.title} - {formTitle}
           </DialogTitle>
-          <p className="text-gray-600 mt-2">
+          <DialogDescription className="text-gray-600 mt-2">
             {showNameInput ? t.nameVisitDesc : t.subtitle}
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         {showNameInput ? (
