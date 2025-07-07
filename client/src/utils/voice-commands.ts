@@ -118,12 +118,23 @@ export function processVoiceCommands(transcript: string): CommandProcessingResul
   const sortedCommands = commands.sort((a, b) => b.trigger.length - a.trigger.length);
 
   for (const command of sortedCommands) {
-    const triggerPattern = new RegExp(
-      `\\b${escapeRegExp(command.trigger)}\\b`,
-      'gi'
-    );
+    // More flexible pattern matching for voice commands
+    // Use word boundaries when appropriate, but allow for more flexible matching
+    const trigger = command.trigger.toLowerCase();
+    const lowerProcessedText = processedText.toLowerCase();
+    
+    console.log(`🔍 Testing command: "${command.trigger}" against transcript`);
 
-    if (triggerPattern.test(processedText)) {
+    // Check if the trigger exists in the text (case-insensitive)
+    if (lowerProcessedText.includes(trigger)) {
+      console.log(`✅ Command matched: "${command.trigger}"`);
+      
+      // Find and replace with case-insensitive matching
+      const triggerPattern = new RegExp(
+        escapeRegExp(command.trigger),
+        'gi'
+      );
+      
       // Mark the replacement text to protect it from AI modification
       const protectedReplacement = `${TEMPLATE_START}${command.replacement}${TEMPLATE_END}`;
       
