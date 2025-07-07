@@ -41,7 +41,7 @@ async function backupSessionToLocal(sessionData: any) {
     console.log("🔍 DEBUG: Sending to 192.168.2.11:3000...");
 
     const response = await fetch(
-      "http://192.168.2.11:3000/save-complete-session",
+      "http://192.168.2.11:3000/backup-session",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
