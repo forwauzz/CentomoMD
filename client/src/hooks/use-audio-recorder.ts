@@ -125,10 +125,32 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
         const result = await processAudioChunk(chunk);
         results.push(result);
         
+        // Create progressive transcript and save backup
+        const progressiveTranscript = results.map(r => r.text).join(' ').trim();
+        
+        // CRITICAL: Save transcript backup immediately after each chunk
+        const backupData = {
+          sessionId: sessionIdRef.current,
+          transcript: progressiveTranscript,
+          chunkIndex: i + 1,
+          totalChunks: chunks.length,
+          timestamp: Date.now(),
+          language: language,
+          isProcessing: true
+        };
+        
+        try {
+          sessionStorage.setItem('dictation_transcript_backup', JSON.stringify(backupData));
+          localStorage.setItem('dictation_emergency_backup', JSON.stringify(backupData));
+          console.log(`💾 Saved transcript backup: chunk ${i + 1}/${chunks.length}, ${progressiveTranscript.length} chars`);
+        } catch (error) {
+          console.warn('Failed to save transcript backup:', error);
+        }
+        
         // Update progress
         updateState({ 
           currentChunkIndex: i + 1,
-          transcript: results.map(r => r.text).join(' ').trim()
+          transcript: progressiveTranscript
         });
       }
       
@@ -375,6 +397,26 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     console.log('⏸️ Pausing audio recording...');
     
     try {
+      // CRITICAL: Save current state before pausing to prevent data loss
+      const pauseBackupData = {
+        sessionId: sessionIdRef.current,
+        transcript: state.transcript,
+        chunks: state.chunks.length,
+        recordingDuration: state.recordingDuration,
+        timestamp: Date.now(),
+        language: language,
+        isPaused: true,
+        action: 'pause'
+      };
+      
+      try {
+        sessionStorage.setItem('dictation_pause_backup', JSON.stringify(pauseBackupData));
+        localStorage.setItem('dictation_emergency_backup', JSON.stringify(pauseBackupData));
+        console.log(`💾 Saved pause backup: ${state.transcript.length} chars, ${state.chunks.length} chunks`);
+      } catch (error) {
+        console.warn('Failed to save pause backup:', error);
+      }
+      
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.pause();
       }
@@ -393,14 +435,14 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
       }
       
       updateState({ isPaused: true });
-      console.log('⏸️ Recording paused successfully');
+      console.log('⏸️ Recording paused successfully with backup saved');
     } catch (error) {
       console.error('❌ Failed to pause recording:', error);
       updateState({ 
         error: error instanceof Error ? error.message : 'Failed to pause recording'
       });
     }
-  }, [state.isRecording, state.isPaused, updateState]);
+  }, [state.isRecording, state.isPaused, state.transcript, state.chunks, state.recordingDuration, language, updateState]);
 
   // Resume recording
   const resumeRecording = useCallback(() => {
@@ -443,8 +485,32 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     }
   }, [state.isRecording, state.isPaused, chunkDuration, updateState]);
 
-  // Reset state
+  // Reset state with data preservation
   const reset = useCallback(() => {
+    console.log('🔄 Resetting audio recorder with data preservation...');
+    
+    // CRITICAL: Save current state before reset to prevent data loss
+    if (state.transcript || state.chunks.length > 0) {
+      const resetBackupData = {
+        sessionId: sessionIdRef.current,
+        transcript: state.transcript,
+        chunks: state.chunks.length,
+        recordingDuration: state.recordingDuration,
+        timestamp: Date.now(),
+        language: language,
+        action: 'reset',
+        preservedData: true
+      };
+      
+      try {
+        sessionStorage.setItem('dictation_reset_backup', JSON.stringify(resetBackupData));
+        localStorage.setItem('dictation_emergency_backup', JSON.stringify(resetBackupData));
+        console.log(`💾 Saved reset backup: ${state.transcript.length} chars before clearing`);
+      } catch (error) {
+        console.warn('Failed to save reset backup:', error);
+      }
+    }
+    
     if (state.isRecording) {
       stopRecording();
     }
@@ -463,7 +529,9 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
       isProcessing: false,
       isPaused: false
     });
-  }, [state.isRecording, stopRecording, updateState]);
+    
+    console.log('🔄 Reset completed with backup preserved');
+  }, [state.isRecording, state.transcript, state.chunks, state.recordingDuration, language, stopRecording, updateState]);
 
   return {
     // State

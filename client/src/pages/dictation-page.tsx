@@ -180,7 +180,7 @@ export default function DictationPage({
   const WARNING_DURATION = 20 * 60; // Warning at 20 minutes
   const MAX_RECOMMENDED = 30 * 60; // Suggest break at 30 minutes
 
-  // Initialize with activeField and language from sessionStorage
+  // Initialize with activeField and language from sessionStorage + DATA RECOVERY
   useEffect(() => {
     const activeField = sessionStorage.getItem("activeField");
     const storedLanguage = sessionStorage.getItem("dictationLanguage") as
@@ -238,12 +238,60 @@ export default function DictationPage({
       }
     }
 
+    // CRITICAL: Check for lost dictation data and offer recovery
+    const checkForLostData = () => {
+      const backupKeys = [
+        'dictation_transcript_backup',
+        'dictation_pause_backup', 
+        'dictation_reset_backup',
+        'dictation_emergency_backup'
+      ];
+      
+      for (const key of backupKeys) {
+        const backupData = sessionStorage.getItem(key) || localStorage.getItem(key);
+        if (backupData) {
+          try {
+            const data = JSON.parse(backupData);
+            // Check if backup is recent (within 5 minutes) and has content
+            const isRecent = data.timestamp && (Date.now() - data.timestamp) < 300000;
+            const hasContent = data.transcript && data.transcript.length > 10;
+            
+            if (isRecent && hasContent) {
+              console.log(`🔄 Found dictation backup (${key}): ${data.transcript.length} chars`);
+              
+              // Show recovery option to user
+              toast({
+                title: currentLanguage === "fr" ? "Récupération de données" : "Data Recovery",
+                description: currentLanguage === "fr" 
+                  ? `Dictée récupérée: ${data.transcript.length} caractères`
+                  : `Recovered dictation: ${data.transcript.length} characters`,
+                variant: "default",
+              });
+              
+              // Auto-restore the content
+              setFinalText(data.transcript);
+              setEditableText(data.transcript);
+              
+              // Clear the backup after successful recovery
+              sessionStorage.removeItem(key);
+              break;
+            }
+          } catch (error) {
+            console.warn(`Failed to parse backup data from ${key}:`, error);
+          }
+        }
+      }
+    };
+    
+    // Check for lost data after component initialization
+    setTimeout(checkForLostData, 500);
+
     const timer = setTimeout(() => {
       setIsInitializing(false);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [currentLanguage, toast]);
 
   const {
     isRecording: isListening,
@@ -294,6 +342,27 @@ export default function DictationPage({
       }
     };
   }, [isListening, isPaused, sessionStartTime]);
+
+  // CRITICAL: Auto-save transcript to prevent data loss
+  useEffect(() => {
+    if (transcript && transcript.length > 0) {
+      const autoSaveData = {
+        transcript: transcript,
+        section: selectedSection,
+        timestamp: Date.now(),
+        language: currentLanguage,
+        source: 'auto-save'
+      };
+      
+      try {
+        sessionStorage.setItem('dictation_auto_save', JSON.stringify(autoSaveData));
+        localStorage.setItem('dictation_emergency_backup', JSON.stringify(autoSaveData));
+        console.log(`💾 Auto-saved transcript: ${transcript.length} chars`);
+      } catch (error) {
+        console.warn('Failed to auto-save transcript:', error);
+      }
+    }
+  }, [transcript, selectedSection, currentLanguage]);
 
   // NEW: Auto-chunking logic - triggers every 4 minutes
   useEffect(() => {
@@ -592,6 +661,25 @@ export default function DictationPage({
   };
 
   const handleClearText = () => {
+    // CRITICAL: Save before clearing to prevent accidental data loss
+    if (finalText && finalText.length > 10) {
+      const clearBackupData = {
+        transcript: finalText,
+        section: selectedSection,
+        timestamp: Date.now(),
+        language: currentLanguage,
+        action: 'clear-backup'
+      };
+      
+      try {
+        sessionStorage.setItem('dictation_clear_backup', JSON.stringify(clearBackupData));
+        localStorage.setItem('dictation_emergency_backup', JSON.stringify(clearBackupData));
+        console.log(`💾 Saved clear backup: ${finalText.length} chars before clearing`);
+      } catch (error) {
+        console.warn('Failed to save clear backup:', error);
+      }
+    }
+    
     setFinalText("");
     setInterimText("");
 
