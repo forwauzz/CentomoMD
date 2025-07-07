@@ -21,6 +21,7 @@ const TEMPLATE_END = '___TEMPLATE_END___';
 
 // Default voice commands for medical practice
 const DEFAULT_COMMANDS: VoiceCommand[] = [
+  // English commands
   {
     trigger: "insert physical exam",
     replacement: "Physical examination reveals normal gait and posture. Patient appears comfortable and in no acute distress. Vital signs are stable and within normal limits.",
@@ -40,6 +41,37 @@ const DEFAULT_COMMANDS: VoiceCommand[] = [
     trigger: "insert normal vitals",
     replacement: "Vital signs: Blood pressure 120/80 mmHg, Heart rate 72 bpm regular, Respiratory rate 16 breaths per minute, Temperature 98.6°F (37°C), Oxygen saturation 98% on room air.",
     category: "vitals"
+  },
+  // French commands for Quebec medical practice
+  {
+    trigger: "insérer examen physique",
+    replacement: "L'examen physique révèle une démarche et une posture normales. Le patient semble à l'aise et ne présente aucune détresse aiguë. Les signes vitaux sont stables et dans les limites normales.",
+    category: "examen"
+  },
+  {
+    trigger: "insérer neuro normal",
+    replacement: "Examen neurologique : Alerte et orienté x3. Nerfs crâniens II-XII intacts. Force motrice 5/5 partout. Réflexes tendineux profonds 2+ et symétriques. Aucun déficit neurologique focal noté.",
+    category: "examen"
+  },
+  {
+    trigger: "insérer suivi",
+    replacement: "Le patient est conseillé de suivre dans 2-4 semaines ou plus tôt si les symptômes s'aggravent. Les précautions de retour ont été discutées. Le patient a verbalisé sa compréhension.",
+    category: "instructions"
+  },
+  {
+    trigger: "insérer signes vitaux",
+    replacement: "Signes vitaux : Tension artérielle 120/80 mmHg, Fréquence cardiaque 72 bpm régulière, Fréquence respiratoire 16 respirations par minute, Température 37°C, Saturation en oxygène 98% à l'air ambiant.",
+    category: "vitaux"
+  },
+  {
+    trigger: "insérer examen genou",
+    replacement: "Examen du genou : Inspection révèle absence d'œdème, d'ecchymose ou de déformation. Palpation normale. Amplitude de mouvement complète. Manœuvres ligamentaires négatives. Ménisques intacts.",
+    category: "orthopédie"
+  },
+  {
+    trigger: "insérer douleur chronique",
+    replacement: "Douleur chronique bien contrôlée avec médication actuelle. Patient rapporte amélioration fonctionnelle. Aucun effet secondaire significatif des médicaments rapporté.",
+    category: "douleur"
   }
 ];
 

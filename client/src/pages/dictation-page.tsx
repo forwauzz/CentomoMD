@@ -1,4 +1,6 @@
 import { enhanceVoiceInput } from "../utils/voice-enhancement";
+import { processTranscriptWithCommands } from "../utils/medical-context";
+import { VoiceCommandsManager } from "../components/voice-commands-manager";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +24,7 @@ import {
   Clock,
   Pause,
   Play,
+  Settings,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -363,6 +366,44 @@ export default function DictationPage({
       }
     }
   }, [transcript, selectedSection, currentLanguage]);
+
+  // VOICE COMMANDS PROCESSING: Apply voice commands and medical enhancement
+  useEffect(() => {
+    if (transcript && transcript.length > 0) {
+      console.log(`🎙️ Processing transcript with voice commands: ${transcript.length} chars`);
+      
+      try {
+        // Process voice commands and medical enhancements
+        const result = processTranscriptWithCommands(transcript, currentLanguage);
+        
+        // Update final text with processed result
+        setFinalText(result.finalText);
+        setEditableText(result.finalText);
+        
+        // Log processing results
+        if (result.commandsUsed.length > 0) {
+          console.log(`✅ Applied ${result.commandsUsed.length} voice commands:`, result.commandsUsed);
+          toast({
+            title: currentLanguage === "fr" ? "Commandes vocales appliquées" : "Voice commands applied",
+            description: currentLanguage === "fr" 
+              ? `${result.commandsUsed.length} commandes traitées` 
+              : `${result.commandsUsed.length} commands processed`,
+            variant: "default",
+          });
+        }
+        
+        if (result.medicalCorrections > 0) {
+          console.log(`🏥 Applied ${result.medicalCorrections} medical corrections`);
+        }
+        
+      } catch (error) {
+        console.error('Voice commands processing failed:', error);
+        // Fallback to original transcript
+        setFinalText(transcript);
+        setEditableText(transcript);
+      }
+    }
+  }, [transcript, currentLanguage, toast]);
 
   // NEW: Auto-chunking logic - triggers every 4 minutes
   useEffect(() => {
@@ -995,6 +1036,9 @@ export default function DictationPage({
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Voice Commands Manager */}
+              <VoiceCommandsManager language={currentLanguage} />
             </div>
           </div>
         </div>
