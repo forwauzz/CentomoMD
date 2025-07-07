@@ -38,13 +38,18 @@ async function backupSessionToLocal(sessionData: any) {
   console.log("🔍 DEBUG: Attempting backup...", sessionData.id);
 
   try {
-    console.log("🔍 DEBUG: Sending to 192.168.2.11:3000...");
+    console.log(
+      "🔍 DEBUG: Sending to https://60b0-76-66-187-191.ngrok-free.app...",
+    );
 
     const response = await fetch(
-      "http://192.168.2.11:3000/backup-session",
+      "https://60b0-76-66-187-191.ngrok-free.app/backup-session",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true"
+        },
         body: JSON.stringify(sessionData),
         signal: AbortSignal.timeout(15000),
       },
