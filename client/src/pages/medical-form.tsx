@@ -2013,6 +2013,21 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
               </Button>
             </div>
             
+            {/* Patient Name Display */}
+            {form.watch('patientName') && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-blue-700">
+                    {language === 'fr' ? 'Dossier patient:' : 'Patient file:'}
+                  </span>
+                  <span className="text-sm font-bold text-blue-900">
+                    {form.watch('patientName')}
+                  </span>
+                </div>
+              </div>
+            )}
+            
             {/* Section A: Renseignements sur le travailleur (Static) */}
             <CollapsibleSection id="section1" title={t.sectionA}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
