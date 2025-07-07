@@ -106,6 +106,14 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **January 7, 2025**: **Critical Voice Commands System Fix** - Resolved major issue where voice commands were not being triggered during dictation
+  - Enhanced French pattern matching to handle article variations ("l'", "le", "les", "des")
+  - Added verb conjugation support (insérer/insérez/ajouter/ajoutez)
+  - Implemented medical terminology synonyms (signes vitaux ↔ constantes normales)
+  - Fixed case-insensitive matching for natural speech patterns
+  - Added comprehensive debug logging and testing functionality
+  - Created voice commands audit system with pattern validation
+  - Fixed core issue where "Insérez l'examen physique" wasn't matching "insérer examen physique"
 - **July 5, 2025**: **Critical Backend Stability Improvements** - Fixed app startup failures and enhanced Whisper system reliability
   - Created missing `recent_patients` database table resolving "relation does not exist" errors
   - Added comprehensive Whisper API retry logic with exponential backoff (3 retries, 1-10 second delays)

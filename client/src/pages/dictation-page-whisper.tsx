@@ -29,6 +29,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { processTranscriptWithCommands } from "@/utils/medical-context";
+import { testVoiceCommands } from "@/utils/voice-commands";
 import { VoiceCommandsManager } from "@/components/voice-commands-manager";
 import { Badge } from "@/components/ui/badge";
 
@@ -668,6 +669,29 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                 {t.finalText}
                 <div className="flex flex-wrap gap-2">
                   <VoiceCommandsManager language={currentLanguage} />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const testText = "Insérez l'examen physique. Insérez les constantes normales. Insérez le suivi.";
+                      const testResult = testVoiceCommands(testText);
+                      console.log("🧪 Voice Commands Test Results:", testResult);
+                      
+                      // Process the test text to see actual output
+                      const processedResult = processTranscriptWithCommands(testText, currentLanguage);
+                      setEditableText(processedResult.finalText);
+                      
+                      toast({
+                        title: currentLanguage === "fr" ? "Test des commandes vocales" : "Voice commands test",
+                        description: currentLanguage === "fr" 
+                          ? `${processedResult.commandsUsed.length} commandes appliquées: ${processedResult.commandsUsed.join(', ')}`
+                          : `${processedResult.commandsUsed.length} commands applied: ${processedResult.commandsUsed.join(', ')}`,
+                        variant: processedResult.commandsUsed.length > 0 ? "default" : "destructive",
+                      });
+                    }}
+                  >
+                    🧪 Test
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

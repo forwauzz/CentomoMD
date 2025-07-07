@@ -118,20 +118,17 @@ export function processVoiceCommands(transcript: string): CommandProcessingResul
   const sortedCommands = commands.sort((a, b) => b.trigger.length - a.trigger.length);
 
   for (const command of sortedCommands) {
-    // More flexible pattern matching for voice commands
-    // Use word boundaries when appropriate, but allow for more flexible matching
-    const trigger = command.trigger.toLowerCase();
-    const lowerProcessedText = processedText.toLowerCase();
-    
     console.log(`🔍 Testing command: "${command.trigger}" against transcript`);
 
-    // Check if the trigger exists in the text (case-insensitive)
-    if (lowerProcessedText.includes(trigger)) {
-      console.log(`✅ Command matched: "${command.trigger}"`);
+    // Enhanced pattern matching for French voice commands
+    const matched = matchVoiceCommand(command.trigger, processedText);
+    
+    if (matched.isMatch) {
+      console.log(`✅ Command matched: "${command.trigger}" (pattern: "${matched.pattern}")`);
       
-      // Find and replace with case-insensitive matching
+      // Use the matched pattern for replacement
       const triggerPattern = new RegExp(
-        escapeRegExp(command.trigger),
+        escapeRegExp(matched.pattern),
         'gi'
       );
       
@@ -233,6 +230,94 @@ export function validateCommandTrigger(trigger: string, existingCommands: VoiceC
   return { isValid: true };
 }
 
+// Enhanced voice command matching with French language support
+function matchVoiceCommand(trigger: string, text: string): { isMatch: boolean; pattern?: string } {
+  const lowerText = text.toLowerCase();
+  const lowerTrigger = trigger.toLowerCase();
+  
+  // Direct match first
+  if (lowerText.includes(lowerTrigger)) {
+    return { isMatch: true, pattern: findExactMatch(trigger, text) };
+  }
+  
+  // Handle French article variations and verb conjugations
+  const variations = generateFrenchVariations(lowerTrigger);
+  
+  for (const variation of variations) {
+    if (lowerText.includes(variation)) {
+      const exactMatch = findExactMatch(variation, text);
+      if (exactMatch) {
+        return { isMatch: true, pattern: exactMatch };
+      }
+    }
+  }
+  
+  return { isMatch: false };
+}
+
+// Generate French language variations for voice commands
+function generateFrenchVariations(trigger: string): string[] {
+  const variations: string[] = [trigger];
+  
+  // Handle verb conjugations: insérer <-> insérez
+  if (trigger.includes('insérer')) {
+    variations.push(trigger.replace('insérer', 'insérez'));
+    variations.push(trigger.replace('insérer', 'ajouter'));
+    variations.push(trigger.replace('insérer', 'ajoutez'));
+  }
+  
+  // Handle article variations: no article <-> l' <-> le <-> les
+  const articleVariations = [
+    { from: ' examen', to: " l'examen" },
+    { from: ' examen', to: ' un examen' },
+    { from: ' suivi', to: ' le suivi' },
+    { from: ' suivi', to: ' un suivi' },
+    { from: ' signes vitaux', to: ' les signes vitaux' },
+    { from: ' signes vitaux', to: ' des signes vitaux' },
+    { from: ' constantes normales', to: ' les constantes normales' },
+    { from: ' constantes normales', to: ' des constantes normales' }
+  ];
+  
+  for (const variation of [...variations]) {
+    for (const article of articleVariations) {
+      if (variation.includes(article.from)) {
+        variations.push(variation.replace(article.from, article.to));
+      }
+    }
+  }
+  
+  // Handle medical terminology synonyms
+  const synonyms = [
+    { from: 'signes vitaux', to: 'constantes normales' },
+    { from: 'constantes normales', to: 'signes vitaux' },
+    { from: 'constantes', to: 'signes vitaux' },
+    { from: 'vitales', to: 'signes vitaux' }
+  ];
+  
+  for (const variation of [...variations]) {
+    for (const synonym of synonyms) {
+      if (variation.includes(synonym.from)) {
+        variations.push(variation.replace(synonym.from, synonym.to));
+      }
+    }
+  }
+  
+  return [...new Set(variations)]; // Remove duplicates
+}
+
+// Find exact match in text preserving case
+function findExactMatch(pattern: string, text: string): string | null {
+  const lowerPattern = pattern.toLowerCase();
+  const lowerText = text.toLowerCase();
+  
+  const index = lowerText.indexOf(lowerPattern);
+  if (index !== -1) {
+    return text.substring(index, index + pattern.length);
+  }
+  
+  return null;
+}
+
 // Escape special regex characters
 function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -263,4 +348,53 @@ export function importVoiceCommands(jsonData: string): { success: boolean; error
   } catch (error) {
     return { success: false, error: "Invalid JSON format" };
   }
+}
+
+// Test voice commands system - for debugging and validation
+export function testVoiceCommands(testTranscript: string): {
+  results: Array<{
+    command: string;
+    matched: boolean;
+    pattern?: string;
+    variations: string[];
+  }>;
+  summary: {
+    totalCommands: number;
+    matchedCommands: number;
+    successRate: number;
+  };
+} {
+  const commands = loadVoiceCommands();
+  const results = [];
+  let matchedCount = 0;
+  
+  console.log(`🧪 Testing voice commands against: "${testTranscript}"`);
+  
+  for (const command of commands) {
+    const variations = generateFrenchVariations(command.trigger.toLowerCase());
+    const matched = matchVoiceCommand(command.trigger, testTranscript);
+    
+    if (matched.isMatch) {
+      matchedCount++;
+    }
+    
+    results.push({
+      command: command.trigger,
+      matched: matched.isMatch,
+      pattern: matched.pattern,
+      variations: variations
+    });
+    
+    console.log(`${matched.isMatch ? '✅' : '❌'} "${command.trigger}" - Variations: ${variations.length}`);
+  }
+  
+  const summary = {
+    totalCommands: commands.length,
+    matchedCommands: matchedCount,
+    successRate: Math.round((matchedCount / commands.length) * 100)
+  };
+  
+  console.log(`📊 Test Summary: ${matchedCount}/${commands.length} commands matched (${summary.successRate}%)`);
+  
+  return { results, summary };
 }
