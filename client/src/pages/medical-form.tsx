@@ -6307,6 +6307,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
             <DialogTitle>
               {language === 'fr' ? 'Formulaires sauvegardés' : 'Saved Forms'}
             </DialogTitle>
+            <DialogDescription>
+              {language === 'fr' ? 'Gérez vos formulaires sauvegardés' : 'Manage your saved forms'}
+            </DialogDescription>
           </DialogHeader>
           <SavedFormsManager
             language={language}
@@ -6323,6 +6326,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
             <DialogTitle>
               {language === 'fr' ? 'Brouillons' : 'Drafts'}
             </DialogTitle>
+            <DialogDescription>
+              {language === 'fr' ? 'Gérez vos brouillons de formulaires' : 'Manage your draft forms'}
+            </DialogDescription>
           </DialogHeader>
           <SavedFormsManager
             language={language}
@@ -6339,6 +6345,9 @@ La collaboration offerte est optimale, pour les fins d'examen Madame est vêtue 
             <DialogTitle>
               {language === 'fr' ? 'Copies sauvegardées' : 'Saved Copies'}
             </DialogTitle>
+            <DialogDescription>
+              {language === 'fr' ? 'Gérez vos copies de formulaires' : 'Manage your form copies'}
+            </DialogDescription>
           </DialogHeader>
           <SavedFormsManager
             language={language}
