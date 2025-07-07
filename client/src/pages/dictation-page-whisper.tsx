@@ -673,21 +673,34 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const testText = "Insérez l'examen physique. Insérez les constantes normales. Insérez le suivi.";
-                      const testResult = testVoiceCommands(testText);
-                      console.log("🧪 Voice Commands Test Results:", testResult);
+                      // Test both default and any custom commands
+                      const testTexts = [
+                        "Insérez l'examen physique. Insérez les constantes normales. Insérez le suivi.",
+                        "Ajoutez l'examen physique. Insérer un diagnostic. Ajouter les résultats."
+                      ];
                       
-                      // Process the test text to see actual output
-                      const processedResult = processTranscriptWithCommands(testText, currentLanguage);
-                      setEditableText(processedResult.finalText);
+                      const allResults = testTexts.map(testText => {
+                        const processedResult = processTranscriptWithCommands(testText, currentLanguage);
+                        console.log(`🧪 Testing: "${testText}" → Commands used: ${processedResult.commandsUsed.length}`);
+                        return processedResult;
+                      });
+                      
+                      // Use the first test for display
+                      const mainResult = allResults[0];
+                      setEditableText(mainResult.finalText);
+                      
+                      const totalCommands = allResults.reduce((sum, result) => sum + result.commandsUsed.length, 0);
+                      const allCommandsUsed = allResults.flatMap(result => result.commandsUsed);
                       
                       toast({
                         title: currentLanguage === "fr" ? "Test des commandes vocales" : "Voice commands test",
                         description: currentLanguage === "fr" 
-                          ? `${processedResult.commandsUsed.length} commandes appliquées: ${processedResult.commandsUsed.join(', ')}`
-                          : `${processedResult.commandsUsed.length} commands applied: ${processedResult.commandsUsed.join(', ')}`,
-                        variant: processedResult.commandsUsed.length > 0 ? "default" : "destructive",
+                          ? `${totalCommands} commandes détectées. Voir console pour détails.`
+                          : `${totalCommands} commands detected. Check console for details.`,
+                        variant: totalCommands > 0 ? "default" : "destructive",
                       });
+                      
+                      console.log("🧪 All Commands Used:", [...new Set(allCommandsUsed)]);
                     }}
                   >
                     🧪 Test
