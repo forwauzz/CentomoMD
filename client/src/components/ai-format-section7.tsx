@@ -164,6 +164,13 @@ export function AIFormatSection7({ value, onValueChange, language }: AIFormatSec
       });
     } catch (error) {
       console.error('Copy error:', error);
+      toast({
+        title: language === 'fr' ? "Erreur" : "Error",
+        description: language === 'fr'
+          ? "Impossible de copier dans le presse-papiers."
+          : "Failed to copy to clipboard.",
+        variant: "destructive",
+      });
     }
   };
 
