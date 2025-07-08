@@ -49,6 +49,7 @@ export function RecentPatients({ language, onPatientSelect, collapsed = false }:
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
+  const [switchingPatient, setSwitchingPatient] = useState<number | null>(null);
   const locale = language === 'fr' ? fr : enUS;
   const t = translations[language];
 
@@ -91,7 +92,10 @@ export function RecentPatients({ language, onPatientSelect, collapsed = false }:
 
   const handlePatientSelect = (patient: any) => {
     try {
-      // Navigate to form with patient context
+      // Set loading state for visual feedback
+      setSwitchingPatient(patient.id);
+      
+      // Immediately navigate without waiting for any async operations
       if (patient.savedFormId) {
         // Load the saved form
         setLocation(`/forms/cnesst-medical?draft=${patient.savedFormId}`);
@@ -100,24 +104,31 @@ export function RecentPatients({ language, onPatientSelect, collapsed = false }:
         setLocation(`/forms/cnesst-medical?visit=new&name=${encodeURIComponent(patient.patientName)}`);
       }
       
-      // Update last accessed time
-      fetch("/api/recent-patients/access", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ patientName: patient.patientName }),
-      }).catch(error => {
-        console.warn('Failed to update patient access time:', error);
-        // Don't block navigation for this non-critical operation
-      });
+      // Clear loading state after navigation
+      setTimeout(() => {
+        setSwitchingPatient(null);
+      }, 200);
+      
+      // Update last accessed time in background (non-blocking)
+      setTimeout(() => {
+        fetch("/api/recent-patients/access", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ patientName: patient.patientName }),
+        }).catch(error => {
+          console.warn('Failed to update patient access time:', error);
+        });
+      }, 0);
 
       if (onPatientSelect) {
         onPatientSelect(patient);
       }
     } catch (error) {
       console.error('Error switching to patient:', error);
+      setSwitchingPatient(null);
       toast({
         title: t.error,
         description: "Failed to switch to selected patient",
@@ -184,7 +195,11 @@ export function RecentPatients({ language, onPatientSelect, collapsed = false }:
               {recentPatients.map((patient: any) => (
                 <div
                   key={patient.id}
-                  className="flex items-start justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group"
+                  className={`flex items-start justify-between p-3 rounded-lg transition-colors cursor-pointer group ${
+                    switchingPatient === patient.id 
+                      ? 'bg-blue-100 border border-blue-300' 
+                      : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
                   onClick={() => handlePatientSelect(patient)}
                 >
                   <div className="flex-1 min-w-0">

@@ -592,30 +592,39 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   // Helper function for seamless patient switching
   const switchToPatient = async (patientName: string, isNewVisit: boolean = false, draftId?: number) => {
     try {
-      // Clear previous patient data
-      clearData();
-      
-      // Reset form and UI state
-      form.reset();
-      setSelectedGender(null);
-      setShowGenderWarning(false);
-      setGenderInconsistencies([]);
-      
-      // Set patient name if provided
+      // Immediately update UI with patient name for instant feedback
       if (patientName) {
         form.setValue('patientName', patientName);
       }
       
-      // Load draft if specified
-      if (draftId) {
-        await loadDraftForm(draftId);
-      }
-      
-      // Update status
+      // Update status immediately
       const statusMessage = isNewVisit 
         ? `${language === 'fr' ? 'Nouvelle visite' : 'New visit'}: ${patientName}`
         : `${language === 'fr' ? 'Patient chargé' : 'Patient loaded'}: ${patientName}`;
       setLastSaved(statusMessage);
+      
+      // Clear previous patient data asynchronously
+      setTimeout(() => {
+        clearData();
+        
+        // Reset form and UI state
+        const currentName = form.getValues('patientName');
+        form.reset();
+        
+        // Restore patient name after reset
+        if (currentName) {
+          form.setValue('patientName', currentName);
+        }
+        
+        setSelectedGender(null);
+        setShowGenderWarning(false);
+        setGenderInconsistencies([]);
+        
+        // Load draft if specified
+        if (draftId) {
+          loadDraftForm(draftId);
+        }
+      }, 50);
       
       console.log('Successfully switched to patient:', patientName);
     } catch (error) {
