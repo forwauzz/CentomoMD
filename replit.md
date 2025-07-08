@@ -106,6 +106,14 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **January 7, 2025**: **Custom Verbatim Commands System** - Added user-configurable verbatim triggers for specialized medical content
+  - Created verbatim commands manager with CRUD operations for custom medical triggers
+  - Implemented default medical verbatim commands: "rapport radiologique", "citation patient", "spécifications techniques", "résultats laboratoire"
+  - Added English equivalents: "radiology report", "patient quote", "technical specifications", "lab results"
+  - Enhanced verbatim processing pipeline to handle custom triggers before standard verbatim markers
+  - Added visual indicators showing custom verbatim usage with trigger names and categories
+  - Integrated with existing voice commands system maintaining full backward compatibility
+  - **Use case**: Quebec healthcare providers can now create custom verbatim triggers like "diagnostic médical" → "fin diagnostic" for specialized content preservation
 - **January 7, 2025**: **Verbatim Input Design Implementation Complete** - Added comprehensive verbatim mode for preserving exact medical content without AI modification
   - Implemented voice commands for verbatim sections: "ouvrir/fermer parenthèse" (French) and "open/close parenthesis" (English)
   - Created verbatim processing pipeline that completely bypasses AI enhancement for protected content

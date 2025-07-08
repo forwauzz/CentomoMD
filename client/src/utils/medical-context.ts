@@ -9,6 +9,10 @@ import {
   hasProtectedRegions,
   type CommandProcessingResult 
 } from './voice-commands';
+import { 
+  processVerbatimCommands,
+  type VerbatimCommandProcessingResult 
+} from './verbatim-commands';
 
 interface MedicalCorrection {
   pattern: RegExp;
@@ -196,7 +200,7 @@ export function restoreVerbatimSections(
   return finalText;
 }
 
-// Enhanced text processing: Voice Commands → Verbatim Protection → Medical Enhancement
+// Enhanced text processing: Custom Verbatim → Standard Verbatim → Voice Commands → Medical Enhancement
 export function processTranscriptWithCommands(
   transcript: string,
   language: 'fr' | 'en' = 'fr'
@@ -207,6 +211,8 @@ export function processTranscriptWithCommands(
   confidence: number;
   verbatimSections: string[];
   hasVerbatim: boolean;
+  customVerbatimUsed: boolean;
+  verbatimTriggers: string[];
 } {
   if (!transcript.trim()) {
     return {
@@ -215,17 +221,22 @@ export function processTranscriptWithCommands(
       medicalCorrections: 0,
       confidence: 0,
       verbatimSections: [],
-      hasVerbatim: false
+      hasVerbatim: false,
+      customVerbatimUsed: false,
+      verbatimTriggers: []
     };
   }
 
-  // Step 1: Process verbatim sections first (handles "open/close parenthesis")
-  const verbatimResult = processVerbatimSections(transcript);
+  // Step 1: Process custom verbatim commands first (handles "rapport radiologique", etc.)
+  const customVerbatimResult = processVerbatimCommands(transcript, language);
   
-  // Step 2: Separate protected (template) and unprotected (user) regions
+  // Step 2: Process standard verbatim sections (handles "open/close parenthesis")
+  const verbatimResult = processVerbatimSections(customVerbatimResult.processedText);
+  
+  // Step 3: Separate protected (template) and unprotected (user) regions
   const { regions } = separateProtectedRegions(verbatimResult.processedText);
   
-  // Step 3: Apply medical enhancement only to unprotected regions
+  // Step 4: Apply medical enhancement only to unprotected regions
   let finalText = '';
   let totalCorrections = 0;
   
@@ -241,21 +252,33 @@ export function processTranscriptWithCommands(
     }
   }
   
-  // Step 4: Restore verbatim sections (bypass AI enhancement)
-  const textWithVerbatim = restoreVerbatimSections(finalText, verbatimResult.verbatimSections);
+  // Step 5: Restore all verbatim sections (bypass AI enhancement)
+  const textWithVerbatim = restoreVerbatimSections(finalText, [
+    ...customVerbatimResult.verbatimSections,
+    ...verbatimResult.verbatimSections
+  ]);
   
-  // Step 5: Remove template markers to get clean final text
+  // Step 6: Remove template markers to get clean final text
   const cleanText = unmarkTemplates(textWithVerbatim);
   
-  // Step 6: Calculate confidence
+  // Step 7: Calculate confidence
   const confidence = calculateTranscriptConfidence(transcript, cleanText, totalCorrections);
+  
+  // Combine all commands used
+  const allCommandsUsed = [
+    ...(customVerbatimResult.customVerbatimUsed ? ['custom-verbatim'] : []),
+    ...(verbatimResult.processedText.includes('___VERBATIM_') ? ['verbatim'] : []),
+    ...processVoiceCommands(transcript).commandsUsed
+  ];
   
   return {
     finalText: cleanText,
-    commandsUsed: [...(verbatimResult.processedText.includes('___VERBATIM_') ? ['verbatim'] : []), ...processVoiceCommands(transcript).commandsUsed],
+    commandsUsed: allCommandsUsed,
     medicalCorrections: totalCorrections,
     confidence,
-    verbatimSections: verbatimResult.verbatimSections,
-    hasVerbatim: verbatimResult.hasVerbatim
+    verbatimSections: [...customVerbatimResult.verbatimSections, ...verbatimResult.verbatimSections],
+    hasVerbatim: verbatimResult.hasVerbatim || customVerbatimResult.customVerbatimUsed,
+    customVerbatimUsed: customVerbatimResult.customVerbatimUsed,
+    verbatimTriggers: customVerbatimResult.verbatimTriggers
   };
 }

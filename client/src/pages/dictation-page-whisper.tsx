@@ -31,6 +31,7 @@ import { Progress } from "@/components/ui/progress";
 import { processTranscriptWithCommands } from "@/utils/medical-context";
 import { testVoiceCommands } from "@/utils/voice-commands";
 import { VoiceCommandsManager } from "@/components/voice-commands-manager";
+import { VerbatimCommandsManager } from "@/components/verbatim-commands-manager";
 import { Badge } from "@/components/ui/badge";
 
 interface DictationPageProps {
@@ -114,6 +115,8 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
   const [returnToSection, setReturnToSection] = useState<string | null>(null);
   const [verbatimSections, setVerbatimSections] = useState<string[]>([]);
   const [hasVerbatim, setHasVerbatim] = useState<boolean>(false);
+  const [customVerbatimUsed, setCustomVerbatimUsed] = useState<boolean>(false);
+  const [verbatimTriggers, setVerbatimTriggers] = useState<string[]>([]);
 
   const { toast } = useToast();
   const t = translations[currentLanguage];
@@ -184,6 +187,8 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
         // Update verbatim state
         setVerbatimSections(result.verbatimSections || []);
         setHasVerbatim(result.hasVerbatim || false);
+        setCustomVerbatimUsed(result.customVerbatimUsed || false);
+        setVerbatimTriggers(result.verbatimTriggers || []);
         
         // Show feedback if commands were used
         if (result.commandsUsed.length > 0) {
@@ -681,12 +686,22 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                   {hasVerbatim && (
                     <div className="col-span-2">
                       <div className="text-muted-foreground text-xs mb-1">{t.verbatimSections}</div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">
                           📝 {verbatimSections.length} {t.verbatimCount}
                         </Badge>
+                        {customVerbatimUsed && (
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
+                            🔧 Custom
+                          </Badge>
+                        )}
                         <span className="text-xs text-yellow-600">{t.verbatimActive}</span>
                       </div>
+                      {verbatimTriggers.length > 0 && (
+                        <div className="mt-1 text-xs text-blue-600">
+                          {currentLanguage === "fr" ? "Déclencheurs:" : "Triggers:"} {verbatimTriggers.join(", ")}
+                        </div>
+                      )}
                     </div>
                   )}
                   {/* Storage Usage Monitor */}
@@ -780,6 +795,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                 {t.finalText}
                 <div className="flex flex-wrap gap-2">
                   <VoiceCommandsManager language={currentLanguage} />
+                  <VerbatimCommandsManager language={currentLanguage} />
                   <Button
                     variant="outline"
                     size="sm"
@@ -788,12 +804,20 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                       const testTexts = [
                         "Insérez l'examen physique. Ouvrir parenthèse. Radiographie normale. Fermer parenthèse. Insérez le suivi.",
                         "Insert physical exam. Open parenthesis. X-ray shows normal findings. Close parenthesis. Insert follow up.",
+                        "Rapport radiologique. Radiographie thoracique révèle opacités bilatérales. Fin rapport. Texte normal continue.",
+                        "Citation patient. Je ressens une douleur lancinante. Fin citation. Diagnostic établi.",
                         "Commencer verbatim. Section verbatim complète. Terminer verbatim. Texte normal continue."
                       ];
                       
                       const allResults = testTexts.map(testText => {
                         const processedResult = processTranscriptWithCommands(testText, currentLanguage);
-                        console.log(`🧪 Testing: "${testText}" → Commands used: ${processedResult.commandsUsed.length}`);
+                        console.log(`🧪 Testing: "${testText}"`);
+                        console.log(`   → Commands used: ${processedResult.commandsUsed.length} (${processedResult.commandsUsed.join(', ')})`);
+                        console.log(`   → Verbatim sections: ${processedResult.verbatimSections.length}`);
+                        console.log(`   → Custom verbatim: ${processedResult.customVerbatimUsed}`);
+                        if (processedResult.verbatimTriggers.length > 0) {
+                          console.log(`   → Verbatim triggers: ${processedResult.verbatimTriggers.join(', ')}`);
+                        }
                         return processedResult;
                       });
                       
@@ -802,17 +826,22 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                       setEditableText(mainResult.finalText);
                       
                       const totalCommands = allResults.reduce((sum, result) => sum + result.commandsUsed.length, 0);
-                      const allCommandsUsed = allResults.flatMap(result => result.commandsUsed);
+                      const totalVerbatim = allResults.reduce((sum, result) => sum + result.verbatimSections.length, 0);
+                      const customVerbatimCount = allResults.filter(result => result.customVerbatimUsed).length;
                       
                       toast({
-                        title: currentLanguage === "fr" ? "Test des commandes vocales" : "Voice commands test",
+                        title: currentLanguage === "fr" ? "Test des commandes vocales et verbatim" : "Voice and verbatim commands test",
                         description: currentLanguage === "fr" 
-                          ? `${totalCommands} commandes détectées. Voir console pour détails.`
-                          : `${totalCommands} commands detected. Check console for details.`,
-                        variant: totalCommands > 0 ? "default" : "destructive",
+                          ? `${totalCommands} commandes, ${totalVerbatim} sections verbatim (${customVerbatimCount} personnalisées). Voir console.`
+                          : `${totalCommands} commands, ${totalVerbatim} verbatim sections (${customVerbatimCount} custom). Check console.`,
+                        variant: totalCommands > 0 || totalVerbatim > 0 ? "default" : "destructive",
                       });
                       
-                      console.log("🧪 All Commands Used:", [...new Set(allCommandsUsed)]);
+                      console.log("🧪 Summary:");
+                      console.log(`   → Total commands: ${totalCommands}`);
+                      console.log(`   → Total verbatim sections: ${totalVerbatim}`);
+                      console.log(`   → Custom verbatim tests: ${customVerbatimCount}`);
+                      console.log(`   → All commands used: [${[...new Set(allResults.flatMap(r => r.commandsUsed))].join(', ')}]`);
                     }}
                   >
                     🧪 Test
