@@ -90,27 +90,39 @@ export function RecentPatients({ language, onPatientSelect, collapsed = false }:
   });
 
   const handlePatientSelect = (patient: any) => {
-    // Navigate to form with patient context
-    if (patient.savedFormId) {
-      // Load the saved form
-      setLocation(`/forms/cnesst-medical?draft=${patient.savedFormId}`);
-    } else {
-      // Start new visit with patient name
-      setLocation(`/forms/cnesst-medical?visit=new&name=${encodeURIComponent(patient.patientName)}`);
-    }
-    
-    // Update last accessed time
-    fetch("/api/recent-patients/access", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ patientName: patient.patientName }),
-    });
+    try {
+      // Navigate to form with patient context
+      if (patient.savedFormId) {
+        // Load the saved form
+        setLocation(`/forms/cnesst-medical?draft=${patient.savedFormId}`);
+      } else {
+        // Start new visit with patient name
+        setLocation(`/forms/cnesst-medical?visit=new&name=${encodeURIComponent(patient.patientName)}`);
+      }
+      
+      // Update last accessed time
+      fetch("/api/recent-patients/access", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ patientName: patient.patientName }),
+      }).catch(error => {
+        console.warn('Failed to update patient access time:', error);
+        // Don't block navigation for this non-critical operation
+      });
 
-    if (onPatientSelect) {
-      onPatientSelect(patient);
+      if (onPatientSelect) {
+        onPatientSelect(patient);
+      }
+    } catch (error) {
+      console.error('Error switching to patient:', error);
+      toast({
+        title: t.error,
+        description: "Failed to switch to selected patient",
+        variant: "destructive",
+      });
     }
   };
 

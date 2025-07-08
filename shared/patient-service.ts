@@ -87,10 +87,36 @@ export function validatePatientData(patientData: PatientData): { isValid: boolea
     errors.push('Invalid gender value');
   }
 
+  // Validate visit type consistency
+  if (!['new', 'follow-up', 'draft'].includes(patientData.visitType)) {
+    errors.push('Invalid visit type');
+  }
+
+  // Validate form type
+  if (!patientData.formType || patientData.formType.trim().length === 0) {
+    errors.push('Form type is required');
+  }
+
   return {
     isValid: errors.length === 0,
     errors
   };
+}
+
+/**
+ * Clean up previous patient session data
+ */
+export function cleanupPreviousPatientSession(): void {
+  // Clear any lingering patient-specific session data
+  sessionStorage.removeItem('currentPatientId');
+  sessionStorage.removeItem('currentPatientName');
+  sessionStorage.removeItem('patientFormDirty');
+  
+  // Clear auto-save data that might be patient-specific
+  localStorage.removeItem('centMD_formData');
+  localStorage.removeItem('medical-form-autosave');
+  
+  console.log('Previous patient session data cleaned up');
 }
 
 /**

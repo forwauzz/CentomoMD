@@ -549,7 +549,7 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const urlParams = new URLSearchParams(window.location.search);
   const isNewVisit = urlParams.get('visit') === 'new';
   const draftId = urlParams.get('draft');
-  const visitName = urlParams.get('name');
+  const visitName = urlParams.get('name') ? decodeURIComponent(urlParams.get('name')!) : null;
   const [lastSaved, setLastSaved] = useState<string>("Non sauvegardé");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveFormType, setSaveFormType] = useState<'draft' | 'copy'>('copy');
@@ -589,6 +589,45 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
   const queryClient = useQueryClient();
 
   // Function to load a specific draft form
+  // Helper function for seamless patient switching
+  const switchToPatient = async (patientName: string, isNewVisit: boolean = false, draftId?: number) => {
+    try {
+      // Clear previous patient data
+      clearData();
+      
+      // Reset form and UI state
+      form.reset();
+      setSelectedGender(null);
+      setShowGenderWarning(false);
+      setGenderInconsistencies([]);
+      
+      // Set patient name if provided
+      if (patientName) {
+        form.setValue('patientName', patientName);
+      }
+      
+      // Load draft if specified
+      if (draftId) {
+        await loadDraftForm(draftId);
+      }
+      
+      // Update status
+      const statusMessage = isNewVisit 
+        ? `${language === 'fr' ? 'Nouvelle visite' : 'New visit'}: ${patientName}`
+        : `${language === 'fr' ? 'Patient chargé' : 'Patient loaded'}: ${patientName}`;
+      setLastSaved(statusMessage);
+      
+      console.log('Successfully switched to patient:', patientName);
+    } catch (error) {
+      console.error('Error switching to patient:', error);
+      toast({
+        title: language === 'fr' ? 'Erreur' : 'Error',
+        description: language === 'fr' ? 'Erreur lors du changement de patient' : 'Error switching patient',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const loadDraftForm = async (id: number) => {
     try {
       const response = await fetch(`/api/saved-forms/${id}`, { credentials: 'include' });
@@ -596,6 +635,13 @@ export default function MedicalForm({ language, onLanguageChange }: MedicalFormP
         const draftData = await response.json();
         if (draftData.formData) {
           form.reset(draftData.formData);
+          
+          // Restore gender state if available
+          const savedGender = draftData.formData.patientGender;
+          if (savedGender && (savedGender === 'male' || savedGender === 'female')) {
+            setSelectedGender(savedGender);
+          }
+          
           setLastSaved(`${language === 'fr' ? 'Brouillon chargé' : 'Draft loaded'}: ${draftData.title}`);
         }
       } else {
@@ -1066,7 +1112,11 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
         sessionStorage.removeItem('highlightField');
       }
       
-      form.reset(); // Reset to completely blank form
+      // Reset form state and gender selection for new patient
+      form.reset();
+      setSelectedGender(null);
+      setShowGenderWarning(false);
+      setGenderInconsistencies([]);
       
       // Set appropriate status message with visit name if provided
       const statusMessage = visitName 
@@ -1083,6 +1133,11 @@ L'entrevue s'est effectuée cordialement, la patiente participait pleinement à 
       const savedData = loadData();
       if (savedData) {
         form.reset(savedData);
+        // Restore gender state if available
+        const savedGender = savedData.patientGender;
+        if (savedGender && (savedGender === 'male' || savedGender === 'female')) {
+          setSelectedGender(savedGender);
+        }
         setLastSaved('Données récupérées');
       }
     }
