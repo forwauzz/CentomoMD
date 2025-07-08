@@ -42,6 +42,29 @@ const DEFAULT_COMMANDS: VoiceCommand[] = [
     replacement: "Vital signs: Blood pressure 120/80 mmHg, Heart rate 72 bpm regular, Respiratory rate 16 breaths per minute, Temperature 98.6°F (37°C), Oxygen saturation 98% on room air.",
     category: "vitals"
   },
+  
+  // Verbatim commands - English
+  {
+    trigger: "open parenthesis",
+    replacement: "___VERBATIM_START___",
+    category: "verbatim"
+  },
+  {
+    trigger: "close parenthesis", 
+    replacement: "___VERBATIM_END___",
+    category: "verbatim"
+  },
+  {
+    trigger: "start verbatim",
+    replacement: "___VERBATIM_START___",
+    category: "verbatim"
+  },
+  {
+    trigger: "end verbatim",
+    replacement: "___VERBATIM_END___",
+    category: "verbatim"
+  },
+  
   // French commands for Quebec medical practice
   {
     trigger: "insérer examen physique",
@@ -72,6 +95,48 @@ const DEFAULT_COMMANDS: VoiceCommand[] = [
     trigger: "insérer douleur chronique",
     replacement: "Douleur chronique bien contrôlée avec médication actuelle. Patient rapporte amélioration fonctionnelle. Aucun effet secondaire significatif des médicaments rapporté.",
     category: "douleur"
+  },
+  
+  // Commandes verbatim - French
+  {
+    trigger: "ouvrir parenthèse",
+    replacement: "___VERBATIM_START___",
+    category: "verbatim"
+  },
+  {
+    trigger: "fermer parenthèse",
+    replacement: "___VERBATIM_END___",
+    category: "verbatim"
+  },
+  {
+    trigger: "ouvrir parenthese",  // Alternative spelling without accent
+    replacement: "___VERBATIM_START___",
+    category: "verbatim"
+  },
+  {
+    trigger: "fermer parenthese",  // Alternative spelling without accent
+    replacement: "___VERBATIM_END___",
+    category: "verbatim"
+  },
+  {
+    trigger: "commencer verbatim",
+    replacement: "___VERBATIM_START___",
+    category: "verbatim"
+  },
+  {
+    trigger: "terminer verbatim",
+    replacement: "___VERBATIM_END___",
+    category: "verbatim"
+  },
+  {
+    trigger: "début verbatim",
+    replacement: "___VERBATIM_START___",
+    category: "verbatim"
+  },
+  {
+    trigger: "fin verbatim",
+    replacement: "___VERBATIM_END___",
+    category: "verbatim"
   }
 ];
 

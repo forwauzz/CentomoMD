@@ -142,7 +142,61 @@ export function calculateTranscriptConfidence(
   return Math.max(0.5, lengthScore - correctionPenalty * 0.3);
 }
 
-// Comprehensive text processing: Voice Commands → Medical Enhancement
+// Verbatim sections processing - handles "open/close parenthesis" voice commands
+export function processVerbatimSections(transcript: string): {
+  processedText: string;
+  hasVerbatim: boolean;
+  verbatimSections: string[];
+  verbatimCount: number;
+} {
+  if (!transcript.trim()) {
+    return {
+      processedText: transcript,
+      hasVerbatim: false,
+      verbatimSections: [],
+      verbatimCount: 0
+    };
+  }
+
+  // First process voice commands to convert triggers to markers
+  const commandResult = processVoiceCommands(transcript);
+  let text = commandResult.processedText;
+  
+  // Find and protect verbatim sections
+  const verbatimRegex = /___VERBATIM_START___(.*?)___VERBATIM_END___/gs;
+  const verbatimSections: string[] = [];
+  
+  text = text.replace(verbatimRegex, (match, content) => {
+    const trimmedContent = content.trim();
+    verbatimSections.push(trimmedContent);
+    // Use a different marker to distinguish from template protection
+    return ` ___VERBATIM_PROTECTED_${verbatimSections.length - 1}___ `;
+  });
+  
+  return {
+    processedText: text,
+    hasVerbatim: verbatimSections.length > 0,
+    verbatimSections,
+    verbatimCount: verbatimSections.length
+  };
+}
+
+// Restore verbatim sections after AI processing
+export function restoreVerbatimSections(
+  processedText: string, 
+  verbatimSections: string[]
+): string {
+  let finalText = processedText;
+  
+  verbatimSections.forEach((section, index) => {
+    const marker = `___VERBATIM_PROTECTED_${index}___`;
+    finalText = finalText.replace(marker, section);
+  });
+  
+  return finalText;
+}
+
+// Enhanced text processing: Voice Commands → Verbatim Protection → Medical Enhancement
 export function processTranscriptWithCommands(
   transcript: string,
   language: 'fr' | 'en' = 'fr'
@@ -151,21 +205,25 @@ export function processTranscriptWithCommands(
   commandsUsed: string[];
   medicalCorrections: number;
   confidence: number;
+  verbatimSections: string[];
+  hasVerbatim: boolean;
 } {
   if (!transcript.trim()) {
     return {
       finalText: transcript,
       commandsUsed: [],
       medicalCorrections: 0,
-      confidence: 0
+      confidence: 0,
+      verbatimSections: [],
+      hasVerbatim: false
     };
   }
 
-  // Step 1: Process voice commands first (preserves positioning)
-  const commandResult = processVoiceCommands(transcript);
+  // Step 1: Process verbatim sections first (handles "open/close parenthesis")
+  const verbatimResult = processVerbatimSections(transcript);
   
   // Step 2: Separate protected (template) and unprotected (user) regions
-  const { regions } = separateProtectedRegions(commandResult.processedText);
+  const { regions } = separateProtectedRegions(verbatimResult.processedText);
   
   // Step 3: Apply medical enhancement only to unprotected regions
   let finalText = '';
@@ -183,16 +241,21 @@ export function processTranscriptWithCommands(
     }
   }
   
-  // Step 4: Remove template markers to get clean final text
-  const cleanText = unmarkTemplates(finalText);
+  // Step 4: Restore verbatim sections (bypass AI enhancement)
+  const textWithVerbatim = restoreVerbatimSections(finalText, verbatimResult.verbatimSections);
   
-  // Step 5: Calculate confidence
+  // Step 5: Remove template markers to get clean final text
+  const cleanText = unmarkTemplates(textWithVerbatim);
+  
+  // Step 6: Calculate confidence
   const confidence = calculateTranscriptConfidence(transcript, cleanText, totalCorrections);
   
   return {
     finalText: cleanText,
-    commandsUsed: commandResult.commandsUsed,
+    commandsUsed: [...(verbatimResult.processedText.includes('___VERBATIM_') ? ['verbatim'] : []), ...processVoiceCommands(transcript).commandsUsed],
     medicalCorrections: totalCorrections,
-    confidence
+    confidence,
+    verbatimSections: verbatimResult.verbatimSections,
+    hasVerbatim: verbatimResult.hasVerbatim
   };
 }

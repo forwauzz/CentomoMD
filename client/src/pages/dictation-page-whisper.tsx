@@ -48,6 +48,9 @@ const translations = {
     pauseRecording: "Pause",
     resumeRecording: "Reprendre",
     copyText: "Copier le texte",
+    verbatimSections: "Sections Verbatim",
+    verbatimActive: "Mode Verbatim Actif",
+    verbatimCount: "sections",
     clearText: "Effacer le texte",
     saveToSection: "Sauvegarder dans la section",
     backToForm: "Retour au formulaire",
@@ -76,6 +79,9 @@ const translations = {
     clearText: "Clear text",
     saveToSection: "Save to section",
     backToForm: "Back to form",
+    verbatimSections: "Verbatim Sections",
+    verbatimActive: "Verbatim Mode Active",
+    verbatimCount: "sections",
     editText: "Edit text",
     recordingTime: "Recording time",
     chunks: "Chunks",
@@ -106,6 +112,8 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
   const [currentLanguage, setCurrentLanguage] = useState<"fr" | "en">(propLanguage);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [returnToSection, setReturnToSection] = useState<string | null>(null);
+  const [verbatimSections, setVerbatimSections] = useState<string[]>([]);
+  const [hasVerbatim, setHasVerbatim] = useState<boolean>(false);
 
   const { toast } = useToast();
   const t = translations[currentLanguage];
@@ -173,10 +181,18 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
         const result = processTranscriptWithCommands(transcript, currentLanguage);
         setEditableText(result.finalText);
         
+        // Update verbatim state
+        setVerbatimSections(result.verbatimSections || []);
+        setHasVerbatim(result.hasVerbatim || false);
+        
         // Show feedback if commands were used
         if (result.commandsUsed.length > 0) {
+          const commandTypes = result.commandsUsed.includes('verbatim') 
+            ? (currentLanguage === "fr" ? "Commandes vocales et verbatim appliquées" : "Voice commands and verbatim applied")
+            : (currentLanguage === "fr" ? "Commandes vocales appliquées" : "Voice commands applied");
+            
           toast({
-            title: currentLanguage === "fr" ? "Commandes vocales appliquées" : "Voice commands applied",
+            title: commandTypes,
             description: currentLanguage === "fr" 
               ? `${result.commandsUsed.length} commande(s) traitée(s): ${result.commandsUsed.join(', ')}`
               : `${result.commandsUsed.length} command(s) processed: ${result.commandsUsed.join(', ')}`,
@@ -661,6 +677,18 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                     <div className="text-muted-foreground">{t.chunks}</div>
                     <div className="font-mono">{chunkCount}</div>
                   </div>
+                  {/* Verbatim Sections Indicator */}
+                  {hasVerbatim && (
+                    <div className="col-span-2">
+                      <div className="text-muted-foreground text-xs mb-1">{t.verbatimSections}</div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                          📝 {verbatimSections.length} {t.verbatimCount}
+                        </Badge>
+                        <span className="text-xs text-yellow-600">{t.verbatimActive}</span>
+                      </div>
+                    </div>
+                  )}
                   {/* Storage Usage Monitor */}
                   <div className="col-span-2 mt-2">
                     <div className="text-muted-foreground text-xs mb-1">
@@ -758,8 +786,9 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                     onClick={() => {
                       // Test both default and any custom commands
                       const testTexts = [
-                        "Insérez l'examen physique. Insérez les constantes normales. Insérez le suivi.",
-                        "Ajoutez l'examen physique. Insérer un diagnostic. Ajouter les résultats."
+                        "Insérez l'examen physique. Ouvrir parenthèse. Radiographie normale. Fermer parenthèse. Insérez le suivi.",
+                        "Insert physical exam. Open parenthesis. X-ray shows normal findings. Close parenthesis. Insert follow up.",
+                        "Commencer verbatim. Section verbatim complète. Terminer verbatim. Texte normal continue."
                       ];
                       
                       const allResults = testTexts.map(testText => {
@@ -815,12 +844,38 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                 onChange={(e) => setEditableText(e.target.value)}
                 placeholder={
                   currentLanguage === "fr"
-                    ? "Le texte transcrit apparaîtra ici après traitement..."
-                    : "Transcribed text will appear here after processing..."
+                    ? "Le texte transcrit apparaîtra ici. Utilisez 'ouvrir parenthèse' et 'fermer parenthèse' pour le mode verbatim..."
+                    : "Transcribed text will appear here. Use 'open parenthesis' and 'close parenthesis' for verbatim mode..."
                 }
                 className="min-h-[300px] max-h-[60vh] resize-none font-mono text-sm overflow-y-auto"
                 disabled={isProcessing}
               />
+              
+              {/* Verbatim sections preview */}
+              {hasVerbatim && verbatimSections.length > 0 && (
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <h4 className="text-sm font-medium text-yellow-800 mb-2 flex items-center gap-1">
+                    📝 {t.verbatimSections} ({verbatimSections.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {verbatimSections.map((section, index) => (
+                      <div 
+                        key={index}
+                        className="text-xs bg-white p-2 rounded border-l-4 border-yellow-400"
+                      >
+                        <span className="text-yellow-600 font-mono">#{index + 1}:</span>{" "}
+                        <span className="text-gray-700">{section.substring(0, 150)}{section.length > 150 ? '...' : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-2">
+                    {currentLanguage === "fr" 
+                      ? "Ces sections ne seront pas modifiées par l'IA"
+                      : "These sections will not be modified by AI"
+                    }
+                  </p>
+                </div>
+              )}
               
               {editableText && (
                 <div className="mt-4 flex justify-end">
