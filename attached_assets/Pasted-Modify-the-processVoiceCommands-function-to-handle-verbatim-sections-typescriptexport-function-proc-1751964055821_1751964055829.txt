@@ -1,0 +1,86 @@
+Modify the processVoiceCommands function to handle verbatim sections:
+typescriptexport function processVerbatimSections(transcript: string): {
+  processedText: string;
+  hasVerbatim: boolean;
+  verbatimSections: string[];
+} {
+  // First process voice commands to convert triggers to markers
+  const commandResult = processVoiceCommands(transcript);
+  let text = commandResult.processedText;
+  
+  // Find and protect verbatim sections
+  const verbatimRegex = /___VERBATIM_START___(.*?)___VERBATIM_END___/gs;
+  const verbatimSections: string[] = [];
+  
+  text = text.replace(verbatimRegex, (match, content) => {
+    verbatimSections.push(content.trim());
+    // Use a different marker to distinguish from template protection
+    return `___VERBATIM_PROTECTED_${verbatimSections.length - 1}___`;
+  });
+  
+  return {
+    processedText: text,
+    hasVerbatim: verbatimSections.length > 0,
+    verbatimSections
+  };
+}
+3. AI Processing Bypass
+Update your AI enhancement functions to skip verbatim sections:
+typescript// In ai-formatter.ts, modify the enhancement logic
+export async function enhanceTranscriptWithVerbatim(
+  transcript: string,
+  language: string = "fr"
+): Promise<string> {
+  // Extract verbatim sections first
+  const verbatimResult = processVerbatimSections(transcript);
+  
+  if (!verbatimResult.hasVerbatim) {
+    // No verbatim sections, process normally
+    return enhanceTranscript(transcript, language);
+  }
+  
+  // Only enhance the non-verbatim parts
+  const enhancedText = await enhanceTranscript(verbatimResult.processedText, language);
+  
+  // Restore verbatim sections without modification
+  let finalText = enhancedText;
+  verbatimResult.verbatimSections.forEach((section, index) => {
+    finalText = finalText.replace(
+      `___VERBATIM_PROTECTED_${index}___`,
+      section
+    );
+  });
+  
+  return finalText;
+}
+4. User Workflow
+Dr. Centomo would dictate like this:
+"The patient presented with shoulder pain. Open parenthesis. 
+Radiological findings show mild osteoarthritic changes in the 
+acromioclavicular joint with no evidence of rotator cuff tear 
+or impingement syndrome. Close parenthesis. Treatment plan 
+includes physical therapy."
+Result:
+
+"The patient presented with shoulder pain." → AI enhanced
+Radiology report section → Inserted verbatim, no AI formatting
+"Treatment plan includes physical therapy." → AI enhanced
+
+5. Visual Indicators
+Add UI indicators to show verbatim sections:
+typescript// In your transcript display component
+function renderTranscriptWithVerbatim(text: string) {
+  return text.replace(
+    /___VERBATIM_START___(.*?)___VERBATIM_END___/gs,
+    '<span class="verbatim-section bg-yellow-100 border-l-4 border-yellow-400 px-2">📝 $1</span>'
+  );
+}
+6. Implementation Steps
+
+Add verbatim voice commands to your existing DEFAULT_COMMANDS
+Create processVerbatimSections function alongside existing voice command processing
+Modify AI enhancement pipeline to call enhanceTranscriptWithVerbatim instead of direct enhancement
+Update UI components to show verbatim sections with visual distinction
+Test the complete workflow with radiology reports and other verbatim content
+
+This approach leverages your existing voice commands architecture while adding the bypass mechanism Dr. Centomo needs for precise radiology reports and other content that must remain unmodified by AI.
