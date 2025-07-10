@@ -257,6 +257,7 @@ INSTRUCTIONS SPÉCIALISÉES:
 - Utilise EXCLUSIVEMENT "Le travailleur" ou "La travailleuse" (jamais "Le patient")
 - STRUCTURE OBLIGATOIRE: Commence chaque entrée par "Le travailleur/La travailleuse [ACTION]" puis ajoute la date
 - Format: "Le travailleur consulte le docteur [Nom], le [date]." (PAS "Le [date], le travailleur...")
+- CRITÈRE OBLIGATOIRE: JAMAIS commencer par une date - TOUJOURS commencer par "Le travailleur"
 - Préserve TOUTE la terminologie médicale spécialisée
 - Maintiens les citations exactes entre guillemets « ... »
 - Structure en paragraphes par consultation/procédure
@@ -276,6 +277,7 @@ VARIATION OBLIGATOIRE - ÉVITE LA RÉPÉTITION MÉCANIQUE:
 - ALTERNE les structures de phrases pour créer un flow naturel
 - STRUCTURE TRAVAILLEUR-PREMIÈRE: TOUJOURS "Le travailleur [verbe] le docteur [Nom], le [date]"
 - JAMAIS "Le [date], le travailleur..." - TOUJOURS "Le travailleur [action], le [date]"
+- INTERDICTION ABSOLUE: Ne jamais commencer une phrase par "Le 23 octobre 2022," ou toute autre date
 - ÉVITE absolument de répéter la même formulation dans un même document
 - ADAPTE le vocabulaire selon le contexte (première consultation = "consulte", suivi = "revoit")
 
@@ -294,6 +296,18 @@ TERMINOLOGIE SPÉCIALISÉE QUÉBÉCOISE:
 
 EXEMPLES DE FORMAT AUTHENTIQUE:
 ${SECTION_7_SAMPLE}
+
+EXEMPLE DÉTAILLÉ DE STRUCTURE OBLIGATOIRE:
+INCORRECT: "Le 23 octobre 2022, le travailleur consulte le docteur Nicolas Bussière."
+CORRECT: "Le travailleur consulte le docteur Nicolas Bussière, le 23 octobre 2022."
+
+INCORRECT: "Le 5 novembre 2022, le travailleur rencontre le docteur Marc Boudreau."
+CORRECT: "Le travailleur rencontre le docteur Marc Boudreau, le 5 novembre 2022."
+
+INCORRECT: "Le 19 novembre 2022, le travailleur consulte le docteur Lalavie."
+CORRECT: "Le travailleur consulte le docteur Lalavie, le 19 novembre 2022."
+
+STRUCTURE ABSOLUMENT REQUISE: "Le travailleur [ACTION] le docteur [NOM], le [DATE]."
 
 Réponds uniquement avec le texte formaté selon ces standards stricts, sans explications.`
         : `You are a medical expert assistant that formats medical report texts according to professional Quebec standards.
