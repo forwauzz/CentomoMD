@@ -34,27 +34,30 @@ import {
 import type { UploadedFile } from "express-fileupload";
 import "./types";
 // Add this after your existing imports, around line 10
-async function backupSessionToLocal(sessionData: any) {
-  console.log("🔍 DEBUG: Attempting backup...", sessionData.id);
+    async function backupSessionToLocal(sessionData: any) {
+      console.log("🔍 DEBUG: Attempting backup...", sessionData.id);
 
-  try {
-    console.log(
-      "🔍 DEBUG: Sending to https://60b0-76-66-187-191.ngrok-free.app...",
-    );
+      try {
+        console.log(
+          "🔍 DEBUG: Sending to https://c9c415ce6135.ngrok-free.app/save-complete-session..."
+        );
 
-    const response = await fetch(
-      "https://60b0-76-66-187-191.ngrok-free.app/backup-session",
-      {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true"
-        },
-        body: JSON.stringify(sessionData),
-        signal: AbortSignal.timeout(15000),
-      },
-    );
+        const response = await fetch(
+          "https://c9c415ce6135.ngrok-free.app/save-complete-session",
+        );
 
+        console.log("🔍 DEBUG: Response status:", response.status);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`💾 Backup successful: ${result.sessionId}`);
+        } else {
+          console.warn("Backup server responded with error:", response.status);
+        }
+      } catch (error) {
+        console.warn("🔍 DEBUG: Backup failed:", error.message);
+      }
+    }
     console.log("🔍 DEBUG: Response status:", response.status);
 
     if (response.ok) {
