@@ -255,7 +255,8 @@ export async function formatSection7Text(
 INSTRUCTIONS SPÉCIALISÉES:
 - Formate le texte brut fourni selon le style de la Section 7 "Historique de faits et évolution"
 - Utilise EXCLUSIVEMENT "Le travailleur" ou "La travailleuse" (jamais "Le patient")
-- Format chronologique strict avec dates précises (format: "le [jour] [mois] [année]")
+- STRUCTURE OBLIGATOIRE: Commence chaque entrée par "Le travailleur/La travailleuse [ACTION]" puis ajoute la date
+- Format: "Le travailleur consulte le docteur [Nom], le [date]." (PAS "Le [date], le travailleur...")
 - Préserve TOUTE la terminologie médicale spécialisée
 - Maintiens les citations exactes entre guillemets « ... »
 - Structure en paragraphes par consultation/procédure
@@ -273,7 +274,8 @@ INSTRUCTIONS SPÉCIALISÉES:
 VARIATION OBLIGATOIRE - ÉVITE LA RÉPÉTITION MÉCANIQUE:
 - VARIE les verbes de consultation: "consulte", "rencontre", "revoit", "obtient un rendez-vous avec", "se présente chez"
 - ALTERNE les structures de phrases pour créer un flow naturel
-- UTILISE différentes introductions temporelles: "Le [date]", "En date du [date]", "Lors de la consultation du [date]"
+- STRUCTURE TRAVAILLEUR-PREMIÈRE: TOUJOURS "Le travailleur [verbe] le docteur [Nom], le [date]"
+- JAMAIS "Le [date], le travailleur..." - TOUJOURS "Le travailleur [action], le [date]"
 - ÉVITE absolument de répéter la même formulation dans un même document
 - ADAPTE le vocabulaire selon le contexte (première consultation = "consulte", suivi = "revoit")
 

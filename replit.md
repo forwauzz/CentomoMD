@@ -106,6 +106,12 @@ The application follows a full-stack TypeScript architecture with a modular form
 4. **Static Assets**: Served from Express with Vite middleware in development
 
 ## Recent Changes
+- **January 10, 2025**: **Medical Formatting Structure Enhancement** - Updated AI formatter system to use "Le travailleur/La travailleuse" structure instead of date-first format
+  - Modified system prompts in ai-formatter.ts and ai-formatter-enhanced.ts to prioritize worker-first sentence structure
+  - Enhanced formatting instructions: "Le travailleur consulte le docteur [Nom], le [date]" instead of "Le [date], le travailleur..."
+  - Updated variation guidelines to maintain consistent Quebec healthcare documentation standards
+  - Preserved all existing medical terminology and content accuracy while improving structural compliance
+  - **Use case**: Quebec healthcare providers now get properly formatted medical histories matching professional documentation standards
 - **January 7, 2025**: **Custom Verbatim Commands System** - Added user-configurable verbatim triggers for specialized medical content
   - Created verbatim commands manager with CRUD operations for custom medical triggers
   - Implemented default medical verbatim commands: "rapport radiologique", "citation patient", "spécifications techniques", "résultats laboratoire"
