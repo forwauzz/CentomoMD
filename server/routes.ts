@@ -1,4 +1,3 @@
-// Add this with your other imports at the top
 import { randomUUID } from "crypto";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
@@ -33,31 +32,27 @@ import {
 } from "./whisper-service";
 import type { UploadedFile } from "express-fileupload";
 import "./types";
-// Add this after your existing imports, around line 10
-    async function backupSessionToLocal(sessionData: any) {
-      console.log("🔍 DEBUG: Attempting backup...", sessionData.id);
 
-      try {
-        console.log(
-          "🔍 DEBUG: Sending to https://c9c415ce6135.ngrok-free.app/save-complete-session..."
-        );
+// Backup function for session data
+async function backupSessionToLocal(sessionData: any) {
+  console.log("🔍 DEBUG: Attempting backup...", sessionData.id);
 
-        const response = await fetch(
-          "https://c9c415ce6135.ngrok-free.app/save-complete-session",
-        );
+  try {
+    console.log(
+      "🔍 DEBUG: Sending to https://60b0-76-66-187-191.ngrok-free.app..."
+    );
 
-        console.log("🔍 DEBUG: Response status:", response.status);
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`💾 Backup successful: ${result.sessionId}`);
-        } else {
-          console.warn("Backup server responded with error:", response.status);
-        }
-      } catch (error) {
-        console.warn("🔍 DEBUG: Backup failed:", error.message);
+    const response = await fetch(
+      "https://60b0-76-66-187-191.ngrok-free.app/save-complete-session",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(sessionData),
       }
-    }
+    );
+
     console.log("🔍 DEBUG: Response status:", response.status);
 
     if (response.ok) {
@@ -380,85 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update a saved form
-  app.put("/api/saved-forms/:id", requireAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid form ID" });
-      }
-
-      const { title, formData, retentionDays = 7 } = req.body;
-
-      if (!title || !formData) {
-        return res
-          .status(400)
-          .json({ message: "Title and form data are required" });
-      }
-
-      // Check if the form exists and belongs to the user
-      const existingForm = await storage.getSavedForm(id);
-      if (!existingForm) {
-        return res.status(404).json({ message: "Saved form not found" });
-      }
-
-      if (existingForm.userId !== req.session.userId) {
-        return res.status(403).json({ message: "Access denied" });
-      }
-
-      // Validate retention days (1-30 days)
-      const validRetentionDays = Math.min(
-        Math.max(parseInt(retentionDays) || 7, 1),
-        30,
-      );
-
-      const updatedForm = await storage.updateSavedForm(
-        id,
-        title,
-        formData,
-        validRetentionDays,
-      );
-
-      if (!updatedForm) {
-        return res.status(404).json({ message: "Form not found" });
-      }
-
-      res.json(updatedForm);
-    } catch (error) {
-      console.error("Update saved form error:", error);
-      res.status(500).json({ message: "Failed to update saved form" });
-    }
-  });
-
-  // Delete a saved form
-  app.delete("/api/saved-forms/:id", requireAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid form ID" });
-      }
-
-      // Check if the form exists and belongs to the user
-      const existingForm = await storage.getSavedForm(id);
-      if (!existingForm) {
-        return res.status(404).json({ message: "Saved form not found" });
-      }
-
-      if (existingForm.userId !== req.session.userId) {
-        return res.status(403).json({ message: "Access denied" });
-      }
-
-      const deleted = await storage.deleteSavedForm(id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Form not found" });
-      }
-
-      res.status(204).send();
-    } catch (error) {
-      console.error("Delete saved form error:", error);
-      res.status(500).json({ message: "Failed to delete saved form" });
-    }
-  });
+  
 
   // Clean up expired forms (admin only)
   app.post("/api/cleanup-expired-forms", requireAdmin, async (req, res) => {
@@ -1016,7 +933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // 🆕 BACKUP SESSION DATA
       const sessionData = {
-        id: crypto.randomUUID(), // You'll need to import crypto at the top
+        id: randomUUID(),
         timestamp: new Date().toISOString(),
         userId: req.session?.userId || "anonymous",
 
@@ -1071,7 +988,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       // Backup error info too
       const errorData = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         timestamp: new Date().toISOString(),
         userId: req.session?.userId || "anonymous",
         error: {
