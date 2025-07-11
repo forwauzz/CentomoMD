@@ -45,6 +45,7 @@ function Router() {
     <Switch>
       <Route path="/" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
       <Route path="/dictation" component={() => <DictationPageWhisper language={language} />} />
+      <Route path="/dictation-whisper" component={() => <DictationPageWhisper language={language} />} />
       <Route path="/speech-test" component={() => <SpeechTestPage />} />
       <Route path="/forms" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
       <Route path="/forms/:formType">
