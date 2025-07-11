@@ -902,7 +902,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                     ? "Le texte transcrit apparaîtra ici. Utilisez 'ouvrir parenthèse' et 'fermer parenthèse' pour le mode verbatim..."
                     : "Transcribed text will appear here. Use 'open parenthesis' and 'close parenthesis' for verbatim mode..."
                 }
-                className="min-h-[300px] max-h-[60vh] resize-none font-mono text-sm overflow-y-auto"
+                className="min-h-[500px] max-h-[75vh] resize-none font-mono text-sm overflow-y-auto"
                 disabled={isProcessing}
               />
               
