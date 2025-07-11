@@ -33,6 +33,7 @@ import { testVoiceCommands } from "@/utils/voice-commands";
 import { VoiceCommandsManager } from "@/components/voice-commands-manager";
 import { VerbatimCommandsManager } from "@/components/verbatim-commands-manager";
 import { Badge } from "@/components/ui/badge";
+import { SoundBar } from "@/components/ui/sound-bar";
 
 interface DictationPageProps {
   language: "fr" | "en";
@@ -133,6 +134,8 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     currentChunkIndex,
     error,
     isSupported,
+    audioLevel,
+    isListening,
     startRecording,
     stopRecording,
     pauseRecording,
@@ -635,6 +638,29 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                   </>
                 )}
               </div>
+
+              {/* Audio Level Indicator */}
+              {isRecording && (
+                <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {currentLanguage === "fr" ? "Niveau audio" : "Audio Level"}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {isListening ? 
+                        (currentLanguage === "fr" ? "Écoute active" : "Listening") : 
+                        (currentLanguage === "fr" ? "Silencieux" : "Quiet")
+                      }
+                    </span>
+                  </div>
+                  <SoundBar 
+                    audioLevel={audioLevel} 
+                    isListening={isListening} 
+                    isRecording={isRecording}
+                    size="lg"
+                  />
+                </div>
+              )}
 
               {/* Processing Progress */}
               {isProcessing && (

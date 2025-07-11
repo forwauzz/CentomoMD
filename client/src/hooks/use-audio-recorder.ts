@@ -38,6 +38,8 @@ interface AudioRecorderState {
   isSupported: boolean;
   failedChunks: number[];
   retryCount: number;
+  audioLevel: number; // 0-100 representing audio input level
+  isListening: boolean; // true when actively capturing sound
 }
 
 export function useAudioRecorder(options: AudioRecorderOptions = {}) {
@@ -54,6 +56,8 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     isSupported: typeof navigator !== 'undefined' && 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,
     failedChunks: [],
     retryCount: 0,
+    audioLevel: 0,
+    isListening: false,
   });
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -64,6 +68,10 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
   const pauseTimeRef = useRef<number>(0);
   const totalPausedTimeRef = useRef<number>(0);
   const sessionIdRef = useRef<string>('');
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const dataArrayRef = useRef<Uint8Array | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   const {
     language = 'auto',
@@ -77,6 +85,85 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
   const updateState = useCallback((updates: Partial<AudioRecorderState>) => {
     setState(prev => ({ ...prev, ...updates }));
   }, []);
+
+  // Audio level detection
+  const setupAudioLevelDetection = useCallback((stream: MediaStream) => {
+    try {
+      // Create audio context and analyzer
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      
+      // Connect microphone stream to analyzer
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      source.connect(analyserRef.current);
+      
+      // Configure analyzer
+      analyserRef.current.fftSize = 256;
+      const bufferLength = analyserRef.current.frequencyBinCount;
+      dataArrayRef.current = new Uint8Array(bufferLength);
+      
+      console.log('🎵 Audio level detection initialized');
+    } catch (error) {
+      console.warn('Audio level detection setup failed:', error);
+    }
+  }, []);
+
+  // Analyze audio level
+  const analyzeAudioLevel = useCallback(() => {
+    if (!analyserRef.current || !dataArrayRef.current) return;
+    
+    try {
+      // Get frequency data
+      analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+      
+      // Calculate average volume
+      let sum = 0;
+      for (let i = 0; i < dataArrayRef.current.length; i++) {
+        sum += dataArrayRef.current[i];
+      }
+      const average = sum / dataArrayRef.current.length;
+      
+      // Convert to 0-100 scale and apply sensitivity
+      const audioLevel = Math.min(100, Math.round((average / 128) * 100));
+      const isListening = audioLevel > 5; // Threshold for detecting sound
+      
+      updateState({ audioLevel, isListening });
+      
+      // Continue animation loop if recording
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        animationFrameRef.current = requestAnimationFrame(analyzeAudioLevel);
+      }
+    } catch (error) {
+      console.warn('Audio analysis failed:', error);
+    }
+  }, [updateState]);
+
+  // Start audio level monitoring
+  const startAudioLevelMonitoring = useCallback(() => {
+    if (analyserRef.current && dataArrayRef.current) {
+      console.log('🎵 Starting audio level monitoring');
+      animationFrameRef.current = requestAnimationFrame(analyzeAudioLevel);
+    }
+  }, [analyzeAudioLevel]);
+
+  // Stop audio level monitoring
+  const stopAudioLevelMonitoring = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    
+    analyserRef.current = null;
+    dataArrayRef.current = null;
+    
+    updateState({ audioLevel: 0, isListening: false });
+    console.log('🎵 Audio level monitoring stopped');
+  }, [updateState]);
 
   // Process audio chunk with Whisper API with retry logic
   const processAudioChunk = useCallback(async (chunk: AudioChunk, retryAttempt: number = 0): Promise<TranscriptionResult> => {
@@ -310,6 +397,9 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
 
       streamRef.current = stream;
       
+      // Setup audio level detection
+      setupAudioLevelDetection(stream);
+      
       // Setup MediaRecorder
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm;codecs=opus' // Whisper-compatible format
@@ -459,6 +549,9 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
       mediaRecorder.start();
       startTimeRef.current = Date.now();
       
+      // Start audio level monitoring
+      startAudioLevelMonitoring();
+      
       // Reset pause counters
       pauseTimeRef.current = 0;
       totalPausedTimeRef.current = 0;
@@ -517,6 +610,9 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    
+    // Stop audio level monitoring
+    stopAudioLevelMonitoring();
     
     mediaRecorderRef.current = null;
   }, []);
@@ -724,6 +820,8 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     currentChunkIndex: state.currentChunkIndex,
     error: state.error,
     isSupported: state.isSupported,
+    audioLevel: state.audioLevel,
+    isListening: state.isListening,
     
     // Actions
     startRecording,
