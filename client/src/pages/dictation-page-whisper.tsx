@@ -542,9 +542,8 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        {/* Left Column - Controls */}
-        <div className="space-y-4 lg:space-y-6">
+        {/* Top Row - Section Selection and Recording Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
           {/* Section Selection */}
           <Card>
             <CardHeader>
@@ -691,59 +690,192 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
               )}
             </CardContent>
           </Card>
+        </div>
 
-          {/* Session Stats */}
-          {(isRecording || recordingDuration > 0) && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">{t.sessionStats}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <div className="text-muted-foreground">{t.recordingTime}</div>
-                    <div className="font-mono">{formatDuration(recordingDuration)}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">{t.chunks}</div>
-                    <div className="font-mono">{chunkCount}</div>
-                  </div>
-                  {/* Verbatim Sections Indicator */}
-                  {hasVerbatim && (
-                    <div className="col-span-2">
-                      <div className="text-muted-foreground text-xs mb-1">{t.verbatimSections}</div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                          📝 {verbatimSections.length} {t.verbatimCount}
+        {/* Action Buttons Row */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <VoiceCommandsManager language={currentLanguage} />
+          <VerbatimCommandsManager language={currentLanguage} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Test both default and any custom commands
+              const testTexts = [
+                "Insérez l'examen physique. Ouvrir parenthèse. Radiographie normale. Fermer parenthèse. Insérez le suivi.",
+                "Insert physical exam. Open parenthesis. X-ray shows normal findings. Close parenthesis. Insert follow up.",
+                "Rapport radiologique. Radiographie thoracique révèle opacités bilatérales. Fin rapport. Texte normal continue.",
+                "Citation patient. Je ressens une douleur lancinante. Fin citation. Diagnostic établi.",
+                "Commencer verbatim. Section verbatim complète. Terminer verbatim. Texte normal continue."
+              ];
+              
+              const allResults = testTexts.map(testText => {
+                const processedResult = processTranscriptWithCommands(testText, currentLanguage);
+                console.log(`🧪 Testing: "${testText}"`);
+                console.log(`   → Commands used: ${processedResult.commandsUsed.length} (${processedResult.commandsUsed.join(', ')})`);
+                console.log(`   → Verbatim sections: ${processedResult.verbatimSections.length}`);
+                console.log(`   → Custom verbatim: ${processedResult.customVerbatimUsed}`);
+                if (processedResult.verbatimTriggers.length > 0) {
+                  console.log(`   → Verbatim triggers: ${processedResult.verbatimTriggers.join(', ')}`);
+                }
+                return processedResult;
+              });
+              
+              // Use the first test for display
+              const mainResult = allResults[0];
+              setEditableText(mainResult.finalText);
+              
+              const totalCommands = allResults.reduce((sum, result) => sum + result.commandsUsed.length, 0);
+              const totalVerbatim = allResults.reduce((sum, result) => sum + result.verbatimSections.length, 0);
+              const customVerbatimCount = allResults.filter(result => result.customVerbatimUsed).length;
+              
+              toast({
+                title: currentLanguage === "fr" ? "Test des commandes vocales et verbatim" : "Voice and verbatim commands test",
+                description: currentLanguage === "fr" 
+                  ? `${totalCommands} commandes, ${totalVerbatim} sections verbatim (${customVerbatimCount} personnalisées). Voir console.`
+                  : `${totalCommands} commands, ${totalVerbatim} verbatim sections (${customVerbatimCount} custom). Check console.`,
+                variant: totalCommands > 0 || totalVerbatim > 0 ? "default" : "destructive",
+              });
+              
+              console.log("🧪 Summary:");
+              console.log(`   → Total commands: ${totalCommands}`);
+              console.log(`   → Total verbatim sections: ${totalVerbatim}`);
+              console.log(`   → Custom verbatim tests: ${customVerbatimCount}`);
+              console.log(`   → All commands used: [${[...new Set(allResults.flatMap(r => r.commandsUsed))].join(', ')}]`);
+            }}
+          >
+            🧪 Test
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopyText}
+            disabled={!editableText}
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            {t.copyText}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClearText}
+            disabled={!editableText && !isRecording}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {t.clearText}
+          </Button>
+        </div>
+
+        {/* Main Text Area */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.finalText}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={editableText}
+              onChange={(e) => setEditableText(e.target.value)}
+              placeholder={
+                currentLanguage === "fr"
+                  ? "Le texte transcrit apparaîtra ici. Utilisez 'ouvrir parenthèse' et 'fermer parenthèse' pour le mode verbatim..."
+                  : "Transcribed text will appear here. Use 'open parenthesis' and 'close parenthesis' for verbatim mode..."
+              }
+              className="min-h-[500px] max-h-[75vh] resize-none font-mono text-sm overflow-y-auto"
+              disabled={isProcessing}
+            />
+            
+            {/* Verbatim sections preview */}
+            {hasVerbatim && verbatimSections.length > 0 && (
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <h4 className="text-sm font-medium text-yellow-800 mb-2 flex items-center gap-1">
+                  📝 {t.verbatimSections} ({verbatimSections.length})
+                </h4>
+                <div className="space-y-2">
+                  {verbatimSections.map((section, index) => (
+                    <div 
+                      key={index}
+                      className="text-xs bg-white p-2 rounded border-l-4 border-yellow-400"
+                    >
+                      <span className="text-yellow-600 font-mono">#{index + 1}:</span>{" "}
+                      <span className="text-gray-700">{section.substring(0, 150)}{section.length > 150 ? '...' : ''}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-yellow-600 mt-2">
+                  {currentLanguage === "fr" 
+                    ? "Ces sections ont été préservées sans modification par l'IA" 
+                    : "These sections have been preserved without AI modification"}
+                </p>
+              </div>
+            )}
+
+            {/* Save to Section Button */}
+            <div className="mt-4 pt-4 border-t">
+              <Button
+                onClick={handleSaveToSection}
+                disabled={!editableText || !selectedSection || isProcessing}
+                className="w-full"
+                size="lg"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {t.saveToSection}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Session Stats and Additional Info */}
+        {(isRecording || recordingDuration > 0) && (
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle className="text-lg">{t.sessionStats}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div className="text-muted-foreground">{t.recordingTime}</div>
+                  <div className="font-mono">{formatDuration(recordingDuration)}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">{t.chunks}</div>
+                  <div className="font-mono">{chunkCount}</div>
+                </div>
+                {/* Verbatim Sections Indicator */}
+                {hasVerbatim && (
+                  <div className="col-span-2">
+                    <div className="text-muted-foreground text-xs mb-1">{t.verbatimSections}</div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                        📝 {verbatimSections.length} {t.verbatimCount}
+                      </Badge>
+                      {customVerbatimUsed && (
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
+                          🔧 Custom
                         </Badge>
-                        {customVerbatimUsed && (
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
-                            🔧 Custom
-                          </Badge>
-                        )}
-                        <span className="text-xs text-yellow-600">{t.verbatimActive}</span>
-                      </div>
-                      {verbatimTriggers.length > 0 && (
-                        <div className="mt-1 text-xs text-blue-600">
-                          {currentLanguage === "fr" ? "Déclencheurs:" : "Triggers:"} {verbatimTriggers.join(", ")}
-                        </div>
                       )}
+                      <span className="text-xs text-yellow-600">{t.verbatimActive}</span>
                     </div>
-                  )}
-                  {/* Storage Usage Monitor */}
-                  <div className="col-span-2 mt-2">
-                    <div className="text-muted-foreground text-xs mb-1">
-                      {currentLanguage === "fr" ? "Stockage utilisé" : "Storage used"}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Progress 
-                        value={getStorageUsage().percentage} 
-                        className={`flex-1 h-2 ${
-                          getStorageWarning() === 'critical' ? 'bg-red-100' :
-                          getStorageWarning() === 'warning' ? 'bg-yellow-100' : 'bg-green-100'
-                        }`}
-                      />
-                      <span className={`text-xs font-mono ${
+                    {verbatimTriggers.length > 0 && (
+                      <div className="mt-1 text-xs text-blue-600">
+                        {currentLanguage === "fr" ? "Déclencheurs:" : "Triggers:"} {verbatimTriggers.join(", ")}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* Storage Usage Monitor */}
+                <div className="col-span-2 mt-2">
+                  <div className="text-muted-foreground text-xs mb-1">
+                    {currentLanguage === "fr" ? "Stockage utilisé" : "Storage used"}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Progress 
+                      value={getStorageUsage().percentage} 
+                      className={`flex-1 h-2 ${
+                        getStorageWarning() === 'critical' ? 'bg-red-100' :
+                        getStorageWarning() === 'warning' ? 'bg-yellow-100' : 'bg-green-100'
+                      }`}
+                    />
+                    <span className={`text-xs font-mono ${
                         getStorageWarning() === 'critical' ? 'text-red-600' :
                         getStorageWarning() === 'warning' ? 'text-yellow-600' : 'text-green-600'
                       }`}>
@@ -811,142 +943,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
               </CardContent>
             </Card>
           )}
-        </div>
-
-        {/* Right Column - Text Area */}
-        <div className="space-y-4 lg:space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                {t.finalText}
-                <div className="flex flex-wrap gap-2">
-                  <VoiceCommandsManager language={currentLanguage} />
-                  <VerbatimCommandsManager language={currentLanguage} />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      // Test both default and any custom commands
-                      const testTexts = [
-                        "Insérez l'examen physique. Ouvrir parenthèse. Radiographie normale. Fermer parenthèse. Insérez le suivi.",
-                        "Insert physical exam. Open parenthesis. X-ray shows normal findings. Close parenthesis. Insert follow up.",
-                        "Rapport radiologique. Radiographie thoracique révèle opacités bilatérales. Fin rapport. Texte normal continue.",
-                        "Citation patient. Je ressens une douleur lancinante. Fin citation. Diagnostic établi.",
-                        "Commencer verbatim. Section verbatim complète. Terminer verbatim. Texte normal continue."
-                      ];
-                      
-                      const allResults = testTexts.map(testText => {
-                        const processedResult = processTranscriptWithCommands(testText, currentLanguage);
-                        console.log(`🧪 Testing: "${testText}"`);
-                        console.log(`   → Commands used: ${processedResult.commandsUsed.length} (${processedResult.commandsUsed.join(', ')})`);
-                        console.log(`   → Verbatim sections: ${processedResult.verbatimSections.length}`);
-                        console.log(`   → Custom verbatim: ${processedResult.customVerbatimUsed}`);
-                        if (processedResult.verbatimTriggers.length > 0) {
-                          console.log(`   → Verbatim triggers: ${processedResult.verbatimTriggers.join(', ')}`);
-                        }
-                        return processedResult;
-                      });
-                      
-                      // Use the first test for display
-                      const mainResult = allResults[0];
-                      setEditableText(mainResult.finalText);
-                      
-                      const totalCommands = allResults.reduce((sum, result) => sum + result.commandsUsed.length, 0);
-                      const totalVerbatim = allResults.reduce((sum, result) => sum + result.verbatimSections.length, 0);
-                      const customVerbatimCount = allResults.filter(result => result.customVerbatimUsed).length;
-                      
-                      toast({
-                        title: currentLanguage === "fr" ? "Test des commandes vocales et verbatim" : "Voice and verbatim commands test",
-                        description: currentLanguage === "fr" 
-                          ? `${totalCommands} commandes, ${totalVerbatim} sections verbatim (${customVerbatimCount} personnalisées). Voir console.`
-                          : `${totalCommands} commands, ${totalVerbatim} verbatim sections (${customVerbatimCount} custom). Check console.`,
-                        variant: totalCommands > 0 || totalVerbatim > 0 ? "default" : "destructive",
-                      });
-                      
-                      console.log("🧪 Summary:");
-                      console.log(`   → Total commands: ${totalCommands}`);
-                      console.log(`   → Total verbatim sections: ${totalVerbatim}`);
-                      console.log(`   → Custom verbatim tests: ${customVerbatimCount}`);
-                      console.log(`   → All commands used: [${[...new Set(allResults.flatMap(r => r.commandsUsed))].join(', ')}]`);
-                    }}
-                  >
-                    🧪 Test
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopyText}
-                    disabled={!editableText}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    {t.copyText}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClearText}
-                    disabled={!editableText && !isRecording}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    {t.clearText}
-                  </Button>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={editableText}
-                onChange={(e) => setEditableText(e.target.value)}
-                placeholder={
-                  currentLanguage === "fr"
-                    ? "Le texte transcrit apparaîtra ici. Utilisez 'ouvrir parenthèse' et 'fermer parenthèse' pour le mode verbatim..."
-                    : "Transcribed text will appear here. Use 'open parenthesis' and 'close parenthesis' for verbatim mode..."
-                }
-                className="min-h-[500px] max-h-[75vh] resize-none font-mono text-sm overflow-y-auto"
-                disabled={isProcessing}
-              />
-              
-              {/* Verbatim sections preview */}
-              {hasVerbatim && verbatimSections.length > 0 && (
-                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <h4 className="text-sm font-medium text-yellow-800 mb-2 flex items-center gap-1">
-                    📝 {t.verbatimSections} ({verbatimSections.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {verbatimSections.map((section, index) => (
-                      <div 
-                        key={index}
-                        className="text-xs bg-white p-2 rounded border-l-4 border-yellow-400"
-                      >
-                        <span className="text-yellow-600 font-mono">#{index + 1}:</span>{" "}
-                        <span className="text-gray-700">{section.substring(0, 150)}{section.length > 150 ? '...' : ''}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-yellow-600 mt-2">
-                    {currentLanguage === "fr" 
-                      ? "Ces sections ne seront pas modifiées par l'IA"
-                      : "These sections will not be modified by AI"
-                    }
-                  </p>
-                </div>
-              )}
-              
-              {editableText && (
-                <div className="mt-4 flex justify-end">
-                  <Button
-                    onClick={handleSaveToSection}
-                    disabled={!editableText.trim() || !selectedSection}
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    {t.saveToSection}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+        
       </div>
     </div>
   );
