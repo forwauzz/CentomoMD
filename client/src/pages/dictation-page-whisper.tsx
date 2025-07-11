@@ -509,9 +509,9 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-3 sm:p-4 lg:p-6 max-w-4xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="container mx-auto p-3 sm:p-4 lg:p-6 max-w-4xl flex-1 flex flex-col">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
@@ -542,16 +542,16 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
           </Button>
         </div>
 
-        {/* Top Row - Section Selection and Recording Controls */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          {/* Section Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{t.selectSection}</CardTitle>
+        {/* Compact Top Row - Section Selection and Recording Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
+          {/* Section Selection - Compact */}
+          <Card className="h-fit">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">{t.selectSection}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <Select value={selectedSection} onValueChange={setSelectedSection}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9">
                   <SelectValue placeholder={t.selectSection} />
                 </SelectTrigger>
                 <SelectContent>
@@ -565,19 +565,21 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
             </CardContent>
           </Card>
 
-          {/* Recording Controls */}
-          <Card className={isPaused ? "border-orange-300 bg-orange-50/50 dark:border-orange-800 dark:bg-orange-950/20" : ""}>
-            <CardHeader>
-              <CardTitle className={`flex items-center gap-2 ${isPaused ? "text-orange-800 dark:text-orange-200" : ""}`}>
-                {getStatusIcon()}
-                {getStatusText()}
-              </CardTitle>
-              <div className={`flex items-center gap-4 text-sm ${isPaused ? "text-orange-700 dark:text-orange-300" : "text-muted-foreground"}`}>
-                <span>{t.accuracy}: 95%</span>
-                <span>{t.recordingTime}: {formatDuration(recordingDuration)}</span>
-                {chunkCount > 0 && <span>{t.chunks}: {chunkCount}</span>}
+          {/* Recording Controls - Compact */}
+          <Card className={`h-fit ${isPaused ? "border-orange-300 bg-orange-50/50 dark:border-orange-800 dark:bg-orange-950/20" : ""}`}>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className={`text-sm font-medium flex items-center gap-2 ${isPaused ? "text-orange-800 dark:text-orange-200" : ""}`}>
+                  {getStatusIcon()}
+                  {getStatusText()}
+                </CardTitle>
+                <div className={`flex items-center gap-3 text-xs ${isPaused ? "text-orange-700 dark:text-orange-300" : "text-muted-foreground"}`}>
+                  <span>{t.accuracy}: 95%</span>
+                  <span>{formatDuration(recordingDuration)}</span>
+                  {chunkCount > 0 && <span>{chunkCount} chunks</span>}
+                </div>
               </div>
-              {/* Subtle Progress Bar for Multi-Chunk Processing */}
+              {/* Compact Progress Bar */}
               {isProcessing && chunkCount > 1 && (
                 <div className="mt-2">
                   <Progress 
@@ -586,14 +588,14 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     {currentLanguage === "fr" 
-                      ? `Traitement du segment ${currentChunkIndex} sur ${chunkCount}`
-                      : `Processing chunk ${currentChunkIndex} of ${chunkCount}`
+                      ? `Segment ${currentChunkIndex}/${chunkCount}`
+                      : `Chunk ${currentChunkIndex}/${chunkCount}`
                     }
                   </p>
                 </div>
               )}
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="pt-0 space-y-3">
               {/* Recording Controls */}
               <div className="flex flex-col sm:flex-row gap-2">
                 {!isRecording ? (
@@ -692,13 +694,14 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
           </Card>
         </div>
 
-        {/* Action Buttons Row */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        {/* Compact Action Buttons Row */}
+        <div className="flex flex-wrap items-center gap-2 mb-3 p-2 bg-gray-50/50 dark:bg-gray-900/20 rounded-lg">
           <VoiceCommandsManager language={currentLanguage} />
           <VerbatimCommandsManager language={currentLanguage} />
           <Button
             variant="outline"
             size="sm"
+            className="h-8 text-xs"
             onClick={() => {
               // Test both default and any custom commands
               const testTexts = [
@@ -749,44 +752,58 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
           <Button
             variant="outline"
             size="sm"
+            className="h-8 text-xs"
             onClick={handleCopyText}
             disabled={!editableText}
           >
-            <Copy className="h-4 w-4 mr-2" />
+            <Copy className="h-3 w-3 mr-1" />
             {t.copyText}
           </Button>
           <Button
             variant="outline"
             size="sm"
+            className="h-8 text-xs"
             onClick={handleClearText}
             disabled={!editableText && !isRecording}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-3 w-3 mr-1" />
             {t.clearText}
           </Button>
         </div>
 
-        {/* Main Text Area */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.finalText}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={editableText}
-              onChange={(e) => setEditableText(e.target.value)}
-              placeholder={
-                currentLanguage === "fr"
-                  ? "Le texte transcrit apparaîtra ici. Utilisez 'ouvrir parenthèse' et 'fermer parenthèse' pour le mode verbatim..."
-                  : "Transcribed text will appear here. Use 'open parenthesis' and 'close parenthesis' for verbatim mode..."
-              }
-              className="min-h-[500px] max-h-[75vh] resize-none font-mono text-sm overflow-y-auto"
-              disabled={isProcessing}
-            />
-            
-            {/* Verbatim sections preview */}
-            {hasVerbatim && verbatimSections.length > 0 && (
-              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        {/* Optimized Main Text Area - Takes remaining space */}
+        <div className="flex-1 flex flex-col">
+          <Card className="flex-1 flex flex-col">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">{t.finalText}</CardTitle>
+                <Button
+                  onClick={handleSaveToSection}
+                  disabled={!editableText || !selectedSection || isProcessing}
+                  size="sm"
+                  className="h-8 text-xs"
+                >
+                  <Save className="h-3 w-3 mr-1" />
+                  {t.saveToSection}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col p-3">
+              <Textarea
+                value={editableText}
+                onChange={(e) => setEditableText(e.target.value)}
+                placeholder={
+                  currentLanguage === "fr"
+                    ? "Le texte transcrit apparaîtra ici. Utilisez 'ouvrir parenthèse' et 'fermer parenthèse' pour le mode verbatim..."
+                    : "Transcribed text will appear here. Use 'open parenthesis' and 'close parenthesis' for verbatim mode..."
+                }
+                className="flex-1 min-h-0 resize-none font-mono text-sm overflow-y-auto border-0 focus:ring-0 focus:border-0 p-0"
+                disabled={isProcessing}
+              />
+              
+              {/* Verbatim sections preview */}
+              {hasVerbatim && verbatimSections.length > 0 && (
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <h4 className="text-sm font-medium text-yellow-800 mb-2 flex items-center gap-1">
                   📝 {t.verbatimSections} ({verbatimSections.length})
                 </h4>
@@ -808,21 +825,9 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
                 </p>
               </div>
             )}
-
-            {/* Save to Section Button */}
-            <div className="mt-4 pt-4 border-t">
-              <Button
-                onClick={handleSaveToSection}
-                disabled={!editableText || !selectedSection || isProcessing}
-                className="w-full"
-                size="lg"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {t.saveToSection}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Session Stats and Additional Info */}
         {(isRecording || recordingDuration > 0) && (
