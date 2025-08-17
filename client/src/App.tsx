@@ -14,6 +14,7 @@ import LoginPage from "@/pages/login-page";
 import LandingPage from "@/pages/landing-page";
 import FormSelector from "@/pages/form-selector";
 import { SimpleFormContainer } from "@/components/simple-form-container";
+import { MigrationDashboard } from "@/pages/MigrationDashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -70,6 +71,7 @@ function Router() {
         }}
       </Route>
       <Route path="/ai-test" component={SimpleAITest} />
+      <Route path="/migration" component={() => user?.role === 'admin' ? <MigrationDashboard /> : <NotFound />} />
       <Route component={NotFound} />
     </Switch>
   );

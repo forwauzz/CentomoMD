@@ -80,6 +80,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup session middleware
   app.use(getSessionConfig());
 
+  // Import and setup migration routes
+  const migrationRouter = await import("./routes/migration");
+  app.use("/api/migration", migrationRouter.default);
+
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
     try {
