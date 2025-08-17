@@ -1,11 +1,14 @@
 import express from 'express';
-import { 
-  checkMigrationStatus, 
-  performMigration, 
-  validateMigrationReadiness,
-  supabaseMigration 
-} from '../supabase-migration';
 import { isSupabaseConfigured, testSupabaseConnection } from '../supabase-client';
+import { 
+  validateMigrationReadiness,
+  migrateUsers,
+  migrateMedicalForms,
+  migrateSavedForms,
+  validateMigration,
+  performFullMigration,
+  getMigrationHistory
+} from '../simple-migration';
 
 const router = express.Router();
 
@@ -14,14 +17,14 @@ const router = express.Router();
 // Get current migration status
 router.get('/status', async (req, res) => {
   try {
-    const status = await checkMigrationStatus();
+    const migrationHistory = getMigrationHistory();
     const supabaseConfigured = isSupabaseConfigured();
     
     res.json({
       success: true,
       supabaseConfigured,
-      migrationHistory: status,
-      currentPhase: status.length > 0 ? status[status.length - 1].phase : 'not_started'
+      migrationHistory,
+      currentPhase: migrationHistory.length > 0 ? migrationHistory[migrationHistory.length - 1].phase : 'not_started'
     });
   } catch (error) {
     res.status(500).json({
@@ -80,7 +83,7 @@ router.post('/start', async (req, res) => {
     }
 
     // Start migration in background
-    performMigration()
+    performFullMigration()
       .then(() => {
         console.log('Migration completed successfully');
       })
@@ -114,7 +117,12 @@ router.post('/steps/schema', async (req, res) => {
       });
     }
 
-    await supabaseMigration.createSupabaseSchema();
+    // Schema validation will be done in individual steps
+    // For now, just confirm Supabase is accessible
+    const connectionTest = await testSupabaseConnection();
+    if (!connectionTest.success) {
+      throw new Error('Supabase connection failed');
+    }
     
     res.json({
       success: true,
@@ -139,7 +147,7 @@ router.post('/steps/users', async (req, res) => {
       });
     }
 
-    await supabaseMigration.migrateUsers();
+    await migrateUsers();
     
     res.json({
       success: true,
@@ -163,7 +171,7 @@ router.post('/steps/forms', async (req, res) => {
       });
     }
 
-    await supabaseMigration.migrateMedicalForms();
+    await migrateMedicalForms();
     
     res.json({
       success: true,
@@ -187,7 +195,7 @@ router.post('/steps/saved-forms', async (req, res) => {
       });
     }
 
-    await supabaseMigration.migrateSavedForms();
+    await migrateSavedForms();
     
     res.json({
       success: true,
@@ -211,7 +219,7 @@ router.post('/steps/validate', async (req, res) => {
       });
     }
 
-    const validation = await supabaseMigration.validateMigration();
+    const validation = await validateMigration();
     
     res.json({
       success: true,
