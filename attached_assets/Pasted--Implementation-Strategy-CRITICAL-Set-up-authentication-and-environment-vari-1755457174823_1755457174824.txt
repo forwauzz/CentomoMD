@@ -1,0 +1,506 @@
+
+
+---
+
+## 🎯 Implementation Strategy
+
+**CRITICAL:** Set up authentication and environment variables FIRST to avoid integration issues.
+
+**Order of Operations:**
+1. Project foundation with environment setup
+2. Authentication system (using your v0 component)
+3. Navigation and routing
+4. Dashboard components
+5. Medical form sections
+6. Advanced features (voice, AI, export)
+
+---
+
+## Step 1: Project Foundation & Environment Setup
+
+
+
+
+MEDICAL STYLING THEME:
+- Primary color: Medical blue (#0066CC)
+- Professional medical typography
+- Quebec healthcare compliance styling
+- Accessibility (WCAG 2.1) support
+
+Please create the complete project foundation with proper environment setup and Supabase integration ready.
+```
+
+
+```
+Configure environment variables and Supabase integration:
+
+SUPABASE CREDENTIALS (configured and ready):
+NEXT_PUBLIC_SUPABASE_URL=https://[your-project-id].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ[your-anon-key]
+SUPABASE_SERVICE_ROLE_KEY=eyJ[your-service-role-key]
+
+ENVIRONMENT SETUP REQUIREMENTS:
+1. Create .env.local with these credentials
+2. Create .env.example template (without actual keys)
+3. Add environment validation in lib/supabase.ts
+4. Proper error handling for missing environment variables
+5. Next.js configuration for environment variables
+
+SUPABASE CLIENT CONFIGURATION:
+- Client-side Supabase client (lib/supabase.ts)
+- Server-side client for API routes
+- Authentication configuration
+- Database type safety
+
+VALIDATION REQUIREMENTS:
+- Verify environment variables are loaded
+- Test Supabase connection on startup
+- Provide clear error messages if configuration is missing
+- Professional medical error handling
+
+Please implement robust environment configuration that prevents the "URL and Key required" errors.
+```
+
+---
+
+## Step 2: Authentication System Integration
+
+
+```
+Integrate authentication system using this v0 medical login component:
+
+
+AUTHENTICATION REQUIREMENTS:
+- Google OAuth integration with Supabase
+- Email/password authentication
+- Microsoft OAuth (optional)
+- Professional medical UI maintained from v0
+
+DATABASE INTEGRATION:
+Connect to existing Supabase database with these tables:
+- users (id, email, oauth_provider, role, status, full_name)
+- doctor_profiles (user_id, doctor_id, credentials, specialty)
+- user_invitations (admin-controlled invitations)
+
+AUTHENTICATION FLOW:
+1. User chooses auth method (Google OAuth / Email+Password)
+2. Authenticate through Supabase
+3. Create/update user record in users table
+4. Create doctor_profile if role = 'doctor'
+5. Route based on role:
+   - Admin: /admin/dashboard
+   - Doctor: /dashboard
+   - Staff: /dashboard (limited access)
+
+INTEGRATION REQUIREMENTS:
+- Maintain v0 professional medical styling
+- Add Supabase authentication backend
+- Proper error handling and loading states
+- Session management with 30-minute timeout
+- Role-based routing after authentication
+
+Please integrate this v0 component with full Supabase authentication functionality.
+```
+
+
+```
+Test and validate the authentication system:
+
+TESTING REQUIREMENTS:
+1. Google OAuth flow: Login → User creation → Profile creation → Dashboard redirect
+2. Email/password flow: Registration → Login → Profile setup → Dashboard
+3. Role-based routing: Admin vs Doctor dashboard access
+4. Session persistence: Refresh page maintains login state
+5. Logout functionality: Clear session and redirect to login
+
+VALIDATION CHECKLIST:
+- Environment variables loading correctly
+- Supabase client connecting to database
+- Authentication providers working
+- User records created in database
+- Doctor profiles linked to users
+- Professional medical UI preserved
+- Error handling working properly
+
+DATABASE VERIFICATION:
+- Check users table for new registrations
+- Verify doctor_profiles table entries
+- Confirm role-based access control
+- Test session management
+
+If any issues, please debug and fix authentication integration before proceeding to next components.
+```
+
+---
+
+## Step 3: Navigation & Layout System
+
+### **Cursor Prompt 3A: Navigation Integration**
+
+```
+Integrate the navigation sidebar component:
+
+
+NAVIGATION REQUIREMENTS:
+- 11-section medical form navigation
+- Progress tracking for form completion
+- Professional medical sidebar design
+- Responsive layout for tablets
+
+INTEGRATION WITH AUTHENTICATION:
+- Show user profile in navigation (from doctor_profiles table)
+- Role-based navigation items (admin vs doctor)
+- Logout functionality
+- Professional medical branding
+
+ROUTING STRUCTURE:
+```
+/dashboard (doctor dashboard)
+/admin/dashboard (admin dashboard)
+/form/section7 (physical examination)
+/form/section8 (subjective assessment)
+/form/section9 (modular physical exam)
+/form/section11 (medical conclusions)
+/settings (user preferences)
+/training (admin only)
+```
+
+LAYOUT INTEGRATION:
+- Sidebar navigation with main content area
+- Professional medical layout
+- Form progress indicators
+- Mobile-responsive design
+
+Please integrate the navigation component with authentication and routing.
+```
+
+
+```
+Create professional medical dashboards:
+
+DOCTOR DASHBOARD REQUIREMENTS:
+- Recent forms and drafts
+- Quick actions (start new form, resume draft)
+- System status indicators
+- Professional medical statistics
+- Voice recording status
+- Export history
+
+ADMIN DASHBOARD REQUIREMENTS:
+- User management (invite doctors, manage accounts)
+- AI training system access
+- System configuration
+- Audit logs and compliance monitoring
+- Platform analytics
+
+DASHBOARD FEATURES:
+- Form creation and management
+- User profile access
+- System health monitoring
+- Professional medical workflow
+- Quick navigation to form sections
+
+UI REQUIREMENTS:
+- Professional medical design
+- Card-based layout
+- Clean typography
+- Medical blue color scheme (#0066CC)
+- Responsive for clinical use
+
+Please create both doctor and admin dashboards with proper role-based access control.
+```
+
+---
+
+## Step 4: Medical Form Sections
+
+
+```
+Integrate Section 7 Physical Examination component:
+
+
+
+SECTION 7 REQUIREMENTS:
+- Comprehensive physical examination interface
+- Bilateral comparison tables
+- Medical measurement inputs
+- Range of motion assessments
+- Professional medical form layout
+
+DATABASE INTEGRATION:
+- Temporary form sessions (form_sessions table)
+- Auto-save form data (expires in 30 minutes)
+- Form templates from form_templates table
+- Zero patient data retention compliance
+
+MEDICAL FEATURES:
+- Professional examination workflow
+- Medical terminology support
+- Bilateral data entry
+- Measurement validation
+- Export-ready data formatting
+
+VOICE INTEGRATION PREPARATION:
+- Form field targeting for voice input
+- Voice recording interface integration
+- Real-time form population
+- Professional medical dictation workflow
+
+Please integrate Section 7 with database session management and professional medical workflow.
+```
+
+
+```
+Integrate Section 8 Subjective Assessment with template system:
+
+
+TEMPLATE SYSTEM REQUIREMENTS:
+- Multiple assessment templates from database
+- Template selection dropdown
+- Freeform narrative mode
+- Template-specific form fields
+- Admin-configurable templates
+
+DATABASE INTEGRATION:
+- Load templates from form_templates table
+- Save template preferences to user preferences
+- Temporary form data in form_sessions
+- Template management for admins
+
+ASSESSMENT FEATURES:
+- Structured medical narratives
+- Pain assessment tools
+- Functional impact evaluation
+- Professional medical formatting
+- Template-aware form validation
+
+Please integrate Section 8 with the database template system and professional medical assessment tools.
+```
+
+
+```
+Integrate Section 9 Modular Physical Exam system:
+
+
+
+MODULAR SYSTEM REQUIREMENTS:
+- Checkbox-driven body system selection
+- Dynamic table generation
+- Pre-configured examination templates
+- Bilateral comparison functionality
+- Professional medical examination modules
+
+BODY SYSTEM MODULES:
+- Lumbar/Cervical/Thoracic Spine
+- Hip/Knee/Ankle Joints
+- Neurological Assessment
+- Vascular Assessment
+- Custom examination modules
+
+TEMPLATE INTEGRATION:
+- Module configurations from database
+- Save custom module combinations
+- Professional examination workflows
+- Export-ready modular data
+
+Please integrate the modular examination system with dynamic table generation and database templates.
+```
+
+
+```
+Integrate Section 11 Medical Conclusions with intelligent summary:
+
+
+SUMMARY SYSTEM REQUIREMENTS:
+- Selective section summarization
+- Admin-configurable summary templates
+- Medical conclusion workflow
+- Professional diagnostic tools
+- CNESST compliance formatting
+
+INTELLIGENT FEATURES:
+- Auto-generate summaries from previous sections
+- Section selection for summary inclusion
+- Medical conclusion templates
+- Diagnostic code integration
+- Professional medical reporting
+
+DATABASE INTEGRATION:
+- Summary templates from form_templates table
+- Medical conclusion storage (temporary)
+- Export preparation with full report data
+- Professional medical formatting
+
+Please integrate Section 11 with intelligent summarization and medical conclusion workflow.
+```
+
+---
+
+## Step 5: Advanced Features
+
+
+
+```
+Integrate voice recording system:
+
+[PASTE YOUR v0 VOICE RECORDING CODE HERE]
+
+VOICE SYSTEM REQUIREMENTS:
+- 3 recording modes: Word-for-word, Smart dictation, Ambient scribe
+- Real-time audio processing
+- Medical terminology recognition
+- Professional medical interface
+
+TECHNICAL IMPLEMENTATION:
+- WebRTC audio recording
+- OpenAI Whisper integration
+- Real-time transcription streaming
+- Form field population
+- Zero audio retention (compliance)
+
+INTEGRATION WITH FORMS:
+- Voice input for all medical sections
+- Section-specific voice commands
+- Medical terminology enhancement
+- Professional dictation workflow
+
+Please implement complete voice recording system with medical transcription and form integration.
+```
+
+### **Cursor Prompt 5B: Export System**
+
+```
+Integrate export system for professional medical documents:
+
+
+EXPORT SYSTEM REQUIREMENTS:
+- Pixel-perfect PDF generation matching CNESST forms
+- Microsoft Word document export
+- Real-time document preview
+- Professional medical formatting
+
+TECHNICAL IMPLEMENTATION:
+- jsPDF for PDF generation
+- docx library for Word documents
+- Form data compilation from all sections
+- CNESST template compliance
+- Zero-retention document generation
+
+EXPORT FEATURES:
+- Live preview with form data
+- Export validation and quality checking
+- Professional medical document standards
+- Immediate download without server storage
+
+Please implement complete export system with pixel-perfect CNESST form generation.
+```
+
+### **Cursor Prompt 5C: AI Training Interface**
+
+```
+Integrate AI training system for medical documentation improvement:
+
+[PASTE YOUR v0 AI TRAINING CODE HERE]
+
+AI TRAINING REQUIREMENTS:
+- File upload for de-identified training samples
+- Section-specific AI improvement
+- Training effectiveness metrics
+- Admin-only access control
+
+DATABASE INTEGRATION:
+- training_data table for sample management
+- ai_training_metrics for performance tracking
+- Admin action logging
+- Training sample organization
+
+TRAINING FEATURES:
+- Medical document sample processing
+- AI formatting enhancement
+- Performance metrics tracking
+- Professional medical AI optimization
+
+Please integrate the AI training system with database management and medical documentation improvement.
+```
+
+---
+
+## Step 6: Testing & Deployment
+
+### **Cursor Prompt 6A: End-to-End Testing**
+
+```
+Implement comprehensive testing for the medical documentation platform:
+
+TESTING REQUIREMENTS:
+- Authentication flow testing (all methods)
+- Form workflow testing (all sections)
+- Voice recording and transcription
+- Export generation and validation
+- Admin functionality testing
+- Database integration verification
+
+COMPLIANCE TESTING:
+- Zero patient data retention verification
+- Session timeout testing (30 minutes)
+- Auto-cleanup function testing
+- Quebec Law 25 compliance verification
+- Professional medical workflow validation
+
+PERFORMANCE TESTING:
+- Form loading and navigation speed
+- Voice processing performance
+- Export generation speed
+- Database query optimization
+- Professional medical user experience
+
+Please implement testing suite and fix any issues found.
+```
+
+### **Cursor Prompt 6B: Production Deployment**
+
+```
+Prepare the medical documentation platform for production deployment:
+
+DEPLOYMENT REQUIREMENTS:
+- Production environment configuration
+- Supabase production settings
+- Security hardening
+- Performance optimization
+- Professional medical compliance
+
+DEPLOYMENT OPTIONS:
+- Vercel (recommended for Next.js)
+- Railway/DigitalOcean
+- Custom server deployment
+
+PRODUCTION CHECKLIST:
+- Environment variables secured
+- Database policies tested
+- Authentication flows verified
+- Medical compliance validated
+- Professional performance optimized
+
+
+
+---
+
+## 🚨 Critical Success Factors
+
+### **Environment Setup:**
+- ✅ Supabase credentials properly configured
+- ✅ Environment validation working
+- ✅ Error handling for missing config
+
+### **Authentication:**
+- ✅ Google OAuth working
+- ✅ User/profile creation in database
+- ✅ Role-based routing functional
+
+### **Medical Workflow:**
+- ✅ Professional medical UI maintained
+- ✅ Form sessions working
+- ✅ Zero patient data retention
+- ✅ Quebec Law 25 compliance
+
+Use these prompts in order, testing each phase before moving to the next. This ensures solid foundation before adding complexity.
