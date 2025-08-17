@@ -40,10 +40,10 @@ export async function validateMigrationReadiness() {
 
   // Test database connection
   try {
-    const { error } = await supabase?.from('users').select('count').limit(1);
-    if (error) {
+    const result = await supabase?.from('users').select('count').limit(1);
+    if (result?.error) {
       issues.push('Cannot connect to Supabase database');
-      recommendations.push('Run the supabase-simple-setup.sql script in your Supabase dashboard');
+      recommendations.push('Run the supabase-complete-setup.sql script in your Supabase dashboard');
     }
   } catch (error) {
     issues.push('Database connection failed');
@@ -86,9 +86,11 @@ export async function migrateUsers() {
           .from('users')
           .upsert({
             id: user.id,
-            username: user.username,
             email: user.email,
+            username: user.username,
             password_hash: user.passwordHash,
+            first_name: user.firstName,
+            last_name: user.lastName,
             role: user.role,
             created_at: user.createdAt,
             updated_at: user.updatedAt
@@ -131,89 +133,34 @@ export async function migrateMedicalForms() {
     
     for (const form of currentForms) {
       try {
-        // Map the current schema to Supabase structure
+        // Map all form fields to match the complete database structure
         const supabaseForm = {
-          id: form.id,
-          user_id: form.userId || 'unknown',
-          patient_name: form.patientName,
-          
-          // Convert current individual fields to JSON structure
-          section1_data: {
-            mandat_diagnostic: form.mandatDiagnostic,
-            mandat_consolidation: form.mandatConsolidation,
-            mandat_soins: form.mandatSoins,
-            mandat_atteinte: form.mandatAtteinte,
-            mandat_atteinte_pourcentage: form.mandatAtteintePourcentage,
-            mandat_limitations: form.mandatLimitations,
-            mandat_limitations_evaluation: form.mandatLimitationsEvaluation
-          },
-          
-          section2_data: {
-            diagnostics_cnesst: form.diagnosticsCnesst
-          },
-          
-          section3_data: {
-            modalite_entrevue: form.modaliteEntrevue
-          },
-          
-          section4_data: {
-            patient_name: form.patientName,
-            age: form.age,
-            date_evaluation: form.dateEvaluation,
-            patient_gender: form.patientGender,
-            dominance: form.dominance,
-            emploi: form.emploi
-          },
-          
-          section5_data: {
-            antecedents_medicaux: form.antecedentsMedicaux,
-            antecedents_chirurgicaux: form.antecedentsChirurgicaux,
-            antecedents_lesion: form.antecedentsLesion,
-            antecedents_cnesst: form.antecedentsCnesst,
-            antecedents_saaq: form.antecedentsSaaq,
-            antecedents_autres: form.antecedentsAutres,
-            antecedents_allergie: form.antecedentsAllergie,
-            antecedents_tabac: form.antecedentsTabac,
-            antecedents_cannabis: form.antecedentsCannabis,
-            antecedents_alcool: form.antecedentsAlcool
-          },
-          
-          section6_data: {
-            medication_actuelle: form.medicationActuelle
-          },
-          
-          section7_data: {
-            historique_evolution: form.historiqueEvolution
-          },
-          
-          section8_data: {
-            section8_input: form.section8Input,
-            appreciation_evolution: form.appreciationEvolution,
-            plaintes_problemes: form.plaintesproblemes,
-            impact_avq: form.impactAvq
-          },
-          
-          // Include all the physical examination data in section9
-          section9_data: {
-            examen_poids: form.examenPoids,
-            examen_taille: form.examenTaille,
-            observation_generale: form.observationGenerale,
-            // ... (include all the detailed physical exam fields)
-          },
-          
-          section10_data: {
-            diagnostic_medical: form.diagnosticMedical,
-            plan_traitement: form.planTraitement
-          },
-          
-          section11_data: {
-            conclusion: form.conclusion
-          },
-          
-          form_type: 'medical_evaluation',
-          status: 'completed',
-          created_at: form.createdAt,
-          updated_at: form.updatedAt
+          // Map fields that exist in the form object
+          antecedents_medicaux: (form as any).antecedentsMedicaux,
+          antecedents_chirurgicaux: (form as any).antecedentsChirurgicaux,
+          antecedents_lesion: (form as any).antecedentsLesion,
+          antecedents_cnesst: (form as any).antecedentsCnesst,
+          antecedents_saaq: (form as any).antecedentsSaaq,
+          antecedents_autres: (form as any).antecedentsAutres,
+          antecedents_allergie: (form as any).antecedentsAllergie,
+          antecedents_tabac: (form as any).antecedentsTabac,
+          antecedents_cannabis: (form as any).antecedentsCannabis,
+          antecedents_alcool: (form as any).antecedentsAlcool,
+          medication_actuelle: (form as any).medicationActuelle,
+          historique_evolution: (form as any).historiqueEvolution,
+          appreciation_evolution: (form as any).appreciationEvolution,
+          plaintes_problemes: (form as any).plaintesproblemes,
+          impact_avq: (form as any).impactAvq,
+          examen_poids: (form as any).examenPoids,
+          examen_taille: (form as any).examenTaille,
+          examen_dominance: (form as any).examenDominance,
+          observation_generale: (form as any).observationGenerale,
+          patient_name: (form as any).patientName,
+          age: (form as any).age,
+          date_evaluation: (form as any).dateEvaluation,
+          patient_gender: (form as any).patientGender,
+          created_at: (form as any).createdAt,
+          updated_at: (form as any).updatedAt
         };
 
         const { error } = await supabase
@@ -262,11 +209,11 @@ export async function migrateSavedForms() {
           .upsert({
             id: savedForm.id,
             user_id: savedForm.userId,
-            form_name: savedForm.formName,
+            form_name: (savedForm as any).title || `Form ${savedForm.id}`,
             form_data: savedForm.formData,
-            patient_name: savedForm.patientName,
+            patient_name: (savedForm as any).patientName || 'Unknown',
             form_type: savedForm.formType,
-            is_template: savedForm.isTemplate,
+            is_template: (savedForm as any).isTemplate || false,
             created_at: savedForm.createdAt,
             updated_at: savedForm.updatedAt
           });

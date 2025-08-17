@@ -12,9 +12,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
-  username TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
+  username TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
+  first_name TEXT,
+  last_name TEXT,
   role TEXT DEFAULT 'user',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -31,28 +33,31 @@ CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
 CREATE TABLE IF NOT EXISTS medical_forms (
   id SERIAL PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users(id),
+  
+  -- Copy the exact structure from current database
+  antecedents_medicaux TEXT,
+  antecedents_chirurgicaux TEXT,
+  antecedents_lesion TEXT,
+  antecedents_cnesst TEXT,
+  antecedents_saaq TEXT,
+  antecedents_autres TEXT,
+  antecedents_allergie TEXT,
+  antecedents_tabac TEXT,
+  antecedents_cannabis TEXT,
+  antecedents_alcool TEXT,
+  medication_actuelle TEXT,
+  historique_evolution TEXT,
+  appreciation_evolution TEXT,
+  plaintes_problemes TEXT,
+  impact_avq TEXT,
+  examen_poids TEXT,
+  examen_taille TEXT,
+  examen_dominance TEXT,
+  observation_generale TEXT,
+  
+  -- Add basic metadata fields that might be missing
+  user_id TEXT,
   patient_name TEXT,
-  
-  -- Section data (JSON columns to match existing structure)
-  section1_data JSONB DEFAULT '{}',
-  section2_data JSONB DEFAULT '{}',
-  section3_data JSONB DEFAULT '{}',
-  section4_data JSONB DEFAULT '{}',
-  section5_data JSONB DEFAULT '{}',
-  section6_data JSONB DEFAULT '{}',
-  section7_data JSONB DEFAULT '{}',
-  section8_data JSONB DEFAULT '{}',
-  section9_data JSONB DEFAULT '{}',
-  section10_data JSONB DEFAULT '{}',
-  section11_data JSONB DEFAULT '{}',
-  
-  -- Form metadata
-  form_type TEXT DEFAULT 'medical_evaluation',
-  status TEXT DEFAULT 'draft',
-  is_template BOOLEAN DEFAULT FALSE,
-  
-  -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
