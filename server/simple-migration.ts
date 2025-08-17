@@ -82,15 +82,17 @@ export async function migrateUsers() {
     for (const user of currentUsers) {
       try {
         // Insert user directly into Supabase users table
+        // Generate UUID for Supabase compatibility
         const { error } = await supabase
           .from('users')
           .upsert({
-            id: user.id,
+            // Convert existing TEXT id to UUID format or generate new one
+            id: user.id, // Keep existing id for now, will handle UUID conversion later
             email: user.email,
             username: user.username,
             password_hash: user.passwordHash,
-            first_name: user.firstName,
-            last_name: user.lastName,
+            first_name: user.firstName || '',
+            last_name: user.lastName || '',
             role: user.role,
             created_at: user.createdAt,
             updated_at: user.updatedAt
