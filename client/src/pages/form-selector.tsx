@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User, TestTube, Zap } from 'lucide-react';
+import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User, TestTube, Zap, Brain, Mic } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { VisitSelectionModal } from '@/components/visit-selection-modal';
@@ -117,6 +117,20 @@ export default function FormSelector({
               >
                 <TestTube className="w-4 h-4" />
                 <span>{language === 'fr' ? 'Test Vocal' : 'Speech Test'}</span>
+              </Button>
+
+              {/* TGV Transcription Modes Demo Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation('/transcription-modes')}
+                className="flex items-center space-x-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                <Brain className="w-4 h-4" />
+                <span>{language === 'fr' ? 'Modes TGV' : 'TGV Modes'}</span>
+                <div className="bg-green-200 text-green-800 text-xs px-1 py-0.5 rounded ml-1">
+                  {language === 'fr' ? 'NOUVEAU' : 'NEW'}
+                </div>
               </Button>
 
               {/* User Info & Logout */}

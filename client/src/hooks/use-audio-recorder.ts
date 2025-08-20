@@ -5,6 +5,11 @@ interface AudioRecorderOptions {
   language?: 'fr' | 'en' | 'auto';
   chunkDuration?: number; // in seconds
   enhanceText?: boolean;
+  // New unified mode support
+  mode?: import('@shared/transcription-types').TranscriptionMode;
+  realTimeHybrid?: boolean;
+  wordLevelTimestamps?: boolean;
+  speakerIdentification?: boolean;
 }
 
 interface AudioChunk {
@@ -40,6 +45,7 @@ interface AudioRecorderState {
   retryCount: number;
   audioLevel: number; // 0-100 representing audio input level
   isListening: boolean; // true when actively capturing sound
+  confidence: number; // 0-1 confidence score for transcription
 }
 
 export function useAudioRecorder(options: AudioRecorderOptions = {}) {
@@ -58,6 +64,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     retryCount: 0,
     audioLevel: 0,
     isListening: false,
+    confidence: 0,
   });
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -822,6 +829,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     isSupported: state.isSupported,
     audioLevel: state.audioLevel,
     isListening: state.isListening,
+    confidence: state.confidence,
     
     // Actions
     startRecording,

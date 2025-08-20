@@ -32,6 +32,9 @@ import { processTranscriptWithCommands } from "@/utils/medical-context";
 import { testVoiceCommands } from "@/utils/voice-commands";
 import { VoiceCommandsManager } from "@/components/voice-commands-manager";
 import { VerbatimCommandsManager } from "@/components/verbatim-commands-manager";
+import { UnifiedDictationModes } from "@/components/unified-dictation-modes";
+import { TranscriptionModeSelector } from "@/components/transcription-mode-selector";
+import { useTranscriptionMode } from "@/hooks/use-transcription-mode";
 import { Badge } from "@/components/ui/badge";
 import { SoundBar } from "@/components/ui/sound-bar";
 
@@ -744,7 +747,7 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
               console.log(`   → Total commands: ${totalCommands}`);
               console.log(`   → Total verbatim sections: ${totalVerbatim}`);
               console.log(`   → Custom verbatim tests: ${customVerbatimCount}`);
-              console.log(`   → All commands used: [${[...new Set(allResults.flatMap(r => r.commandsUsed))].join(', ')}]`);
+              console.log(`   → All commands used: [${Array.from(new Set(allResults.flatMap(r => r.commandsUsed))).join(', ')}]`);
             }}
           >
             🧪 Test
