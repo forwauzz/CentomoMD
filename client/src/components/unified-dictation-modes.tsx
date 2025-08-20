@@ -134,7 +134,7 @@ export function UnifiedDictationModes({
     if (autoStart && isSupported && !isRecording) {
       startRecording();
     }
-  }, [autoStart, isSupported, isRecording, startRecording]);
+  }, [autoStart, isSupported, isRecording]); // Removed startRecording to prevent infinite loops
 
   // Handle transcript completion
   useEffect(() => {
@@ -152,7 +152,7 @@ export function UnifiedDictationModes({
         }));
       }
     }
-  }, [transcript, isProcessing, isRecording, onTranscriptComplete, currentMode, confidence]);
+  }, [transcript, isProcessing, isRecording, currentMode, confidence]); // Removed onTranscriptComplete to prevent infinite loops
 
   // Get status info
   const getStatus = () => {

@@ -20,6 +20,31 @@ Preferred communication style: Simple, everyday language.
 ## Development Workflow
 **Git Strategy Reference:** Follow `GIT_DEVELOPMENT_STRATEGY.md` for all development work including feature branches, security-first commits, and compliance validation workflows.
 
+## Recent Major Update - TGV Transcription Modes (January 20, 2025)
+**COMPLETED:** Unified TGV-compliant transcription system with three distinct modes:
+
+### Three Transcription Modes:
+1. **Smart Dictation Mode**: AI-enhanced transcription with Quebec French medical terminology optimization (temperature: 0.3)
+2. **Word-for-Word Mode**: Verbatim transcription with maximum precision and zero AI modification (temperature: 0.0)
+3. **Transcribe Mode**: Continuous ambient listening for long consultation sessions with speaker identification (temperature: 0.1)
+
+### Key Features Implemented:
+- Unified dictation modes component with real-time mode switching
+- Transcription mode selector with persistent user preferences
+- Mode-specific Whisper API configurations and processing pipelines
+- Quebec French medical terminology optimization across all modes
+- Confidence scoring and session statistics tracking
+- Zero patient data retention compliance maintained across all modes
+- Real-time hybrid processing (Web Speech API + Whisper verification)
+- Comprehensive demo page accessible via `/transcription-modes` route
+
+### Technical Implementation:
+- **Types System**: `shared/transcription-types.ts` defines all mode configurations and interfaces
+- **Mode Management**: `client/src/hooks/use-transcription-mode.ts` handles state persistence via localStorage
+- **Enhanced Whisper Service**: `server/whisper-service.ts` supports mode-specific temperature and processing settings
+- **Unified Component**: `client/src/components/unified-dictation-modes.tsx` provides seamless mode switching
+- **Navigation Integration**: Added to main app routing and form selector with "NEW" badge
+
 ## Logging Infrastructure
 **Phase 1 Complete (January 20, 2025):** 
 - Zero-retention logging service with medical data sanitization
