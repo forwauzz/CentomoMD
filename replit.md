@@ -20,6 +20,16 @@ Preferred communication style: Simple, everyday language.
 ## Development Workflow
 **Git Strategy Reference:** Follow `GIT_DEVELOPMENT_STRATEGY.md` for all development work including feature branches, security-first commits, and compliance validation workflows.
 
+## Logging Infrastructure
+**Phase 1 Complete (January 20, 2025):** 
+- Zero-retention logging service with medical data sanitization
+- Montreal timezone support for local development
+- Structured console output with categorized events (AUTH, API, FORM, VOICE, OCR)
+- Authentication event tracking (login/logout with performance metrics)
+- API request middleware for comprehensive request/response monitoring
+- Admin endpoints: `/api/logs/recent` and `/api/logs/health` for system monitoring
+- Memory buffer for recent log storage (configurable: 2000 entries in dev, 1000 in production)
+
 ## System Architecture
 
 ### Technology Stack

@@ -77,7 +77,9 @@ class CentomoLogger {
     this.logInternal(LogLevel.INFO, LogCategory.SYSTEM, 'logger', 'LOGGER_INITIALIZED', {
       level: this.config.level,
       bufferSize: this.config.maxBufferSize,
-      sessionId: this.sessionId
+      sessionId: this.sessionId,
+      timezone: 'America/Montreal',
+      localTime: new Date().toLocaleString('en-CA', { timeZone: 'America/Montreal' })
     });
   }
 
@@ -123,7 +125,14 @@ class CentomoLogger {
   }
 
   private formatForConsole(entry: LogEntry): string {
-    const timestamp = new Date(entry.timestamp).toLocaleTimeString();
+    // Format timestamp for Montreal timezone (America/Montreal)
+    const timestamp = new Date(entry.timestamp).toLocaleTimeString('en-CA', {
+      timeZone: 'America/Montreal',
+      hour12: true,
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit'
+    });
     const prefix = `[${entry.level}] ${entry.category}:${entry.event}`;
     const context = entry.component ? ` (${entry.component})` : '';
     const sessionInfo = entry.sessionId ? ` [${entry.sessionId.slice(-8)}]` : '';
