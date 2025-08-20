@@ -402,11 +402,11 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-4 max-w-6xl">
+    <div className="h-screen bg-background flex flex-col">
+      <div className="container mx-auto p-3 max-w-6xl flex-1 flex flex-col">
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
@@ -433,235 +433,196 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="dictation">{t.dictationTab}</TabsTrigger>
-            <TabsTrigger value="settings">{t.settingsTab}</TabsTrigger>
-            <TabsTrigger value="results">{t.resultsTab}</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3 flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-3 h-9">
+            <TabsTrigger value="dictation" className="text-xs">{t.dictationTab}</TabsTrigger>
+            <TabsTrigger value="settings" className="text-xs">{t.settingsTab}</TabsTrigger>
+            <TabsTrigger value="results" className="text-xs">{t.resultsTab}</TabsTrigger>
           </TabsList>
 
           {/* Dictation Tab */}
-          <TabsContent value="dictation" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <TabsContent value="dictation" className="space-y-3">
+            {/* Compact Controls Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               
-              {/* Left Column - Configuration */}
-              <div className="space-y-4">
-                {/* Mode Selection */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
-                      {t.modeSelection}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <TranscriptionModeSelector
-                        currentMode={currentMode}
-                        onModeChange={setMode}
-                        language={currentLanguage}
-                        disabled={isRecording}
-                      />
-                      <div className="text-xs text-muted-foreground">
-                        {modeConfig.settings.enhanceText ? "AI Enhanced" : "Raw"} | 
-                        {modeConfig.settings.quebecFrenchOptimization ? "QC Optimized" : "Standard"}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Section & Template Selection */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">{t.sectionSelection}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Select value={selectedSection} onValueChange={setSelectedSection}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t.selectSection} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sectionOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {currentLanguage === "fr" ? option.labelFr : option.labelEn}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium">{t.templateSelection}</label>
-                      <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {templateOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {currentLanguage === "fr" ? option.labelFr : option.labelEn}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="ai-formatting"
-                        checked={aiFormatting}
-                        onChange={(e) => setAiFormatting(e.target.checked)}
-                        className="h-4 w-4"
-                      />
-                      <label htmlFor="ai-formatting" className="text-sm">
-                        {t.aiEnhancement}
-                      </label>
-                    </div>
-                  </CardContent>
-                </Card>
+              {/* Mode Selection - Compact */}
+              <div className="space-y-2">
+                <div className="text-xs font-medium flex items-center gap-1">
+                  <Settings className="h-3 w-3" />
+                  {t.modeSelection}
+                </div>
+                <TranscriptionModeSelector
+                  currentMode={currentMode}
+                  onModeChange={setMode}
+                  language={currentLanguage}
+                  disabled={isRecording}
+                />
               </div>
 
-              {/* Right Column - Recording Controls */}
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm flex items-center justify-between">
-                      <span>Recording Controls</span>
-                      <div className="text-xs text-muted-foreground">
-                        {formatDuration(recordingDuration)}
-                        {chunkCount > 0 && ` • ${chunkCount} chunks`}
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Recording Buttons */}
-                    <div className="flex gap-2">
-                      {!isRecording ? (
+              {/* Section & Options */}
+              <div className="space-y-2">
+                <div className="text-xs font-medium">{t.sectionSelection}</div>
+                <Select value={selectedSection} onValueChange={setSelectedSection}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder={t.selectSection} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sectionOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {currentLanguage === "fr" ? option.labelFr : option.labelEn}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <div className="flex items-center gap-2">
+                  <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templateOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {currentLanguage === "fr" ? option.labelFr : option.labelEn}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      id="ai-formatting"
+                      checked={aiFormatting}
+                      onChange={(e) => setAiFormatting(e.target.checked)}
+                      className="h-3 w-3"
+                    />
+                    <label htmlFor="ai-formatting" className="text-xs">AI</label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recording Controls - Compact */}
+              <div className="space-y-2">
+                <div className="text-xs font-medium flex items-center justify-between">
+                  <span>Recording</span>
+                  <span className="text-muted-foreground">
+                    {formatDuration(recordingDuration)}
+                    {chunkCount > 0 && ` • ${chunkCount}`}
+                  </span>
+                </div>
+                
+                <div className="flex gap-1">
+                  {!isRecording ? (
+                    <Button
+                      onClick={handleStartRecording}
+                      disabled={!selectedSection || isProcessing}
+                      size="sm"
+                      className="flex-1 h-9"
+                    >
+                      <Mic className="h-3 w-3 mr-1" />
+                      <span className="text-xs">{t.startRecording}</span>
+                    </Button>
+                  ) : (
+                    <>
+                      {!isPaused ? (
                         <Button
-                          onClick={handleStartRecording}
-                          disabled={!selectedSection || isProcessing}
-                          className="flex-1"
+                          onClick={pauseRecording}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 h-9"
                         >
-                          <Mic className="h-4 w-4 mr-2" />
-                          {t.startRecording}
+                          <span className="text-xs">{t.pauseRecording}</span>
                         </Button>
                       ) : (
-                        <>
-                          {!isPaused ? (
-                            <Button
-                              onClick={pauseRecording}
-                              variant="outline"
-                              className="flex-1"
-                            >
-                              {t.pauseRecording}
-                            </Button>
-                          ) : (
-                            <Button
-                              onClick={resumeRecording}
-                              variant="default"
-                              className="flex-1"
-                            >
-                              {t.resumeRecording}
-                            </Button>
-                          )}
-                          <Button
-                            onClick={handleStopRecording}
-                            variant="destructive"
-                            className="flex-1"
-                          >
-                            <MicOff className="h-4 w-4 mr-2" />
-                            {t.stopRecording}
-                          </Button>
-                        </>
+                        <Button
+                          onClick={resumeRecording}
+                          variant="default"
+                          size="sm"
+                          className="flex-1 h-9"
+                        >
+                          <span className="text-xs">{t.resumeRecording}</span>
+                        </Button>
                       )}
-                    </div>
-
-                    {/* Processing Progress */}
-                    {isProcessing && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>{t.processing}</span>
-                          <span>{currentChunkIndex}/{chunkCount}</span>
-                        </div>
-                        <Progress value={getProgress()} className="w-full" />
-                      </div>
-                    )}
-
-                    {/* Session Stats */}
-                    <div className="grid grid-cols-3 gap-4 text-center text-xs border-t pt-3">
-                      <div>
-                        <div className="font-medium">{t.accuracy}</div>
-                        <div className="text-muted-foreground">{confidence || 95}%</div>
-                      </div>
-                      <div>
-                        <div className="font-medium">{t.duration}</div>
-                        <div className="text-muted-foreground">{formatDuration(recordingDuration)}</div>
-                      </div>
-                      <div>
-                        <div className="font-medium">{t.chunks}</div>
-                        <div className="text-muted-foreground">{chunkCount || 0}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <VoiceCommandsManager language={currentLanguage} />
-                  <VerbatimCommandsManager language={currentLanguage} />
+                      <Button
+                        onClick={handleStopRecording}
+                        variant="destructive"
+                        size="sm"
+                        className="flex-1 h-9"
+                      >
+                        <MicOff className="h-3 w-3 mr-1" />
+                        <span className="text-xs">{t.stopRecording}</span>
+                      </Button>
+                    </>
+                  )}
                 </div>
+
+                {/* Processing Progress - Compact */}
+                {isProcessing && (
+                  <div className="space-y-1">
+                    <Progress value={getProgress()} className="w-full h-1" />
+                    <div className="text-xs text-muted-foreground text-center">
+                      {currentChunkIndex}/{chunkCount}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Text Editor */}
-            <Card className="mt-6">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">{t.finalText}</CardTitle>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleCopyText}
-                      disabled={!editableText}
-                      size="sm"
-                      variant="outline"
-                    >
-                      <Copy className="h-3 w-3 mr-1" />
-                      {t.copyText}
-                    </Button>
-                    <Button
-                      onClick={handleClearText}
-                      disabled={!editableText && !isRecording}
-                      size="sm"
-                      variant="outline"
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      {t.clearText}
-                    </Button>
-                    <Button
-                      onClick={handleSaveToSection}
-                      disabled={!editableText || !selectedSection || isProcessing}
-                      size="sm"
-                    >
-                      <Save className="h-3 w-3 mr-1" />
-                      {t.saveToSection}
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                  value={editableText}
-                  onChange={(e) => setEditableText(e.target.value)}
-                  placeholder={
-                    currentLanguage === "fr"
-                      ? "Le texte transcrit apparaîtra ici..."
-                      : "Transcribed text will appear here..."
-                  }
-                  className="min-h-[300px] font-mono text-sm"
-                  disabled={isProcessing}
-                />
-              </CardContent>
-            </Card>
+            {/* Action Buttons Row */}
+            <div className="flex items-center justify-between gap-2 py-2 border-b">
+              <div className="flex gap-1">
+                <VoiceCommandsManager language={currentLanguage} />
+                <VerbatimCommandsManager language={currentLanguage} />
+              </div>
+              
+              <div className="flex gap-1">
+                <Button
+                  onClick={handleCopyText}
+                  disabled={!editableText}
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                >
+                  <Copy className="h-3 w-3 mr-1" />
+                  {t.copyText}
+                </Button>
+                <Button
+                  onClick={handleClearText}
+                  disabled={!editableText && !isRecording}
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  {t.clearText}
+                </Button>
+                <Button
+                  onClick={handleSaveToSection}
+                  disabled={!editableText || !selectedSection || isProcessing}
+                  size="sm"
+                  className="h-7 text-xs"
+                >
+                  <Save className="h-3 w-3 mr-1" />
+                  {t.saveToSection}
+                </Button>
+              </div>
+            </div>
+
+            {/* Maximized Text Editor */}
+            <div className="flex-1">
+              <Textarea
+                value={editableText}
+                onChange={(e) => setEditableText(e.target.value)}
+                placeholder={
+                  currentLanguage === "fr"
+                    ? "Le texte transcrit apparaîtra ici..."
+                    : "Transcribed text will appear here..."
+                }
+                className="w-full h-[calc(100vh-320px)] min-h-[400px] font-mono text-sm resize-none border-0 focus:ring-0 p-4"
+                disabled={isProcessing}
+              />
+            </div>
           </TabsContent>
 
           {/* Settings Tab */}

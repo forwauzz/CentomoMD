@@ -77,199 +77,47 @@ export function TranscriptionModeSelector({
   language,
   disabled = false,
 }: TranscriptionModeSelectorProps) {
-  const [hoveredMode, setHoveredMode] = useState<TranscriptionMode | null>(null);
   const t = translations[language];
 
-  const getModeFeatures = (mode: TranscriptionMode) => {
-    const config = TRANSCRIPTION_MODE_CONFIGS[mode];
-    const features = [];
-
-    if (config.settings.enhanceText) features.push(t.aiEnhanced);
-    if (config.settings.wordLevelTimestamps) features.push(t.wordLevel);
-    if (config.settings.continuousListening) features.push(t.continuous);
-    if (config.settings.speakerIdentification) features.push(t.speaker);
-    if (config.settings.realTimeDisplay) features.push(t.realTime);
-    if (config.settings.confidenceScoring) features.push(t.confidence);
-    if (config.settings.temperature === 0.0) features.push(t.precision);
-
-    return features;
-  };
-
-  const formatDuration = (seconds: number) => {
-    if (seconds >= 60) {
-      return `${Math.floor(seconds / 60)} ${t.minutes}`;
-    }
-    return `${seconds} ${t.seconds}`;
-  };
-
   return (
-    <TooltipProvider>
-      <Card className="w-full">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Zap className="h-5 w-5 text-blue-600" />
-            {t.selectMode}
-          </CardTitle>
-          {currentMode && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{t.currentMode}:</span>
-              <Badge variant="secondary" className="flex items-center gap-1">
-                {React.createElement(modeIcons[TRANSCRIPTION_MODE_CONFIGS[currentMode].icon as keyof typeof modeIcons], {
-                  className: "h-3 w-3"
-                })}
-                {language === 'fr' 
-                  ? TRANSCRIPTION_MODE_CONFIGS[currentMode].name
-                  : TRANSCRIPTION_MODE_CONFIGS[currentMode].name
-                }
-              </Badge>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {(Object.keys(TRANSCRIPTION_MODE_CONFIGS) as TranscriptionMode[]).map((mode) => {
-              const config = TRANSCRIPTION_MODE_CONFIGS[mode];
-              const IconComponent = modeIcons[config.icon as keyof typeof modeIcons];
-              const isActive = currentMode === mode;
-              const isHovered = hoveredMode === mode;
-              const features = getModeFeatures(mode);
-
-              return (
-                <Card
-                  key={mode}
-                  className={`cursor-pointer transition-all duration-200 ${
-                    isActive 
-                      ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950/20' 
-                      : isHovered
-                      ? 'ring-1 ring-blue-300 bg-blue-25 dark:bg-blue-950/10'
-                      : 'hover:shadow-md'
-                  } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onMouseEnter={() => !disabled && setHoveredMode(mode)}
-                  onMouseLeave={() => setHoveredMode(null)}
-                  onClick={() => !disabled && onModeChange(mode)}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <IconComponent className={`h-5 w-5 ${
-                        isActive ? 'text-blue-600' : 'text-gray-600'
-                      }`} />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm">{config.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {language === 'fr' ? (
-                            mode === 'smart' ? t.smartDescription :
-                            mode === 'word-for-word' ? t.wordForWordDescription :
-                            t.transcribeDescription
-                          ) : config.description}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      {/* Features */}
-                      <div>
-                        <div className="text-xs font-medium text-muted-foreground mb-1">
-                          {t.features}
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {features.slice(0, 3).map((feature, index) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs px-1 py-0"
-                            >
-                              {feature}
-                            </Badge>
-                          ))}
-                          {features.length > 3 && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Badge variant="outline" className="text-xs px-1 py-0">
-                                  +{features.length - 3}
-                                </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <div className="space-y-1">
-                                  {features.slice(3).map((feature, index) => (
-                                    <div key={index} className="text-xs">{feature}</div>
-                                  ))}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Technical specs */}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">{t.maxDuration}:</span>
-                          <div className="font-medium">
-                            {formatDuration(config.settings.maxSessionDuration)}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">{t.chunkSize}:</span>
-                          <div className="font-medium">
-                            {formatDuration(config.settings.chunkDuration)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Compliance badges */}
-                      <div className="flex gap-1">
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Badge variant="outline" className="text-xs px-1 py-0 bg-green-50 border-green-200">
-                              <Shield className="h-2 w-2 mr-1" />
-                              TGV
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <div className="text-xs">
-                              {t.tgvCompliant} - {t.zeroRetention}
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                        {config.settings.quebecFrenchOptimization && (
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Badge variant="outline" className="text-xs px-1 py-0 bg-blue-50 border-blue-200">
-                                QC
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <div className="text-xs">{t.quebecOptimized}</div>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Mode change button for mobile */}
-          <div className="mt-4 md:hidden">
+    <div className="space-y-2">
+      {/* Compact 3-button layout */}
+      <div className="flex gap-2">
+        {(Object.keys(TRANSCRIPTION_MODE_CONFIGS) as TranscriptionMode[]).map((mode) => {
+          const config = TRANSCRIPTION_MODE_CONFIGS[mode];
+          const IconComponent = modeIcons[config.icon as keyof typeof modeIcons];
+          const isActive = currentMode === mode;
+          
+          // Get just the first word for compact display
+          const shortName = config.name.split(' ')[0];
+          
+          return (
             <Button
-              className="w-full"
+              key={mode}
+              variant={isActive ? "default" : "outline"}
+              size="sm"
+              className={`flex-1 h-10 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => !disabled && onModeChange(mode)}
               disabled={disabled}
-              onClick={() => {
-                const modes: TranscriptionMode[] = ['smart', 'word-for-word', 'transcribe'];
-                const currentIndex = modes.indexOf(currentMode);
-                const nextIndex = (currentIndex + 1) % modes.length;
-                onModeChange(modes[nextIndex]);
-              }}
             >
-              <Clock className="h-4 w-4 mr-2" />
-              Switch Mode
+              <IconComponent className="h-4 w-4 mr-2" />
+              <span className="text-xs font-medium">
+                {shortName}
+              </span>
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </TooltipProvider>
+          );
+        })}
+      </div>
+      
+      {/* Minimal status line */}
+      <div className="text-xs text-muted-foreground text-center">
+        {TRANSCRIPTION_MODE_CONFIGS[currentMode]?.settings.enhanceText 
+          ? (language === 'fr' ? 'IA Améliorée' : 'AI Enhanced')
+          : (language === 'fr' ? 'Brut' : 'Raw')
+        } • {TRANSCRIPTION_MODE_CONFIGS[currentMode]?.settings.quebecFrenchOptimization 
+          ? 'QC' : 'STD'
+        }
+      </div>
+    </div>
   );
 }
