@@ -266,12 +266,12 @@ export default function SystemLogsPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Level</label>
-                  <Select value={searchParams.level || ""} onValueChange={(value) => setSearchParams({...searchParams, level: value || undefined})}>
+                  <Select value={searchParams.level || "all"} onValueChange={(value) => setSearchParams({...searchParams, level: value === "all" ? undefined : value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="All levels" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All levels</SelectItem>
+                      <SelectItem value="all">All levels</SelectItem>
                       <SelectItem value="ERROR">Errors</SelectItem>
                       <SelectItem value="WARN">Warnings</SelectItem>
                       <SelectItem value="INFO">Info</SelectItem>
@@ -284,12 +284,12 @@ export default function SystemLogsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Category</label>
-                  <Select value={searchParams.category || ""} onValueChange={(value) => setSearchParams({...searchParams, category: value || undefined})}>
+                  <Select value={searchParams.category || "all"} onValueChange={(value) => setSearchParams({...searchParams, category: value === "all" ? undefined : value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="All categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All categories</SelectItem>
+                      <SelectItem value="all">All categories</SelectItem>
                       <SelectItem value="AUTH">Authentication</SelectItem>
                       <SelectItem value="API">API Requests</SelectItem>
                       <SelectItem value="FORM">Form Processing</SelectItem>
