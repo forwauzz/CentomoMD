@@ -229,27 +229,30 @@ export class ContinuousAudioProcessor {
     console.log(`🎵 Creating chunk ${this.chunkCounter} from ${this.allRecordedData.length} data pieces (${(completeWebM.size / 1024).toFixed(1)}KB)`);
     
     const chunk: AudioChunk = {
-      id: `chunk-${this.chunkCounter++}`,
+      id: `chunk-${this.chunkCounter}`,
       data: completeWebM,
       startTime: this.lastChunkTime,
       endTime: now,
       duration: now - this.lastChunkTime,
-      hasOverlap: this.chunkCounter > 1,
-      overlapDuration: this.chunkCounter > 1 ? this.config.overlapMs : undefined
+      hasOverlap: this.chunkCounter > 0,
+      overlapDuration: this.chunkCounter > 0 ? this.config.overlapMs : undefined
     };
+    
+    this.chunkCounter++;
     
     this.addChunkToQueue(chunk);
     
     // FIXED: Reset accumulated data for next chunk (or keep overlap if needed)
-    if (this.config.overlapMs > 0) {
-      // Keep some overlap data for context
+    if (this.config.overlapMs > 0 && this.chunkCounter > 1) {
+      // Keep some overlap data for context (only after first chunk)
       const overlapRatio = this.config.overlapMs / this.config.chunkDurationMs;
       const keepCount = Math.max(1, Math.floor(this.allRecordedData.length * overlapRatio));
       this.allRecordedData = this.allRecordedData.slice(-keepCount);
       console.log(`🔗 Keeping ${keepCount} data pieces for overlap`);
     } else {
-      // No overlap - clear all data
+      // No overlap for first chunk - clear all data
       this.allRecordedData = [];
+      console.log(`🧹 Cleared accumulated data (chunk ${this.chunkCounter - 1})`);
     }
     
     this.lastChunkTime = now - this.config.overlapMs;
@@ -264,13 +267,15 @@ export class ContinuousAudioProcessor {
     console.log(`🎵 Creating final chunk from ${this.allRecordedData.length} data pieces (${(finalWebM.size / 1024).toFixed(1)}KB)`);
     
     const chunk: AudioChunk = {
-      id: `chunk-final-${this.chunkCounter++}`,
+      id: `chunk-final-${this.chunkCounter}`,
       data: finalWebM,
       startTime: this.lastChunkTime,
       endTime: now,
       duration: now - this.lastChunkTime,
       hasOverlap: false
     };
+    
+    this.chunkCounter++;
     
     this.addChunkToQueue(chunk);
     this.allRecordedData = [];
