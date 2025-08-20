@@ -1281,15 +1281,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create blob for transcription with proper format detection
-      const blob = new Blob([audioBuffer], { type: 'audio/webm;codecs=opus' });
-
       // Convert language format for Whisper API (fr/en only, not fr-CA/en-US)
       const whisperLanguage = language === 'fr-CA' || language === 'fr' ? 'fr' : 
                               language === 'en-US' || language === 'en' ? 'en' : 
                               'auto';
 
-      const result = await transcribeAudioChunk(blob, chunkIndex, {
+      // Use audioBuffer directly instead of creating Blob (which causes format issues)
+      const result = await transcribeAudioWithWhisper(audioBuffer, {
         language: whisperLanguage as "fr" | "en" | "auto",
         enhanceText: false, // Transcribe mode uses minimal processing
         sessionId,
@@ -1298,7 +1296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Log voice activity for this chunk
-      logVoiceEvent('AMBIENT_TRANSCRIPTION', req.session?.userId, {
+      logVoiceEvent('AMBIENT_TRANSCRIPTION', req.session?.userId || '', {
         chunkIndex,
         sessionId,
         duration: result.duration,
@@ -1315,7 +1313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         language: result.language,
         confidence: result.confidence || 0.95,
         chunkIndex,
-        speaker: result.speaker || null // Speaker identification if available
+        speaker: result.speakers?.[0]?.speaker || null // Speaker identification if available
       });
 
     } catch (error) {
@@ -1323,7 +1321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error(`❌ Ambient transcription error (chunk ${chunkIndex}):`, error);
 
       // Log the error
-      logVoiceEvent('AMBIENT_TRANSCRIPTION_ERROR', req.session?.userId, {
+      logVoiceEvent('AMBIENT_TRANSCRIPTION_ERROR', req.session?.userId || '', {
         chunkIndex,
         sessionId,
         error: error instanceof Error ? error.message : 'Unknown error'
