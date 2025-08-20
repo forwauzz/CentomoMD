@@ -17,6 +17,9 @@ Preferred communication style: Simple, everyday language.
 
 **Security Implementation Strategy:** Every new feature requires security validation using our comprehensive checklist covering authentication, data protection, audit logging, and compliance monitoring.
 
+## Development Workflow
+**Git Strategy Reference:** Follow `GIT_DEVELOPMENT_STRATEGY.md` for all development work including feature branches, security-first commits, and compliance validation workflows.
+
 ## System Architecture
 
 ### Technology Stack
