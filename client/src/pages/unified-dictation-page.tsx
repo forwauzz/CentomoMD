@@ -151,6 +151,9 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
   
   // Ambient listening state for transcribe mode
   const [ambientListening, setAmbientListening] = useState(false);
+  const [ambientChunkCounter, setAmbientChunkCounter] = useState(0);
+  const [ambientSessionId, setAmbientSessionId] = useState('');
+  const [ambientTranscriptions, setAmbientTranscriptions] = useState<{[key: number]: string}>({});
   
   const t = translations[currentLanguage];
 
@@ -263,8 +266,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
           language: getWhisperLanguage(currentLanguage), // Ensure correct Whisper language format
           mode: 'transcribe',
           temperature: 0.1, // Transcribe mode setting
-          chunkIndex: 1,
-          sessionId: `ambient-${Date.now()}`
+          chunkIndex: ambientChunkCounter,
+          sessionId: ambientSessionId
         }),
       });
       
@@ -273,17 +276,36 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
         console.log('🔍 Ambient transcription result:', result);
         
         if (result.text?.trim()) {
-          // Append transcribed text with speaker identification
-          const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          const speakerLabel = result.speaker ? `[${result.speaker}]` : '';
-          const formattedText = `[${timestamp}]${speakerLabel} ${result.text.trim()}`;
+          // Store chunk result in order for proper concatenation
+          console.log(`📝 Chunk ${ambientChunkCounter} transcription: "${result.text.trim()}"`);
           
-          setEditableText(prev => {
-            const separator = prev ? "\n" : "";
-            return prev + separator + formattedText;
+          setAmbientTranscriptions(prev => {
+            const updated = { ...prev, [ambientChunkCounter]: result.text.trim() };
+            console.log(`📊 Updated transcriptions:`, Object.keys(updated).map(k => `Chunk ${k}: "${updated[parseInt(k)].substring(0, 50)}..."`));
+            
+            // Concatenate all chunks in order to build final transcript
+            const orderedChunks = Object.keys(updated)
+              .map(k => parseInt(k))
+              .sort((a, b) => a - b)
+              .map(index => updated[index])
+              .filter(text => text?.trim());
+            
+            const finalTranscript = orderedChunks.join(' ');
+            console.log(`🔗 Final concatenated transcript (${orderedChunks.length} chunks): "${finalTranscript.substring(0, 100)}..."`);
+            
+            // Format with timestamp and speaker for display
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const speakerLabel = result.speaker ? `[${result.speaker}]` : '';
+            const formattedText = `[${timestamp}]${speakerLabel} ${finalTranscript}`;
+            
+            setEditableText(formattedText);
+            return updated;
           });
           
-          console.log(`✅ Ambient transcription added: ${formattedText.substring(0, 50)}...`);
+          // Increment chunk counter for next chunk
+          setAmbientChunkCounter(prev => prev + 1);
+          
+          console.log(`✅ Chunk ${ambientChunkCounter} processed successfully`);
         } else {
           console.warn('⚠️ Ambient transcription returned empty text');
         }
@@ -307,6 +329,13 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     }
 
     if (currentMode === 'transcribe') {
+      // Initialize ambient session for transcribe mode
+      const sessionId = `ambient-${Date.now()}`;
+      setAmbientSessionId(sessionId);
+      setAmbientChunkCounter(0);
+      setAmbientTranscriptions({});
+      console.log(`🎙️ Starting ambient session: ${sessionId}`);
+      
       // Start ambient listening for transcribe mode
       setAmbientListening(true);
     } else {
@@ -317,7 +346,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
 
   const handleStopRecording = () => {
     if (currentMode === 'transcribe') {
-      // Stop ambient listening
+      // Stop ambient listening and log final results
+      console.log(`🏁 Stopping ambient session: ${ambientSessionId} with ${Object.keys(ambientTranscriptions).length} chunks`);
       setAmbientListening(false);
     } else {
       // Stop traditional recording
