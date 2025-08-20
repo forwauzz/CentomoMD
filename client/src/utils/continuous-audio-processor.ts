@@ -56,7 +56,10 @@ export class ContinuousAudioProcessor {
   };
   
   private callbacks: ProcessingCallbacks = {};
-  private recordingData: Blob[] = [];
+  
+  // FIXED: Accumulative recording strategy
+  private allRecordedData: Blob[] = [];
+  private chunkingInterval: NodeJS.Timeout | null = null;
   private lastChunkTime = 0;
 
   constructor(config?: Partial<ContinuousProcessorConfig>) {
@@ -93,15 +96,15 @@ export class ContinuousAudioProcessor {
         await this.speakerIdentifier.initialize(audioContext);
       }
       
-      // Initialize MediaRecorder
+      // FIXED: Initialize MediaRecorder for CONTINUOUS recording (no time slicing)
       this.mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm',
+        mimeType: 'audio/webm;codecs=opus',
         audioBitsPerSecond: 128000
       });
       
       this.setupMediaRecorderEvents();
       
-      console.log('🎙️ Continuous Audio Processor initialized');
+      console.log('🎙️ Continuous Audio Processor initialized with accumulative strategy');
     } catch (error) {
       console.error('❌ Failed to initialize continuous processor:', error);
       throw error;
@@ -126,9 +129,9 @@ export class ContinuousAudioProcessor {
 
     this.isRecording = true;
     this.startTime = Date.now();
-    this.chunkCounter = 0;
     this.lastChunkTime = this.startTime;
-    this.recordingData = [];
+    this.chunkCounter = 0;
+    this.allRecordedData = [];
     
     // Start VAD if enabled
     if (this.vad) {
@@ -136,9 +139,15 @@ export class ContinuousAudioProcessor {
     }
     
     try {
-      // Start recording with time slicing for continuous chunks
-      this.mediaRecorder.start(this.config.chunkDurationMs);
-      console.log(`🔴 Continuous recording started (${this.config.chunkDurationMs}ms chunks)`);
+      // FIXED: Start CONTINUOUS recording (no time slicing)
+      this.mediaRecorder.start();
+      
+      // FIXED: Set up manual chunking interval
+      this.chunkingInterval = setInterval(() => {
+        this.createChunkFromAccumulatedData();
+      }, this.config.chunkDurationMs);
+      
+      console.log(`🔴 Continuous recording started with ${this.config.chunkDurationMs}ms manual chunking`);
     } catch (error) {
       console.error('❌ Failed to start MediaRecorder:', error);
       this.isRecording = false;
@@ -155,16 +164,19 @@ export class ContinuousAudioProcessor {
     }
 
     this.isRecording = false;
+    
+    // Clear chunking interval
+    if (this.chunkingInterval) {
+      clearInterval(this.chunkingInterval);
+      this.chunkingInterval = null;
+    }
+    
+    // Stop MediaRecorder
     this.mediaRecorder.stop();
     
     // Stop VAD
     if (this.vad) {
       this.vad.stop();
-    }
-    
-    // Process final chunk if any
-    if (this.recordingData.length > 0) {
-      this.createFinalChunk();
     }
     
     console.log('⏹️ Continuous recording stopped');
@@ -173,19 +185,19 @@ export class ContinuousAudioProcessor {
   private setupMediaRecorderEvents(): void {
     if (!this.mediaRecorder) return;
 
+    // FIXED: Accumulate ALL data instead of processing individual chunks
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0 && this.isRecording) {
-        // Create chunk from each time slice
-        this.createChunkFromData([event.data]);
-        console.log(`🔄 Processing chunk: ${this.chunkCounter - 1}`);
+        console.log(`📦 Accumulating data: ${(event.data.size / 1024).toFixed(1)}KB`);
+        this.allRecordedData.push(event.data);
       }
     };
 
     this.mediaRecorder.onstop = () => {
       console.log('⏹️ MediaRecorder stopped');
-      // Process any remaining data
-      if (this.recordingData.length > 0) {
-        this.createFinalChunk();
+      // Process any remaining accumulated data as final chunk
+      if (this.allRecordedData.length > 0) {
+        this.createFinalChunkFromAccumulatedData();
       }
     };
 
@@ -195,18 +207,23 @@ export class ContinuousAudioProcessor {
     };
   }
 
-  private scheduleNextChunk(): void {
-    // MediaRecorder with time slicing handles this automatically
-    // No need for manual scheduling
-  }
+  // FIXED: Create chunks from accumulated data instead of individual fragments
+  private createChunkFromAccumulatedData(): void {
+    if (this.allRecordedData.length === 0) {
+      console.log('⚠️ No accumulated data to chunk');
+      return;
+    }
 
-  private createChunkFromData(data: Blob[]): void {
     const now = Date.now();
-    const chunkBlob = new Blob(data, { type: 'audio/webm' });
+    
+    // FIXED: Create complete WebM file from all accumulated data
+    const completeWebM = new Blob(this.allRecordedData, { type: 'audio/webm;codecs=opus' });
+    
+    console.log(`🎵 Creating chunk ${this.chunkCounter} from ${this.allRecordedData.length} data pieces (${(completeWebM.size / 1024).toFixed(1)}KB)`);
     
     const chunk: AudioChunk = {
       id: `chunk-${this.chunkCounter++}`,
-      data: chunkBlob,
+      data: completeWebM,
       startTime: this.lastChunkTime,
       endTime: now,
       duration: now - this.lastChunkTime,
@@ -215,18 +232,33 @@ export class ContinuousAudioProcessor {
     };
     
     this.addChunkToQueue(chunk);
-    this.lastChunkTime = now - this.config.overlapMs; // Account for overlap
+    
+    // FIXED: Reset accumulated data for next chunk (or keep overlap if needed)
+    if (this.config.overlapMs > 0) {
+      // Keep some overlap data for context
+      const overlapRatio = this.config.overlapMs / this.config.chunkDurationMs;
+      const keepCount = Math.max(1, Math.floor(this.allRecordedData.length * overlapRatio));
+      this.allRecordedData = this.allRecordedData.slice(-keepCount);
+      console.log(`🔗 Keeping ${keepCount} data pieces for overlap`);
+    } else {
+      // No overlap - clear all data
+      this.allRecordedData = [];
+    }
+    
+    this.lastChunkTime = now - this.config.overlapMs;
   }
 
-  private createFinalChunk(): void {
-    if (this.recordingData.length === 0) return;
+  private createFinalChunkFromAccumulatedData(): void {
+    if (this.allRecordedData.length === 0) return;
     
-    const finalBlob = new Blob(this.recordingData, { type: 'audio/webm' });
+    const finalWebM = new Blob(this.allRecordedData, { type: 'audio/webm;codecs=opus' });
     const now = Date.now();
+    
+    console.log(`🎵 Creating final chunk from ${this.allRecordedData.length} data pieces (${(finalWebM.size / 1024).toFixed(1)}KB)`);
     
     const chunk: AudioChunk = {
       id: `chunk-final-${this.chunkCounter++}`,
-      data: finalBlob,
+      data: finalWebM,
       startTime: this.lastChunkTime,
       endTime: now,
       duration: now - this.lastChunkTime,
@@ -234,13 +266,7 @@ export class ContinuousAudioProcessor {
     };
     
     this.addChunkToQueue(chunk);
-    this.recordingData = [];
-  }
-
-  private processAccumulatedData(): void {
-    if (this.recordingData.length > 0) {
-      this.createFinalChunk();
-    }
+    this.allRecordedData = [];
   }
 
   private addChunkToQueue(chunk: AudioChunk): void {
@@ -337,6 +363,7 @@ export class ContinuousAudioProcessor {
     failedChunks: number;
     isRecording: boolean;
     recordingDuration: number;
+    accumulatedDataPieces: number;
   } {
     return {
       totalChunks: this.chunkCounter,
@@ -345,7 +372,8 @@ export class ContinuousAudioProcessor {
       completedChunks: this.queue.completed.length,
       failedChunks: this.queue.failed.length,
       isRecording: this.isRecording,
-      recordingDuration: this.isRecording ? Date.now() - this.startTime : 0
+      recordingDuration: this.isRecording ? Date.now() - this.startTime : 0,
+      accumulatedDataPieces: this.allRecordedData.length
     };
   }
 
@@ -359,6 +387,11 @@ export class ContinuousAudioProcessor {
   cleanup(): void {
     this.stopContinuousRecording();
     this.clearQueue();
+    
+    if (this.chunkingInterval) {
+      clearInterval(this.chunkingInterval);
+      this.chunkingInterval = null;
+    }
     
     if (this.vad) {
       this.vad.cleanup();
@@ -376,7 +409,7 @@ export class ContinuousAudioProcessor {
     }
     
     this.mediaRecorder = null;
-    this.recordingData = [];
+    this.allRecordedData = [];
     
     console.log('🧹 Continuous Audio Processor cleaned up');
   }
