@@ -5,8 +5,8 @@ import { setupVite, serveStatic, log } from "./vite";
 import { initializeAIConfigurations } from "./ai-registry";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '10mb' })); // Increased limit for audio chunks
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit for audio files
   abortOnLimit: true,
