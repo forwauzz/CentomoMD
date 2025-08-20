@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
 import MedicalForm from "@/pages/medical-form";
 import DictationPageWhisper from "@/pages/dictation-page-whisper";
+import { UnifiedDictationPage } from "@/pages/unified-dictation-page";
 import { TranscriptionModesDemo } from "@/pages/transcription-modes-demo";
 import SpeechTestPage from "@/pages/speech-test-page";
 import SimpleAITest from "@/pages/simple-ai-test";
@@ -46,8 +47,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
-      <Route path="/dictation" component={() => <DictationPageWhisper language={language} />} />
+      <Route path="/dictation" component={() => <UnifiedDictationPage language={language} />} />
       <Route path="/dictation-whisper" component={() => <DictationPageWhisper language={language} />} />
+      <Route path="/unified-dictation" component={() => <UnifiedDictationPage language={language} />} />
       <Route path="/transcription-modes" component={() => <TranscriptionModesDemo language={language} />} />
       <Route path="/speech-test" component={() => <SpeechTestPage />} />
       <Route path="/forms" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
