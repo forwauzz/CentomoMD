@@ -1,5 +1,6 @@
-import OpenAI from 'openai';
+import OpenAI, { toFile } from 'openai';
 import { enhanceVoiceInput } from './ai-formatter';
+import { webmToWavMono16k, validateAudioBuffer } from './audio-convert';
 import { 
   TranscriptionMode, 
   TRANSCRIPTION_MODE_CONFIGS, 
@@ -147,6 +148,79 @@ export interface WhisperTranscriptionOptions {
   realTimeHybrid?: boolean;
   wordLevelTimestamps?: boolean;
   speakerIdentification?: boolean;
+}
+
+// New enhanced transcription function with format fallback
+export async function transcribeAudioWithWhisperMultipart(args: {
+  buffer: Buffer;
+  filename: string;
+  mimetype?: string;
+  language?: "en" | "fr" | "auto";
+  temperature?: number;
+  sessionId?: string;
+  chunkIndex?: number;
+  mode: "transcribe" | "smart" | "word-for-word";
+}): Promise<{ text: string; chunkIndex?: number }> {
+  const { buffer, filename, mimetype, language, temperature = 0.2, mode } = args;
+
+  // Validate audio buffer
+  if (!validateAudioBuffer(buffer)) {
+    throw new Error("Invalid audio buffer provided");
+  }
+
+  console.log(`🎵 Processing ${(buffer.length / 1024).toFixed(1)}KB audio file: ${filename}`);
+
+  // 1) Try direct WebM/audio upload first (fast path)
+  try {
+    const file = await toFile(buffer, filename, { type: mimetype ?? "audio/webm" });
+    
+    const result = await openai.audio.transcriptions.create({
+      model: "whisper-1", // Use whisper-1 for stability
+      file,
+      ...(language && language !== "auto" ? { language } : {}),
+      temperature,
+      response_format: "json",
+    });
+    
+    console.log(`✅ Direct WebM transcription successful: "${result.text.substring(0, 50)}..."`);
+    return { text: result.text, chunkIndex: args.chunkIndex };
+    
+  } catch (e: any) {
+    // Only fall back on format/decoder problems
+    const errorMessage = (e?.message || "").toLowerCase();
+    if (!errorMessage.includes("decoded") && !errorMessage.includes("format")) {
+      throw e; // Re-throw non-format errors
+    }
+    
+    console.warn(`⚠️ WebM transcription failed (${e.message}), attempting WAV conversion...`);
+  }
+
+  // 2) Fallback: convert in-memory to 16k mono WAV (no disk usage)
+  try {
+    console.log("🔄 Converting WebM to WAV format...");
+    const wavBuffer = await webmToWavMono16k(buffer);
+    
+    const wavFile = await toFile(
+      wavBuffer, 
+      filename.replace(/\.webm$/i, ".wav"), 
+      { type: "audio/wav" }
+    );
+    
+    const result = await openai.audio.transcriptions.create({
+      model: "whisper-1",
+      file: wavFile,
+      ...(language && language !== "auto" ? { language } : {}),
+      temperature,
+      response_format: "json",
+    });
+    
+    console.log(`✅ WAV fallback transcription successful: "${result.text.substring(0, 50)}..."`);
+    return { text: result.text, chunkIndex: args.chunkIndex };
+    
+  } catch (conversionError: any) {
+    console.error("🔴 Both WebM and WAV transcription attempts failed:", conversionError);
+    throw new Error(`Transcription failed: ${conversionError.message}`);
+  }
 }
 
 export async function transcribeAudioWithWhisper(

@@ -27,12 +27,15 @@ import {
 import { setupInitialUsers } from "./setup-users";
 import {
   transcribeAudioWithWhisper,
+  transcribeAudioWithWhisperMultipart,
   transcribeAudioChunk,
   validateAudioFormat,
 } from "./whisper-service";
 import type { UploadedFile } from "express-fileupload";
 import "./types";
 import logger, { LogCategory, logApiRequest, logAuthEvent, logFormEvent, logVoiceEvent } from "@shared/logger";
+import multer from 'multer';
+import { audioLimiter, validateAudioFile } from './security';
 
 // Backup function for session data
 async function backupSessionToLocal(sessionData: any) {
@@ -1245,21 +1248,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Ambient transcription endpoint for continuous listening mode
-  app.post("/api/transcribe-ambient-chunk", async (req, res) => {
-    try {
-      const {
-        audio: base64Audio,
-        language = "fr",
-        mode = "transcribe",
-        temperature = 0.1,
-        chunkIndex = 0,
-        sessionId
-      } = req.body;
+  // Import security and audio utilities - already imported at top
 
-      if (!base64Audio) {
-        return res.status(400).json({ message: "Audio data is required" });
+  // Configure multer for audio file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 25 * 1024 * 1024 }, // 25MB safety limit for audio files
+    fileFilter: (_req: any, file: any, cb: any) =>
+      /audio\/(webm|wav|mp3|m4a|aac|ogg|flac)/.test(file.mimetype)
+        ? cb(null, true) 
+        : cb(new Error("UNSUPPORTED_AUDIO_TYPE")),
+  });
+
+  // Enhanced ambient transcription endpoint with multipart upload and format fallback
+  app.post("/api/transcribe-ambient-chunk", 
+    audioLimiter, 
+    upload.single("file"), 
+    validateAudioFile,
+    async (req, res) => {
+    try {
+      if (!req.file?.buffer?.length) {
+        return res.status(400).json({ error: "NO_FILE", message: "Audio file is required" });
       }
+
+      const { sessionId, chunkIndex = 0, language = "fr", mode = "transcribe" } = req.body;
 
       if (!process.env.OPENAI_API_KEY) {
         return res.status(500).json({
@@ -1268,69 +1280,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log(`🎙️ Processing ambient chunk: ${chunkIndex} (${sessionId})`);
-
-      // Convert base64 to buffer
-      const audioBuffer = Buffer.from(base64Audio, 'base64');
-      
-      // Validate audio data
-      if (audioBuffer.length < 1024) {
-        return res.status(400).json({
-          message: `Audio data too small (${audioBuffer.length} bytes). Recording may have failed.`,
-          error: "AUDIO_DATA_TOO_SMALL",
-        });
-      }
+      console.log(`🎙️ Processing ambient chunk: ${chunkIndex} (${sessionId}) - ${(req.file.size / 1024).toFixed(1)}KB`);
 
       // Convert language format for Whisper API (fr/en only, not fr-CA/en-US)
       const whisperLanguage = language === 'fr-CA' || language === 'fr' ? 'fr' : 
                               language === 'en-US' || language === 'en' ? 'en' : 
                               'auto';
 
-      // Use audioBuffer directly instead of creating Blob (which causes format issues)
-      const result = await transcribeAudioWithWhisper(audioBuffer, {
+      // Use new multipart transcription with format fallback
+      const result = await transcribeAudioWithWhisperMultipart({
+        buffer: req.file.buffer,
+        filename: req.file.originalname || `ambient-${sessionId}-${chunkIndex}.webm`,
+        mimetype: req.file.mimetype,
         language: whisperLanguage as "fr" | "en" | "auto",
-        enhanceText: false, // Transcribe mode uses minimal processing
+        temperature: 0.2, // Transcribe mode setting
         sessionId,
-        temperature: temperature,
-        mode: 'transcribe', // Ensure transcribe mode is used
-      });
-
-      // Log voice activity for this chunk
-      logVoiceEvent('AMBIENT_TRANSCRIPTION', req.session?.userId || '', {
-        chunkIndex,
-        sessionId,
-        duration: result.duration,
-        textLength: result.text?.length || 0,
-        confidence: result.confidence || 0.95,
+        chunkIndex: Number(chunkIndex),
         mode: 'transcribe'
       });
 
+      // Audit logging (metadata only, no PHI)
+      logVoiceEvent('AMBIENT_TRANSCRIPTION', req.session?.userId || '', {
+        chunkIndex: Number(chunkIndex),
+        sessionId,
+        audioSize: req.file.size,
+        textLength: result.text?.length || 0,
+        mode: 'transcribe',
+        success: true,
+        provider: 'openai'
+      });
+
+      // Return text only; do NOT store
       res.json({
         success: true,
         text: result.text,
-        enhanced: result.enhanced,
-        duration: result.duration,
-        language: result.language,
-        confidence: result.confidence || 0.95,
-        chunkIndex,
-        speaker: result.speakers?.[0]?.speaker || null // Speaker identification if available
+        chunkIndex: Number(chunkIndex)
       });
 
     } catch (error) {
       const { chunkIndex = 0, sessionId } = req.body;
       console.error(`❌ Ambient transcription error (chunk ${chunkIndex}):`, error);
 
-      // Log the error
+      // Log the error (no PHI in logs)
       logVoiceEvent('AMBIENT_TRANSCRIPTION_ERROR', req.session?.userId || '', {
-        chunkIndex,
+        chunkIndex: Number(chunkIndex),
         sessionId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message.slice(0, 120) : 'Unknown error'
       });
 
       res.status(500).json({
+        error: "TRANSCRIPTION_FAILED",
         message: `Failed to transcribe ambient chunk ${chunkIndex}`,
-        error: error instanceof Error ? error.message : "Unknown error",
       });
+    } finally {
+      // Defensive cleanup (zero-retention)
+      if (global.gc) {
+        try { 
+          global.gc(); 
+        } catch {}
+      }
     }
   });
 

@@ -248,27 +248,17 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     try {
       console.log(`🎙️ Processing ambient chunk: ${chunk.id} (${(chunk.data.size / 1024).toFixed(1)}KB)`);
       
-      // Convert blob to base64 for API call
-      const arrayBuffer = await chunk.data.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      let binaryString = '';
-      for (let i = 0; i < uint8Array.length; i++) {
-        binaryString += String.fromCharCode(uint8Array[i]);
-      }
-      const base64Audio = btoa(binaryString);
-      
-      // Send to ambient transcription API with transcribe mode settings
-      const response = await fetch('/api/transcribe-ambient-chunk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          audio: base64Audio,
-          language: getWhisperLanguage(currentLanguage), // Ensure correct Whisper language format
-          mode: 'transcribe',
-          temperature: 0.1, // Transcribe mode setting
-          chunkIndex: ambientChunkCounter,
-          sessionId: ambientSessionId
-        }),
+      // Use multipart form upload instead of base64 JSON
+      const form = new FormData();
+      form.append("file", chunk.data, `ambient-${ambientSessionId}-${ambientChunkCounter}.webm`);
+      form.append("sessionId", ambientSessionId);
+      form.append("chunkIndex", String(ambientChunkCounter));
+      form.append("language", getWhisperLanguage(currentLanguage)); // 'fr' | 'en' | 'auto'
+      form.append("mode", "transcribe");
+
+      const response = await fetch("/api/transcribe-ambient-chunk", {
+        method: "POST",
+        body: form, // No Content-Type header needed - browser sets it automatically
       });
       
       if (response.ok) {
