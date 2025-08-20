@@ -45,6 +45,33 @@ Preferred communication style: Simple, everyday language.
 - **Unified Component**: `client/src/components/unified-dictation-modes.tsx` provides seamless mode switching
 - **Navigation Integration**: Added to main app routing and form selector with "NEW" badge
 
+## Audio Transcription Fix - Phase 1 Complete (August 20, 2025)
+**RESOLVED:** WebM/Opus format compatibility issue with OpenAI Whisper API
+
+### Problem Identified:
+- MediaRecorder WebM/Opus output incompatible with OpenAI Whisper API
+- "Audio file could not be decoded" errors preventing transcription
+- Base64 audio transmission causing performance and format issues
+
+### Phase 1 Solution Implemented:
+- **Multipart Upload System**: Replaced base64 JSON with FormData multipart uploads
+- **Audio Format Fallback**: WebM → 16kHz WAV conversion using FFmpeg when needed
+- **Security Enhancements**: Added rate limiting, file validation, and proper error handling
+- **Zero Data Retention**: All audio processing happens in-memory with immediate cleanup
+
+### Technical Changes:
+- **Enhanced Whisper Service**: `server/whisper-service.ts` - Added `transcribeAudioWithWhisperMultipart()` function
+- **Audio Conversion**: `server/audio-convert.ts` - FFmpeg-based WebM to WAV conversion utilities
+- **Security Middleware**: `server/security.ts` - Rate limiting and file validation for audio uploads
+- **API Endpoint**: `server/routes.ts` - Updated `/api/transcribe-ambient-chunk` for multipart uploads
+- **Frontend Update**: `client/src/pages/unified-dictation-page.tsx` - FormData instead of base64 transmission
+
+### Performance Strategy:
+1. **Fast Path**: Attempt direct WebM transcription first
+2. **Fallback Path**: Convert to 16kHz mono WAV if WebM fails
+3. **Error Handling**: Comprehensive logging without PHI retention
+4. **Memory Management**: Explicit garbage collection after processing
+
 ## Logging Infrastructure
 **Phase 1 Complete (January 20, 2025):** 
 - Zero-retention logging service with medical data sanitization
