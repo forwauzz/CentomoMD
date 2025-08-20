@@ -6,6 +6,17 @@ CentomoMD is a comprehensive digital medical evaluation platform designed to str
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Critical Security Requirements
+**MANDATORY REFERENCE:** All new features must be reviewed against `SECURITY_COMPLIANCE_CHECKLIST.md` before implementation.
+
+**Zero-Retention Security Model:** CentomoMD processes medical data but stores NOTHING permanently. All patient/health data must be:
+- Processed in-memory only
+- Immediately deleted after processing
+- Never written to database or filesystem
+- Cleaned from memory with explicit garbage collection
+
+**Security Implementation Strategy:** Every new feature requires security validation using our comprehensive checklist covering authentication, data protection, audit logging, and compliance monitoring.
+
 ## System Architecture
 
 ### Technology Stack

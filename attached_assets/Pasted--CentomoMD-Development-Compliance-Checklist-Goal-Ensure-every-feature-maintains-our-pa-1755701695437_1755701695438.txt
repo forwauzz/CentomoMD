@@ -1,0 +1,367 @@
+# CentomoMD Development Compliance Checklist
+
+> **🎯 Goal:** Ensure every feature maintains our path to 65% TGV compliance for a ZERO-RETENTION platform  
+> **📋 Usage:** Check relevant sections before implementing any feature or making changes  
+> **🔄 Status:** Living document - update as compliance requirements evolve  
+> **⚡ KEY PRINCIPLE:** CentomoMD stores NO patient data permanently - all data is processed and immediately deleted  
+
+---
+
+## 🚦 **PRE-DEVELOPMENT COMPLIANCE GATE**
+
+**Before starting ANY new feature or change, ask:**
+
+### ✅ **Data Impact Assessment - ZERO RETENTION MODEL**
+- [ ] Does this feature process patient/health data? *(Must be immediately processed and deleted)*
+- [ ] Does this feature temporarily store data during processing? *(Must have automatic cleanup)*
+- [ ] Does this feature involve user authentication or session data? *(Minimal necessary data only)*
+- [ ] Does this feature integrate with external services? *(No patient data can leave our system)*
+- [ ] Does this feature change data processing workflows? *(Ensure zero retention maintained)*
+
+**ZERO RETENTION PRINCIPLE:** Any patient health data must be processed in-memory and immediately deleted. Only user account data and non-health metadata can persist.
+
+---
+
+## 🔒 **SECURITY & ACCESS CONTROL CHECKLIST - ZERO RETENTION**
+
+### **For ANY feature that processes user data:**
+
+#### Authentication & Authorization *(Minimal Data Storage)*
+- [ ] **User Authentication:** Does the feature require login? *(Store only username/email + hashed password)*
+- [ ] **Session Management:** Session data minimized? *(Only essential session info, auto-expire)*
+- [ ] **Role-Based Access:** Different user types? *(Store role enum only, not patient data)*
+- [ ] **Password Security:** Secure password handling? *(Hash immediately, never store plaintext)*
+- [ ] **Session Timeout:** Sessions auto-expire? *(No persistent sensitive data)*
+
+#### Data Protection - ZERO RETENTION
+- [ ] **Temporary Processing:** Patient data processed in-memory only? *(No disk writes)*
+- [ ] **Immediate Cleanup:** Processing data deleted after use? *(Automated cleanup)*
+- [ ] **Input Validation:** All inputs validated before processing? *(Reject invalid data immediately)*
+- [ ] **Memory Management:** No sensitive data in logs/dumps? *(Scrub memory after processing)*
+- [ ] **API Security:** External APIs don't receive patient data? *(Only metadata/results)*
+
+#### Zero Retention Implementation
+```typescript
+// Example: Voice processing with zero retention
+class ZeroRetentionProcessor {
+  async processVoiceToText(audioBuffer: ArrayBuffer, userId: string): Promise<string> {
+    let transcribedText: string;
+    
+    try {
+      // Process in memory only
+      transcribedText = await this.whisperService.transcribe(audioBuffer);
+      
+      // Log the processing event (no patient data)
+      await this.auditLog({
+        userId,
+        action: 'voice_processing_completed',
+        resourceType: 'session',
+        details: { duration: audioBuffer.byteLength }
+      });
+      
+      // Return result immediately
+      return transcribedText;
+      
+    } finally {
+      // Explicit cleanup
+      audioBuffer = null;
+      transcribedText = null;
+      // Force garbage collection if needed
+      if (global.gc) global.gc();
+    }
+  }
+}
+```
+
+---
+
+## 👥 **PRIVACY & PERSONAL INFORMATION - ZERO RETENTION MODEL**
+
+### **For ANY feature that processes personal data:**
+
+#### Data Processing (Not Storage)
+- [ ] **Processing Consent:** User consents to data processing? *(Clear about zero retention)*
+- [ ] **Purpose Limitation:** Data processed only for stated purpose? *(AI transcription/processing)*
+- [ ] **Processing Minimization:** Processing only necessary data? *(No excess data processing)*
+- [ ] **Immediate Deletion:** All health data deleted after processing? *(Automated cleanup)*
+
+#### Zero Retention Privacy Implementation
+- [ ] **Transparency:** Users informed about zero retention model? *(Clear privacy notice)*
+- [ ] **Processing Notice:** Users know what processing occurs? *(AI enhancement, transcription)*
+- [ ] **No Data Export:** No patient data available for export? *(Only user account data)*
+- [ ] **Session Cleanup:** Session data cleaned after logout? *(Complete session clearing)*
+
+#### Zero Retention Consent Template
+```typescript
+interface ZeroRetentionConsent {
+  userId: string;
+  consentType: 'voice_processing' | 'ai_enhancement' | 'session_data';
+  processingPurpose: string;
+  dataRetention: 'zero' | 'session_only' | 'account_only';
+  consentGiven: boolean;
+  consentTimestamp: Date;
+}
+
+// Consent verification before processing
+async function verifyZeroRetentionConsent(userId: string, processingType: string) {
+  const consent = await getConsent(userId, processingType);
+  if (!consent || !consent.consentGiven) {
+    throw new Error('User consent required for data processing');
+  }
+  if (consent.dataRetention !== 'zero' && processingType.includes('health')) {
+    throw new Error('Zero retention required for health data processing');
+  }
+}
+```
+
+#### What CAN be stored (Non-Health Data):
+- [ ] **User Account Info:** Username, email, password hash, preferences
+- [ ] **Usage Analytics:** Aggregated, anonymized usage statistics
+- [ ] **System Logs:** Technical logs without patient data
+- [ ] **Audit Trails:** User actions without health data content
+
+---
+
+## 📊 **AUDIT & LOGGING - ZERO RETENTION MODEL**
+
+### **For ANY feature that processes data:**
+
+#### Audit Trail Requirements (No Patient Data)
+- [ ] **User Actions:** Log WHO performed action? *(User ID, timestamp, no health data)*
+- [ ] **Processing Events:** Log WHAT was processed? *(Type of processing, duration, no content)*
+- [ ] **System Events:** Log technical events? *(Errors, security events, performance)*
+- [ ] **Access Attempts:** Log authentication attempts? *(Success/failure, IP, no session content)*
+- [ ] **Data Flow:** Log data processing flow? *(Input → Processing → Output, no actual data)*
+
+#### Zero Retention Audit Implementation
+```typescript
+// Audit logging that preserves privacy
+interface ZeroRetentionAuditLog {
+  id: string;
+  userId: string;
+  timestamp: Date;
+  action: string;
+  processingType: 'voice_transcription' | 'ai_enhancement' | 'export_request';
+  metadata: {
+    duration?: number;        // Processing time
+    dataSize?: number;       // Size of processed data (bytes)
+    success: boolean;        // Processing success
+    errorType?: string;      // Error category (no details)
+  };
+  ipAddress: string;
+  userAgent: string;
+  // NO PATIENT DATA OR ACTUAL CONTENT LOGGED
+}
+
+// Example usage
+async function auditProcessingEvent(userId: string, event: {
+  action: string;
+  processingType: string;
+  dataSize: number;
+  success: boolean;
+}) {
+  await db.insert(auditLogs).values({
+    userId,
+    timestamp: new Date(),
+    action: event.action,
+    processingType: event.processingType,
+    metadata: {
+      dataSize: event.dataSize,
+      success: event.success,
+      duration: Date.now() - event.startTime
+    },
+    // Never log actual patient data content
+  });
+}
+```
+
+#### Audit Retention Policy
+- [ ] **Technical Logs:** Keep for operational needs (30-90 days)
+- [ ] **Security Logs:** Keep for security analysis (1 year)
+- [ ] **User Action Logs:** Keep for accountability (3-7 years, no health data)
+- [ ] **Processing Logs:** Keep minimal metadata only (30 days)
+
+---
+
+## 🌐 **INTEROPERABILITY & DATA STANDARDS CHECKLIST**
+
+### **For ANY feature that exchanges data:**
+
+#### Data Standards
+- [ ] **Healthcare Standards:** Using appropriate medical data formats? *(HL7, FHIR where applicable)*
+- [ ] **Patient Identification:** Proper patient ID handling? *(Unique identifiers, validation)*
+- [ ] **Provider Identification:** Proper healthcare provider ID? *(Professional license validation)*
+- [ ] **Data Validation:** All healthcare data properly validated? *(Medical terminology checks)*
+
+#### Integration Security
+- [ ] **API Security:** External integrations secured? *(API keys, OAuth, rate limiting)*
+- [ ] **Data Transmission:** Secure data exchange? *(HTTPS, encrypted payloads)*
+- [ ] **Third-Party Vetting:** External services vetted for compliance? *(Security assessments)*
+
+---
+
+## 🇫🇷 **QUEBEC-SPECIFIC COMPLIANCE CHECKLIST**
+
+### **For ALL user-facing features:**
+
+#### Language Requirements
+- [ ] **French Interface:** All UI elements available in French? *(Complete translation)*
+- [ ] **French Documentation:** Help text and policies in French? *(Legal compliance)*
+- [ ] **Error Messages:** All errors shown in French? *(User experience)*
+- [ ] **Default Language:** French as default for Quebec users? *(Locale detection)*
+
+#### Quebec Healthcare Integration
+- [ ] **RAMQ Integration:** Compatible with Quebec health card? *(Future integration ready)*
+- [ ] **Quebec EMR Systems:** Compatible with common Quebec EMRs? *(Omnimed, etc.)*
+- [ ] **Professional Orders:** Compatible with Quebec professional requirements? *(CMQ, OPQ, etc.)*
+
+---
+
+## 🔍 **TESTING & VALIDATION CHECKLIST**
+
+### **For EVERY feature before deployment:**
+
+#### Security Testing
+- [ ] **Input Validation Testing:** All inputs tested with malicious data? *(SQL injection, XSS)*
+- [ ] **Authentication Testing:** Login/logout flows tested? *(Session management)*
+- [ ] **Authorization Testing:** Permission boundaries tested? *(Access control)*
+- [ ] **Data Protection Testing:** Sensitive data properly protected? *(Encryption verification)*
+
+#### Privacy Testing
+- [ ] **Consent Flow Testing:** Consent collection and withdrawal tested? *(User journey)*
+- [ ] **Data Access Testing:** User data access rights tested? *(Data export/deletion)*
+- [ ] **Privacy Notice Testing:** Privacy information clearly displayed? *(UI/UX validation)*
+
+#### Compliance Validation
+- [ ] **Audit Log Testing:** All required actions logged? *(Log completeness)*
+- [ ] **Data Retention Testing:** Automatic data deletion working? *(Cleanup processes)*
+- [ ] **Error Handling Testing:** Compliance maintained during errors? *(Graceful degradation)*
+
+---
+
+## 📝 **DOCUMENTATION REQUIREMENTS**
+
+### **For EVERY feature:**
+
+#### Technical Documentation
+- [ ] **Security Measures:** Document security controls implemented
+- [ ] **Privacy Impact:** Document privacy implications and mitigations
+- [ ] **Compliance Mapping:** Map feature to relevant TGV criteria
+- [ ] **Audit Requirements:** Document what gets logged and why
+
+#### User Documentation
+- [ ] **Privacy Notice Updates:** Update privacy policy if needed
+- [ ] **User Instructions:** Clear instructions in French
+- [ ] **Consent Information:** Clear explanation of data use
+
+#### Compliance Evidence
+- [ ] **Implementation Notes:** How compliance requirements were addressed
+- [ ] **Testing Results:** Evidence that compliance testing passed
+- [ ] **Review Checklist:** This checklist completed and signed off
+
+---
+
+## ⚠️ **RED FLAGS - STOP AND REVIEW**
+
+**Immediately escalate to compliance review if:**
+
+- [ ] Feature attempts to store ANY patient health data permanently
+- [ ] Feature creates database tables for health/medical information  
+- [ ] Feature integrates with external services that could receive patient data
+- [ ] Feature implements data export containing health information
+- [ ] Feature changes the zero-retention processing model
+- [ ] Feature involves communication that stores message content
+- [ ] Feature caches patient data beyond single session
+- [ ] Feature logs actual patient data content (not just metadata)
+- [ ] Feature implements backup/sync of health data
+- [ ] Feature allows bulk processing that might store intermediate results
+
+**ZERO RETENTION VIOLATIONS = IMMEDIATE STOP**
+
+---
+
+## 🎯 **COMPLIANCE SCORING TRACKER - ZERO RETENTION ADVANTAGE**
+
+### **Current CentomoMD Compliance Status:**
+
+| Category | Current % | Target % | Zero Retention Boost | Priority |
+|----------|-----------|----------|---------------------|----------|
+| **PRPS (Privacy)** | 15% → 45% | 75% | +30% *(No data storage issues)* | 🟡 MEDIUM |
+| **Security** | 25% → 40% | 65% | +15% *(Reduced attack surface)* | 🔴 HIGH |
+| **Technology** | 80% | 90% | +0% *(Already strong)* | 🟡 MEDIUM |
+| **Interoperability** | 15% → 25% | 70% | +10% *(Simplified data exchange)* | 🟠 HIGH |
+| **Performance** | 60% | 85% | +0% *(Already documented)* | 🟢 LOW |
+| **General** | 70% | 100% | +0% *(Language requirements)* | 🟢 LOW |
+
+**Overall Compliance: 30% → 42% (Zero Retention) → Target: 65%**
+
+### **Zero Retention Compliance Advantages:**
+- **✅ Data Retention Policies:** Automatically compliant (P09.01-P09.04)
+- **✅ Data Minimization:** Inherently minimal processing (P11.01-P11.04) 
+- **✅ Data Security:** Reduced risk surface (S06.01-S06.03 partially)
+- **✅ Data Breach Risk:** Minimized impact (S13.01-S13.03 easier)
+- **✅ Right to Deletion:** Automatic compliance (P08.01-P08.03)
+- **✅ Data Portability:** Only account data exportable (I30-I40 simplified)
+
+---
+
+## 🚀 **IMPLEMENTATION WORKFLOW**
+
+### **1. Pre-Development (15 minutes)**
+1. Review this checklist for relevant sections
+2. Complete Data Impact Assessment
+3. Identify compliance requirements for the feature
+4. Plan compliance implementation alongside feature development
+
+### **2. During Development**
+1. Implement feature functionality
+2. Add required security controls
+3. Implement privacy protections
+4. Add audit logging
+5. Write compliance documentation
+
+### **3. Pre-Deployment**
+1. Complete all applicable checklist items
+2. Test compliance requirements
+3. Update privacy notices if needed
+4. Document compliance impact
+
+### **4. Post-Deployment**
+1. Monitor audit logs for issues
+2. Validate compliance controls are working
+3. Update compliance tracking spreadsheet
+4. Plan next compliance improvements
+
+---
+
+## 📞 **ESCALATION CONTACTS**
+
+**When to escalate:**
+- Unsure about compliance requirements
+- Red flag situations
+- Privacy or security concerns
+- External integration questions
+
+**Escalation process:**
+1. **Fractional CTO:** Technical security questions
+2. **Legal Counsel:** Privacy policy and legal compliance
+3. **Compliance Consultant:** TGV-specific questions
+
+---
+
+## 📊 **COMPLIANCE METRICS**
+
+Track monthly:
+- [ ] **Features released with full compliance review:** Target 100%
+- [ ] **Security incidents related to new features:** Target 0
+- [ ] **Privacy complaints or issues:** Target 0
+- [ ] **Audit log completeness:** Target 100%
+- [ ] **Compliance documentation up-to-date:** Target 100%
+
+---
+
+> **💡 Remember:** Compliance is not a blocker to innovation - it's a framework for building trustworthy healthcare technology. Every compliance measure protects both your users and your business.
+
+**Last Updated:** [Current Date]  
+**Next Review:** [Monthly Review Date]  
+**Version:** 1.0
