@@ -1281,14 +1281,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create blob for transcription
-      const blob = new Blob([audioBuffer], { type: 'audio/webm' });
+      // Create blob for transcription with proper format detection
+      const blob = new Blob([audioBuffer], { type: 'audio/webm;codecs=opus' });
 
       const result = await transcribeAudioChunk(blob, chunkIndex, {
         language: language as "fr" | "en" | "auto",
         enhanceText: false, // Transcribe mode uses minimal processing
         sessionId,
         temperature: temperature,
+        mode: 'transcribe', // Ensure transcribe mode is used
       });
 
       // Log voice activity for this chunk

@@ -171,8 +171,11 @@ export async function transcribeAudioWithWhisper(
     }
     
     // Create a File-like object for the API with proper audio format
-    // Use wav format for better compatibility with Whisper
-    const file = new File([audioBuffer], 'audio.wav', { type: 'audio/wav' });
+    // Detect format based on buffer or use webm for ambient chunks
+    const isWebM = audioBuffer.slice(0, 4).toString('hex').startsWith('1a45dfa3');
+    const fileName = isWebM ? 'audio.webm' : 'audio.wav';
+    const mimeType = isWebM ? 'audio/webm' : 'audio/wav';
+    const file = new File([audioBuffer], fileName, { type: mimeType });
     
     // Determine mode configuration
     const mode = options.mode || 'smart';
