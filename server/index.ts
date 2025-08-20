@@ -5,6 +5,9 @@ import { setupVite, serveStatic, log } from "./vite";
 import { initializeAIConfigurations } from "./ai-registry";
 
 const app = express();
+// Trust proxy for rate limiting (needed for Replit deployment)
+app.set('trust proxy', 1);
+
 app.use(express.json({ limit: '10mb' })); // Increased limit for audio chunks
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(fileUpload({

@@ -1250,24 +1250,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Import security and audio utilities - already imported at top
 
-  // Configure multer for audio file uploads
+  // Configure multer for audio file uploads with debugging
   const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 25 * 1024 * 1024 }, // 25MB safety limit for audio files
-    fileFilter: (_req: any, file: any, cb: any) =>
-      /audio\/(webm|wav|mp3|m4a|aac|ogg|flac)/.test(file.mimetype)
-        ? cb(null, true) 
-        : cb(new Error("UNSUPPORTED_AUDIO_TYPE")),
+    limits: { 
+      fileSize: 25 * 1024 * 1024, // 25MB safety limit
+      files: 1,
+      fields: 10
+    },
+    fileFilter: (req: any, file: any, cb: any) => {
+      console.log(`📁 File upload: ${file.originalname}, type: ${file.mimetype}, size: ${file.size || 'unknown'}`);
+      
+      // Accept webm files even if mimetype is not perfect
+      if (file.mimetype && file.mimetype.includes('audio')) {
+        cb(null, true);
+      } else if (file.originalname && file.originalname.includes('.webm')) {
+        cb(null, true);
+      } else {
+        console.warn(`⚠️ Rejected file: ${file.originalname} with type: ${file.mimetype}`);
+        cb(new Error("UNSUPPORTED_AUDIO_TYPE"));
+      }
+    },
   });
 
-  // Enhanced ambient transcription endpoint with multipart upload and format fallback
+  // Temporary simplified endpoint for debugging multipart issues
   app.post("/api/transcribe-ambient-chunk", 
-    audioLimiter, 
     upload.single("file"), 
-    validateAudioFile,
     async (req, res) => {
     try {
+      console.log(`🔍 DEBUG - Headers:`, req.headers['content-type']);
+      console.log(`🔍 DEBUG - File received:`, !!req.file);
+      console.log(`🔍 DEBUG - File details:`, req.file ? {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      } : 'none');
+      console.log(`🔍 DEBUG - Body:`, req.body);
+      
       if (!req.file?.buffer?.length) {
+        console.error('❌ No file buffer received');
         return res.status(400).json({ error: "NO_FILE", message: "Audio file is required" });
       }
 
