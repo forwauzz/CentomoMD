@@ -270,11 +270,24 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
       });
       return;
     }
-    startRecording();
+
+    if (currentMode === 'transcribe') {
+      // Start ambient listening for transcribe mode
+      setAmbientListening(true);
+    } else {
+      // Start traditional recording for smart/word-for-word modes
+      startRecording();
+    }
   };
 
   const handleStopRecording = () => {
-    stopRecording();
+    if (currentMode === 'transcribe') {
+      // Stop ambient listening
+      setAmbientListening(false);
+    } else {
+      // Stop traditional recording
+      stopRecording();
+    }
   };
 
   const handleSaveToSection = async () => {
@@ -563,7 +576,12 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
               {/* Recording Controls - Compact */}
               <div className="space-y-2">
                 <div className="text-xs font-medium flex items-center justify-between">
-                  <span>Recording</span>
+                  <span>
+                    {currentMode === 'transcribe' && ambientListening 
+                      ? (currentLanguage === "fr" ? "Écoute Ambiante" : "Ambient Listening")
+                      : "Recording"
+                    }
+                  </span>
                   <span className="text-muted-foreground">
                     {formatDuration(recordingDuration)}
                     {chunkCount > 0 && ` • ${chunkCount}`}
@@ -571,7 +589,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                 </div>
                 
                 <div className="flex gap-1">
-                  {!isRecording ? (
+                  {/* Unified Recording Button - adapts behavior based on mode */}
+                  {!(isRecording || ambientListening) ? (
                     <Button
                       onClick={handleStartRecording}
                       disabled={!selectedSection || isProcessing}
@@ -579,38 +598,62 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                       className="flex-1 h-9"
                     >
                       <Mic className="h-3 w-3 mr-1" />
-                      <span className="text-xs">{t.startRecording}</span>
+                      <span className="text-xs">
+                        {currentMode === 'transcribe' 
+                          ? (currentLanguage === "fr" ? "Démarrer Écoute Ambiante" : "Start Ambient Listening")
+                          : t.startRecording
+                        }
+                      </span>
                     </Button>
                   ) : (
                     <>
-                      {!isPaused ? (
+                      {/* Show different controls based on recording type */}
+                      {currentMode === 'transcribe' ? (
+                        // Transcribe mode - only stop button for ambient listening
                         <Button
-                          onClick={pauseRecording}
-                          variant="outline"
+                          onClick={handleStopRecording}
+                          variant="destructive"
                           size="sm"
                           className="flex-1 h-9"
                         >
-                          <span className="text-xs">{t.pauseRecording}</span>
+                          <MicOff className="h-3 w-3 mr-1" />
+                          <span className="text-xs">
+                            {currentLanguage === "fr" ? "Arrêter Écoute" : "Stop Listening"}
+                          </span>
                         </Button>
                       ) : (
-                        <Button
-                          onClick={resumeRecording}
-                          variant="default"
-                          size="sm"
-                          className="flex-1 h-9"
-                        >
-                          <span className="text-xs">{t.resumeRecording}</span>
-                        </Button>
+                        // Smart/Word-for-Word modes - traditional controls
+                        <>
+                          {!isPaused ? (
+                            <Button
+                              onClick={pauseRecording}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-9"
+                            >
+                              <span className="text-xs">{t.pauseRecording}</span>
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={resumeRecording}
+                              variant="default"
+                              size="sm"
+                              className="flex-1 h-9"
+                            >
+                              <span className="text-xs">{t.resumeRecording}</span>
+                            </Button>
+                          )}
+                          <Button
+                            onClick={handleStopRecording}
+                            variant="destructive"
+                            size="sm"
+                            className="flex-1 h-9"
+                          >
+                            <MicOff className="h-3 w-3 mr-1" />
+                            <span className="text-xs">{t.stopRecording}</span>
+                          </Button>
+                        </>
                       )}
-                      <Button
-                        onClick={handleStopRecording}
-                        variant="destructive"
-                        size="sm"
-                        className="flex-1 h-9"
-                      >
-                        <MicOff className="h-3 w-3 mr-1" />
-                        <span className="text-xs">{t.stopRecording}</span>
-                      </Button>
                     </>
                   )}
                 </div>
@@ -667,8 +710,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
               </div>
             </div>
 
-            {/* Ambient Listening Panel - Show only for transcribe mode */}
-            {currentMode === 'transcribe' && (
+            {/* Ambient Listening Panel - Show only when active in transcribe mode */}
+            {currentMode === 'transcribe' && ambientListening && (
               <div className="mb-3">
                 <AmbientListeningPanel
                   isActive={ambientListening}
