@@ -32,6 +32,7 @@ import {
 } from "./whisper-service";
 import type { UploadedFile } from "express-fileupload";
 import "./types";
+import logger, { LogCategory, logApiRequest, logAuthEvent, logFormEvent, logVoiceEvent } from "@shared/logger";
 
 // Backup function for session data
 async function backupSessionToLocal(sessionData: any) {
@@ -73,19 +74,54 @@ function getErrorMessage(error: unknown): string {
   return String(error);
 }
 
+// API request logging middleware
+function logRequest(req: any, res: any, next: any) {
+  const startTime = Date.now();
+  
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    const userId = req.user?.id;
+    
+    logApiRequest(
+      req.method,
+      req.path,
+      res.statusCode,
+      duration,
+      userId
+    );
+  });
+  
+  next();
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize logging
+  logger.info(LogCategory.SYSTEM, 'server', 'ROUTES_INITIALIZATION_START', {
+    nodeEnv: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+
   // Setup initial users
   await setupInitialUsers();
 
   // Setup session middleware
   app.use(getSessionConfig());
+  
+  // Add request logging middleware to all routes
+  app.use(logRequest);
 
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
+    const startTime = Date.now();
+    const { username } = req.body;
+    
     try {
-      const { username, password } = req.body;
-
-      if (!username || !password) {
+      if (!username || !req.body.password) {
+        logAuthEvent('LOGIN_FAILED', undefined, {
+          reason: 'MISSING_CREDENTIALS',
+          username: username || 'NOT_PROVIDED',
+          duration: Date.now() - startTime
+        });
         return res
           .status(400)
           .json({ message: "Username and password are required" });
@@ -93,28 +129,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.getUserByUsername(username);
       if (!user) {
+        logAuthEvent('LOGIN_FAILED', undefined, {
+          reason: 'USER_NOT_FOUND',
+          username,
+          duration: Date.now() - startTime
+        });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const isValidPassword = await verifyPassword(password, user.passwordHash);
+      const isValidPassword = await verifyPassword(req.body.password, user.passwordHash);
       if (!isValidPassword) {
+        logAuthEvent('LOGIN_FAILED', user.id, {
+          reason: 'INVALID_PASSWORD',
+          username,
+          duration: Date.now() - startTime
+        });
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       req.session.userId = user.id;
       req.session.userRole = user.role;
 
+      logAuthEvent('LOGIN_SUCCESS', user.id, {
+        username,
+        role: user.role,
+        duration: Date.now() - startTime
+      });
+
       // Return user without password hash
       const { passwordHash, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
     } catch (error) {
-      console.error("Login error:", error);
+      logger.error(LogCategory.AUTH, 'auth-service', 'LOGIN_ERROR', {
+        username,
+        duration: Date.now() - startTime
+      }, error as Error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
 
   app.post("/api/auth/logout", (req, res) => {
+    const userId = req.session.userId;
+    
     req.session.destroy(() => {
+      logAuthEvent('LOGOUT_SUCCESS', userId, {
+        sessionDestroyed: true
+      });
       res.json({ message: "Logged out successfully" });
     });
   });
@@ -169,17 +229,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create a new medical form
   app.post("/api/medical-forms", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId;
+    
     try {
       const validatedData = insertMedicalFormSchema.parse(req.body);
+      
+      logFormEvent('FORM_CREATE_ATTEMPT', 'new_form', {
+        userId,
+        fieldCount: Object.keys(validatedData).length,
+        hasContent: !!validatedData.patientName || !!validatedData.employerName
+      });
+      
       const newForm = await storage.createMedicalForm(validatedData);
+      
+      logFormEvent('FORM_CREATE_SUCCESS', 'new_form', {
+        userId,
+        formId: newForm.id,
+        duration: Date.now() - startTime
+      });
+      
       res.status(201).json(newForm);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        logFormEvent('FORM_CREATE_VALIDATION_ERROR', 'new_form', {
+          userId,
+          errorCount: error.errors.length,
+          duration: Date.now() - startTime
+        });
         return res.status(400).json({
           message: "Validation error",
           errors: error.errors,
         });
       }
+      
+      logger.error(LogCategory.FORM, 'form-handler', 'FORM_CREATE_ERROR', {
+        userId,
+        duration: Date.now() - startTime
+      }, error as Error);
+      
       res.status(500).json({ message: "Failed to create medical form" });
     }
   });
@@ -1155,6 +1243,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
+  });
+
+  // Logging endpoints for debugging and monitoring
+  app.get("/api/logs/recent", requireAdmin, async (req, res) => {
+    try {
+      const count = parseInt(req.query.count as string) || 100;
+      const level = req.query.level as string;
+      const category = req.query.category as string;
+      
+      let logs = logger.getRecentLogs(count);
+      
+      if (level) {
+        logs = logs.filter(log => log.level === level);
+      }
+      
+      if (category) {
+        logs = logs.filter(log => log.category === category);
+      }
+      
+      logger.info(LogCategory.SYSTEM, 'logger', 'LOGS_ACCESSED', {
+        userId: req.session.userId,
+        count: logs.length,
+        filters: { level, category }
+      });
+      
+      res.json({
+        logs,
+        total: logs.length,
+        filters: { level, category, count }
+      });
+    } catch (error) {
+      logger.error(LogCategory.SYSTEM, 'logger', 'LOGS_ACCESS_ERROR', {
+        userId: req.session.userId
+      }, error as Error);
+      res.status(500).json({ message: "Failed to retrieve logs" });
+    }
+  });
+
+  app.get("/api/logs/health", async (req, res) => {
+    try {
+      const health = logger.healthCheck();
+      res.json(health);
+    } catch (error) {
+      res.status(500).json({ message: "Logger health check failed" });
+    }
+  });
+
+  logger.info(LogCategory.SYSTEM, 'server', 'ROUTES_INITIALIZATION_COMPLETE', {
+    timestamp: new Date().toISOString(),
+    totalRoutes: app._router?.stack?.length || 'unknown'
   });
 
   const httpServer = createServer(app);
