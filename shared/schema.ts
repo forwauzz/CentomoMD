@@ -2,6 +2,9 @@ import { pgTable, text, serial, integer, boolean, timestamp, varchar, jsonb, ind
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Import log schema
+export * from "./log-schema";
+
 export const medicalForms = pgTable("medical_forms", {
   id: serial("id").primaryKey(),
 

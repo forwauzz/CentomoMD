@@ -13,6 +13,7 @@ import SimpleAITest from "@/pages/simple-ai-test";
 import LoginPage from "@/pages/login-page";
 import LandingPage from "@/pages/landing-page";
 import FormSelector from "@/pages/form-selector";
+import SystemLogsPage from "@/pages/system-logs";
 import { SimpleFormContainer } from "@/components/simple-form-container";
 import NotFound from "@/pages/not-found";
 
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/dictation-whisper" component={() => <DictationPageWhisper language={language} />} />
       <Route path="/speech-test" component={() => <SpeechTestPage />} />
       <Route path="/forms" component={() => <FormSelector language={language} onLanguageChange={setLanguage} />} />
+      <Route path="/system-logs" component={SystemLogsPage} />
       <Route path="/forms/:formType">
         {(params) => {
           // Handle CNESST medical form with special routing

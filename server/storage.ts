@@ -4,6 +4,7 @@ import {
   savedForms, 
   genericForms,
   recentPatients,
+  systemLogs,
   type MedicalForm, 
   type InsertMedicalForm, 
   type User, 
@@ -13,10 +14,13 @@ import {
   type GenericForm,
   type InsertGenericForm,
   type RecentPatient,
-  type InsertRecentPatient
+  type InsertRecentPatient,
+  type SystemLog,
+  type InsertSystemLog,
+  type LogSearchParams
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, lt, and, desc } from "drizzle-orm";
+import { eq, lt, and, desc, gte, lte, like } from "drizzle-orm";
 
 export interface IStorage {
   // Medical forms
@@ -59,6 +63,12 @@ export interface IStorage {
   updateRecentPatientAccess(userId: string, patientName: string): Promise<void>;
   deleteRecentPatient(id: number): Promise<boolean>;
   cleanupOldRecentPatients(userId: string, keepCount?: number): Promise<number>;
+
+  // System logging management
+  createSystemLog(log: InsertSystemLog): Promise<SystemLog>;
+  getSystemLogs(params: LogSearchParams): Promise<SystemLog[]>;
+  getSystemLogCount(params: Omit<LogSearchParams, 'limit' | 'offset'>): Promise<number>;
+  deleteOldSystemLogs(olderThanDays: number): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -435,6 +445,95 @@ export class DatabaseStorage implements IStorage {
       console.error('Error cleaning up old recent patients:', error);
       return 0;
     }
+  }
+
+  // System logging implementation
+  async createSystemLog(insertLog: InsertSystemLog): Promise<SystemLog> {
+    const [log] = await db
+      .insert(systemLogs)
+      .values({
+        ...insertLog,
+        localTimestamp: new Date(insertLog.timestamp || new Date()),
+      })
+      .returning();
+    return log;
+  }
+
+  async getSystemLogs(params: LogSearchParams): Promise<SystemLog[]> {
+    let whereConditions: any[] = [];
+
+    if (params.startDate) {
+      whereConditions.push(gte(systemLogs.localTimestamp, new Date(params.startDate)));
+    }
+    if (params.endDate) {
+      whereConditions.push(lte(systemLogs.localTimestamp, new Date(params.endDate)));
+    }
+    if (params.level) {
+      whereConditions.push(eq(systemLogs.level, params.level));
+    }
+    if (params.category) {
+      whereConditions.push(eq(systemLogs.category, params.category));
+    }
+    if (params.userId) {
+      whereConditions.push(eq(systemLogs.userId, params.userId));
+    }
+    if (params.event) {
+      whereConditions.push(like(systemLogs.event, `%${params.event}%`));
+    }
+
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+    return await db
+      .select()
+      .from(systemLogs)
+      .where(whereClause)
+      .orderBy(desc(systemLogs.localTimestamp))
+      .limit(params.limit || 100)
+      .offset(params.offset || 0);
+  }
+
+  async getSystemLogCount(params: Omit<LogSearchParams, 'limit' | 'offset'>): Promise<number> {
+    let whereConditions: any[] = [];
+
+    if (params.startDate) {
+      whereConditions.push(gte(systemLogs.localTimestamp, new Date(params.startDate)));
+    }
+    if (params.endDate) {
+      whereConditions.push(lte(systemLogs.localTimestamp, new Date(params.endDate)));
+    }
+    if (params.level) {
+      whereConditions.push(eq(systemLogs.level, params.level));
+    }
+    if (params.category) {
+      whereConditions.push(eq(systemLogs.category, params.category));
+    }
+    if (params.userId) {
+      whereConditions.push(eq(systemLogs.userId, params.userId));
+    }
+    if (params.event) {
+      whereConditions.push(like(systemLogs.event, `%${params.event}%`));
+    }
+
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+    const result = await db
+      .select({ count: systemLogs.id })
+      .from(systemLogs)
+      .where(whereClause);
+    
+    return result.length;
+  }
+
+  async deleteOldSystemLogs(olderThanDays: number): Promise<number> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+
+    const deletedLogs = await db
+      .delete(systemLogs)
+      .where(lte(systemLogs.localTimestamp, cutoffDate))
+      .returning();
+
+    return deletedLogs.length;
   }
 }
 

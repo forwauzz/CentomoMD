@@ -49,6 +49,11 @@ app.use((req, res, next) => {
     // Initialize AI processing configurations
     initializeAIConfigurations();
     
+    // Initialize logger with storage
+    const { default: logger } = await import("@shared/logger");
+    const { storage } = await import("./storage");
+    logger.setStorage(storage);
+    
     const server = await registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

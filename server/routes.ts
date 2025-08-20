@@ -1245,32 +1245,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Logging endpoints for debugging and monitoring
+  // Enhanced logging endpoints with database search
   app.get("/api/logs/recent", requireAdmin, async (req, res) => {
     try {
       const count = parseInt(req.query.count as string) || 100;
       const level = req.query.level as string;
       const category = req.query.category as string;
       
-      let logs = logger.getRecentLogs(count);
+      // Memory buffer logs (immediate access)
+      let bufferLogs = logger.getRecentLogs(count);
       
       if (level) {
-        logs = logs.filter(log => log.level === level);
+        bufferLogs = bufferLogs.filter(log => log.level === level);
       }
       
       if (category) {
-        logs = logs.filter(log => log.category === category);
+        bufferLogs = bufferLogs.filter(log => log.category === category);
       }
       
       logger.info(LogCategory.SYSTEM, 'logger', 'LOGS_ACCESSED', {
         userId: req.session.userId,
-        count: logs.length,
+        count: bufferLogs.length,
         filters: { level, category }
       });
       
       res.json({
-        logs,
-        total: logs.length,
+        logs: bufferLogs,
+        total: bufferLogs.length,
+        source: 'memory_buffer',
         filters: { level, category, count }
       });
     } catch (error) {
@@ -1278,6 +1280,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.session.userId
       }, error as Error);
       res.status(500).json({ message: "Failed to retrieve logs" });
+    }
+  });
+
+  // NEW: Database log search endpoint for historical data
+  app.get("/api/logs/search", requireAdmin, async (req, res) => {
+    try {
+      const searchParams = {
+        startDate: req.query.startDate as string,
+        endDate: req.query.endDate as string,
+        level: req.query.level as string,
+        category: req.query.category as string,
+        userId: req.query.userId as string,
+        event: req.query.event as string,
+        search: req.query.search as string,
+        limit: parseInt(req.query.limit as string) || 100,
+        offset: parseInt(req.query.offset as string) || 0
+      };
+
+      // Remove undefined values
+      const cleanParams = Object.fromEntries(
+        Object.entries(searchParams).filter(([_, value]) => value !== undefined && value !== '')
+      );
+
+      const [logs, total] = await Promise.all([
+        storage.getSystemLogs(cleanParams as any),
+        storage.getSystemLogCount(cleanParams as any)
+      ]);
+
+      logger.info(LogCategory.SYSTEM, 'logger', 'DATABASE_LOGS_SEARCHED', {
+        userId: req.session.userId,
+        resultCount: logs.length,
+        totalMatching: total,
+        searchParams: cleanParams
+      });
+
+      res.json({
+        logs,
+        total,
+        returned: logs.length,
+        source: 'database',
+        filters: cleanParams
+      });
+    } catch (error) {
+      logger.error(LogCategory.SYSTEM, 'logger', 'DATABASE_LOGS_SEARCH_ERROR', {
+        userId: req.session.userId
+      }, error as Error);
+      res.status(500).json({ message: "Failed to search database logs" });
     }
   });
 

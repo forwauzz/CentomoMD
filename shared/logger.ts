@@ -60,6 +60,7 @@ class CentomoLogger {
   private config: LoggerConfig;
   private buffer: LogEntry[] = [];
   private sessionId: string;
+  private storage: any; // Will be injected to avoid circular dependencies
 
   constructor(config?: Partial<LoggerConfig>) {
     this.config = {
@@ -72,6 +73,9 @@ class CentomoLogger {
     };
     
     this.sessionId = this.generateSessionId();
+    
+    // Enhanced buffer size for development
+    this.config.maxBufferSize = process.env.NODE_ENV === 'production' ? 1000 : 2000;
     
     // Log logger initialization
     this.logInternal(LogLevel.INFO, LogCategory.SYSTEM, 'logger', 'LOGGER_INITIALIZED', {
@@ -214,6 +218,9 @@ class CentomoLogger {
         this.buffer.shift(); // Remove oldest entry
       }
     }
+
+    // Database persistence for critical events
+    this.persistToDatabase(entry);
   }
 
   private hashUserId(userId: string): string {
@@ -324,6 +331,60 @@ class CentomoLogger {
       bufferSize: this.buffer.length,
       sessionId: this.sessionId
     };
+  }
+
+  // Database persistence
+  setStorage(storage: any) {
+    this.storage = storage;
+  }
+
+  private async persistToDatabase(entry: LogEntry): Promise<void> {
+    if (!this.storage) return;
+
+    // Only persist important events to database
+    const shouldPersist = 
+      entry.level === LogLevel.ERROR || 
+      entry.level === LogLevel.FATAL ||
+      entry.category === LogCategory.AUTH ||
+      entry.category === LogCategory.SECURITY ||
+      (entry.category === LogCategory.VOICE && entry.event.includes('FAILED')) ||
+      (entry.category === LogCategory.API && entry.metadata.status >= 400);
+
+    if (!shouldPersist) return;
+
+    try {
+      // Convert to Montreal time
+      const localTimestamp = new Date(entry.timestamp);
+      
+      await this.storage.createSystemLog({
+        timestamp: new Date(entry.timestamp),
+        level: entry.level,
+        category: entry.category,
+        component: entry.component,
+        event: entry.event,
+        userId: entry.userId,
+        sessionId: entry.sessionId,
+        correlationId: entry.correlationId,
+        metadata: entry.metadata,
+        errorMessage: entry.error?.message,
+        errorCode: entry.error?.code,
+        localTimestamp
+      });
+    } catch (error) {
+      // Avoid infinite recursion - log to console only
+      console.error('Failed to persist log to database:', error);
+    }
+  }
+
+  // Database search methods
+  async searchLogs(params: any): Promise<any[]> {
+    if (!this.storage) return [];
+    return this.storage.getSystemLogs(params);
+  }
+
+  async getLogCount(params: any): Promise<number> {
+    if (!this.storage) return 0;
+    return this.storage.getSystemLogCount(params);
   }
 }
 
