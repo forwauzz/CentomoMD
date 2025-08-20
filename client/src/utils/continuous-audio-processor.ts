@@ -142,8 +142,13 @@ export class ContinuousAudioProcessor {
       // FIXED: Start CONTINUOUS recording (no time slicing)
       this.mediaRecorder.start();
       
-      // FIXED: Set up manual chunking interval
+      // FIXED: Set up manual chunking interval with data request
       this.chunkingInterval = setInterval(() => {
+        // Request data from MediaRecorder to trigger ondataavailable
+        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+          console.log(`🔄 Requesting data from MediaRecorder (state: ${this.mediaRecorder.state})`);
+          this.mediaRecorder.requestData();
+        }
         this.createChunkFromAccumulatedData();
       }, this.config.chunkDurationMs);
       
@@ -188,8 +193,10 @@ export class ContinuousAudioProcessor {
     // FIXED: Accumulate ALL data instead of processing individual chunks
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0 && this.isRecording) {
-        console.log(`📦 Accumulating data: ${(event.data.size / 1024).toFixed(1)}KB`);
+        console.log(`📦 Accumulating data: ${(event.data.size / 1024).toFixed(1)}KB (total pieces: ${this.allRecordedData.length + 1})`);
         this.allRecordedData.push(event.data);
+      } else if (event.data.size === 0) {
+        console.log('⚠️ Received empty data event');
       }
     };
 
