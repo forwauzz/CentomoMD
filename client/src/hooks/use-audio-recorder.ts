@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { sessionManager, generateSessionId, isSessionRecoverable } from '@/utils/session-storage';
 
 interface AudioRecorderOptions {
-  language?: 'fr' | 'en' | 'auto';
+  language?: string; // fr-CA, en-US, auto, etc. (Web Speech API format)
   chunkDuration?: number; // in seconds
   enhanceText?: boolean;
   // New unified mode support
@@ -81,10 +81,17 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
   const animationFrameRef = useRef<number | null>(null);
 
   const {
-    language = 'auto',
+    language = 'fr-CA',
     chunkDuration = 2 * 60, // 2 minutes in seconds for better reliability
     enhanceText = true
   } = options;
+
+  // Convert Web Speech API language format to Whisper API format
+  const getWhisperLanguage = (webSpeechLang: string): string => {
+    if (webSpeechLang.startsWith('fr')) return 'fr';
+    if (webSpeechLang.startsWith('en')) return 'en';
+    return 'auto';
+  };
 
 
 
@@ -178,7 +185,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
     
     const formData = new FormData();
     formData.append('audio', chunk.blob, `chunk-${chunk.chunkIndex}.webm`);
-    formData.append('language', language);
+    formData.append('language', getWhisperLanguage(language)); // Convert format for Whisper API
     formData.append('enhanceText', enhanceText.toString());
     formData.append('chunkIndex', chunk.chunkIndex.toString());
 

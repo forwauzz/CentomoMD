@@ -1284,8 +1284,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create blob for transcription with proper format detection
       const blob = new Blob([audioBuffer], { type: 'audio/webm;codecs=opus' });
 
+      // Convert language format for Whisper API (fr/en only, not fr-CA/en-US)
+      const whisperLanguage = language === 'fr-CA' || language === 'fr' ? 'fr' : 
+                              language === 'en-US' || language === 'en' ? 'en' : 
+                              'auto';
+
       const result = await transcribeAudioChunk(blob, chunkIndex, {
-        language: language as "fr" | "en" | "auto",
+        language: whisperLanguage as "fr" | "en" | "auto",
         enhanceText: false, // Transcribe mode uses minimal processing
         sessionId,
         temperature: temperature,

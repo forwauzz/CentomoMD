@@ -128,6 +128,12 @@ const templateOptions = [
   { value: "assessment", labelFr: "Évaluation complète", labelEn: "Complete Assessment" },
 ];
 
+const languageOptions = [
+  { value: "fr", labelFr: "Français (FR)", labelEn: "French (FR)" },
+  { value: "en", labelFr: "Anglais (EN)", labelEn: "English (EN)" },
+  { value: "auto", labelFr: "Détection automatique (Bientôt)", labelEn: "Auto-detect (Coming Soon)", disabled: true },
+];
+
 export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDictationPageProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -148,13 +154,37 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
   
   const t = translations[currentLanguage];
 
-  // Initialize from sessionStorage
+  // Helper function to get speech recognition language code
+  const getSpeechRecognitionLanguage = (lang: "fr" | "en") => {
+    return lang === "fr" ? "fr-CA" : "en-US";
+  };
+
+  // Helper function to get Whisper API language code
+  const getWhisperLanguage = (lang: "fr" | "en") => {
+    return lang === "fr" ? "fr" : "en";
+  };
+
+  // Save language preference to localStorage for persistence
+  const handleLanguageChange = (newLanguage: "fr" | "en") => {
+    setCurrentLanguage(newLanguage);
+    localStorage.setItem("userLanguagePreference", newLanguage);
+    sessionStorage.setItem("dictationLanguage", newLanguage);
+    console.log(`🌐 Language changed to: ${newLanguage} (Speech: ${getSpeechRecognitionLanguage(newLanguage)}, Whisper: ${getWhisperLanguage(newLanguage)})`);
+  };
+
+  // Initialize from sessionStorage and localStorage
   useEffect(() => {
     const activeField = sessionStorage.getItem("activeField");
-    const storedLanguage = sessionStorage.getItem("dictationLanguage") as "fr" | "en";
+    const sessionLanguage = sessionStorage.getItem("dictationLanguage") as "fr" | "en";
+    const preferredLanguage = localStorage.getItem("userLanguagePreference") as "fr" | "en";
     
-    if (storedLanguage) {
-      setCurrentLanguage(storedLanguage);
+    // Priority: sessionStorage (current session) > localStorage (user preference) > initialLanguage prop
+    const languageToUse = sessionLanguage || preferredLanguage || initialLanguage;
+    
+    if (languageToUse && languageToUse !== currentLanguage) {
+      setCurrentLanguage(languageToUse);
+      sessionStorage.setItem("dictationLanguage", languageToUse);
+      console.log(`🌐 Initialized with language: ${languageToUse}`);
     }
     
     if (activeField) {
@@ -162,7 +192,7 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     }
     
     setTimeout(() => setIsInitializing(false), 1000);
-  }, []);
+  }, [initialLanguage]);
 
   // Configure audio recorder with current mode settings
   const {
@@ -184,7 +214,7 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     currentChunkIndex,
     getProgress,
   } = useAudioRecorder({
-    language: currentLanguage,
+    language: getSpeechRecognitionLanguage(currentLanguage), // Use proper speech recognition format
     chunkDuration: modeConfig.settings.chunkDuration,
     enhanceText: modeConfig.settings.enhanceText,
     realTimeHybrid: modeConfig.settings.realTimeDisplay,
@@ -230,7 +260,7 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           audio: base64Audio,
-          language: currentLanguage,
+          language: getWhisperLanguage(currentLanguage), // Ensure correct Whisper language format
           mode: 'transcribe',
           temperature: 0.1, // Transcribe mode setting
           chunkIndex: 1,
@@ -578,6 +608,28 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                 </div>
               </div>
 
+              {/* Language Selection - New */}
+              <div className="space-y-2">
+                <div className="text-xs font-medium">Langue / Language</div>
+                <Select value={currentLanguage} onValueChange={handleLanguageChange}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageOptions.map((option) => (
+                      <SelectItem 
+                        key={option.value} 
+                        value={option.value}
+                        disabled={option.disabled}
+                      >
+                        {currentLanguage === "fr" ? option.labelFr : option.labelEn}
+                        {option.disabled && " ⏳"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Recording Controls - Compact */}
               <div className="space-y-2">
                 <div className="text-xs font-medium flex items-center justify-between">
@@ -590,6 +642,9 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                   <span className="text-muted-foreground">
                     {formatDuration(recordingDuration)}
                     {chunkCount > 0 && ` • ${chunkCount}`}
+                    <span className="ml-2 text-blue-600">
+                      {currentLanguage.toUpperCase()}
+                    </span>
                   </span>
                 </div>
                 
