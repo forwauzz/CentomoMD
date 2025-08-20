@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User, TestTube } from 'lucide-react';
+import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User, TestTube, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { VisitSelectionModal } from '@/components/visit-selection-modal';
@@ -163,6 +163,52 @@ export default function FormSelector({
 
         {/* Form Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* System Logs Card for Admin Users */}
+          {user?.role === 'admin' && (
+            <Card 
+              className="cursor-pointer hover:shadow-lg transition-shadow duration-200 border-2 hover:border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50"
+              onClick={() => setLocation('/system-logs')}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <Zap className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg text-yellow-800">
+                      {language === 'fr' ? 'Journaux Système' : 'System Logs'}
+                    </CardTitle>
+                    <CardDescription className="text-yellow-700">
+                      {language === 'fr' 
+                        ? 'Rechercher les incidents et erreurs historiques'
+                        : 'Search historical incidents and errors'
+                      }
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-yellow-700">
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    {language === 'fr' ? 'Recherche par date' : 'Search by date'}
+                  </div>
+                  <div className="flex items-center text-sm text-yellow-700">
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    {language === 'fr' ? 'Filtres par niveau d\'erreur' : 'Filter by error level'}
+                  </div>
+                  <div className="flex items-center text-sm text-yellow-700">
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    {language === 'fr' ? 'Audit médical complet' : 'Complete medical audit'}
+                  </div>
+                </div>
+                <div className="mt-4 text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
+                  {language === 'fr' ? 'Accès administrateur requis' : 'Admin access required'}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {availableForms.map((form) => {
             const Icon = form.icon;
             const title = language === 'fr' ? form.title.fr : form.title.en;
