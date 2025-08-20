@@ -15,7 +15,7 @@ This document outlines our Git workflow strategy for CentomoMD, a medical evalua
 
 ### Main Branches
 
-#### `main` (Production)
+#### `Production` (Production)
 - **Purpose**: Production-ready code only
 - **Protection**: Fully protected, requires PR approval
 - **Deployment**: Auto-deploys to production Replit environment
@@ -84,11 +84,11 @@ git checkout -b release/v1.2.0
 # Run full security test suite
 # Generate compliance report
 
-# Merge to main when ready
-git checkout main
+# Merge to Production when ready
+git checkout Production
 git merge --no-ff release/v1.2.0
 git tag v1.2.0
-git push origin main --tags
+git push origin Production --tags
 
 # Merge back to develop
 git checkout develop
@@ -107,9 +107,9 @@ git merge --no-ff release/v1.2.0
 
 **Workflow:**
 ```bash
-# Create hotfix from main
-git checkout main
-git pull origin main
+# Create hotfix from Production
+git checkout Production
+git pull origin Production
 git checkout -b hotfix/URGENT-session-timeout-fix
 
 # Implement critical fix with security validation
@@ -123,11 +123,11 @@ Security: ✅ Data exposure risk eliminated
 Urgency: CRITICAL - affects active medical sessions
 Testing: ✅ Verified in staging environment"
 
-# Deploy to main immediately
-git checkout main
+# Deploy to Production immediately
+git checkout Production
 git merge --no-ff hotfix/URGENT-session-timeout-fix
 git tag v1.1.1-hotfix
-git push origin main --tags
+git push origin Production --tags
 
 # Merge to develop
 git checkout develop
@@ -291,7 +291,7 @@ Special deployment considerations or rollback procedures.
 3. **QA Validation**: Test coverage and quality assurance
 
 #### Approval Requirements
-- **Main Branch**: 2 approvals (Security Officer + Technical Lead)
+- **Production Branch**: 2 approvals (Security Officer + Technical Lead)
 - **Develop Branch**: 1 approval (Technical Lead or Senior Developer)
 - **Feature Branches**: 1 approval (Peer review)
 
@@ -340,9 +340,9 @@ name: CentomoMD Deployment Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [Production, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [Production, develop]
 
 jobs:
   security-scan:
@@ -374,7 +374,7 @@ jobs:
           replit deploy staging
 
   deploy-production:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/Production'
     needs: [security-scan, test-suite]
     steps:
       - name: Deploy to Production
@@ -431,7 +431,7 @@ echo "✅ Pre-commit security checks passed"
 
 ### Branch Protection Rules
 
-#### Main Branch Protection
+#### Production Branch Protection
 - Require pull request reviews before merging
 - Require status checks to pass before merging
 - Require security review approval
@@ -483,7 +483,7 @@ Following Semantic Versioning (SemVer): `MAJOR.MINOR.PATCH`
 #### Security Incident Response
 ```bash
 # Emergency hotfix workflow
-git checkout main
+git checkout Production
 git checkout -b hotfix/EMERGENCY-security-patch
 
 # Implement critical fix
@@ -501,10 +501,10 @@ Mitigation: [Solution implemented]
 Validation: [Testing completed]"
 
 # Deploy immediately
-git checkout main
+git checkout Production
 git merge --no-ff hotfix/EMERGENCY-security-patch
 git tag v1.2.1-emergency
-git push origin main --tags
+git push origin Production --tags
 
 # Immediate deployment to production
 # Full incident report to follow
