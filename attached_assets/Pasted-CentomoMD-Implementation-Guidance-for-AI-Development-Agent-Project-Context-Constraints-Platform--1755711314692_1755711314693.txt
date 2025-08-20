@@ -1,0 +1,290 @@
+CentomoMD Implementation Guidance for AI Development Agent
+Project Context & Constraints
+Platform: CentomoMD - Zero-retention AI medical scribe for Quebec healthcare market
+Current Stack: React + TypeScript + Express + PostgreSQL + Drizzle ORM
+Existing Implementation: Smart dictation using Whisper API (Section 7)
+Critical Constraint: ZERO patient data retention - process in-memory only, immediate deletion
+
+Feature 1: Word-for-Word Dictation Enhancement
+Current State Analysis Required:
+
+Review existing Whisper service implementation in /server/whisper-service.ts
+Analyze current audio processing pipeline and session management
+Identify how smart dictation currently handles real-time feedback
+
+Implementation Strategy:
+
+Enhance Whisper Configuration:
+
+Modify existing Whisper API calls to use temperature: 0.0 for maximum precision
+Add response_format: 'verbose_json' to get word-level timestamps
+Implement French language detection and optimization for Quebec market
+
+
+Real-time Display System:
+
+Create hybrid approach: Web Speech API for instant word display + Whisper for accuracy verification
+Implement word-by-word streaming display in the React frontend
+Add confidence scoring visualization for each transcribed word
+
+
+Spoken Punctuation Handler:
+
+Add command processing for spoken punctuation ("period", "comma", "new paragraph")
+Implement voice commands for corrections ("delete last word", "capitalize that")
+Create French language command set for Quebec users
+
+
+Zero Retention Compliance:
+
+Ensure all audio buffers are cleared after processing
+Add explicit memory cleanup after each transcription session
+Implement session-only temporary storage for real-time display
+
+
+
+
+Feature 2: Ambient Listening & Transcription (Scribe)
+Architecture Decision:
+Choose between cloud-based (OpenAI Whisper API) vs local processing (@xenova/transformers) based on:
+
+Privacy requirements (local = better privacy)
+Performance needs (cloud = better accuracy)
+Cost considerations (local = no API costs)
+
+Implementation Requirements:
+
+Continuous Audio Capture:
+
+Implement voice activity detection to start/stop recording automatically
+Create 30-second audio chunking system with overlap for context
+Add background noise filtering and echo cancellation
+
+
+Speaker Identification:
+
+Develop simple speaker diarization to distinguish doctor vs patient voices
+Implement speaker labels in transcription output
+Create speaker-specific formatting for medical notes
+
+
+Real-time Processing Pipeline:
+
+Build queue system for processing audio chunks while recording continues
+Implement progressive transcription display (show results as they come in)
+Add session state management for long consultations
+
+
+Integration with Existing System:
+
+Extend current session management to handle ambient mode
+Modify existing React components to support continuous transcription
+Ensure ambient mode maintains zero retention principles
+
+
+
+
+Feature 3: Template Application System
+Quebec Medical Standards Research:
+
+Research Quebec medical documentation standards (RAMQ, CMQ requirements)
+Identify most common medical note formats used in Quebec healthcare
+Create French-language template structures for Quebec physicians
+
+Implementation Approach:
+
+Template Definition System:
+
+Create JSON-based template definitions for SOAP notes, H&P, progress notes
+Build French-language template library specific to Quebec medical practice
+Implement template inheritance system for customization
+
+
+AI-Powered Section Extraction:
+
+Use existing OpenAI integration to analyze transcriptions
+Implement section identification and content extraction
+Create prompt engineering system for medical content categorization
+
+
+Auto-Template Detection:
+
+Build keyword-based template suggestion system
+Implement machine learning approach to recommend templates based on transcription content
+Add user preference learning for template selection
+
+
+Template Application Engine:
+
+Create system to map transcribed content to template sections
+Implement content formatting and medical terminology standardization
+Add validation system for required template sections
+
+
+
+
+Feature 4: Pixel Perfect Export System
+Document Generation Strategy:
+Research Quebec medical form layouts and standards to ensure exported documents match expected professional formats.
+Implementation Requirements:
+
+Word Document Export:
+
+Use docx library to generate professional Word documents
+Create template-based formatting system that matches Quebec medical standards
+Implement custom styles for headers, sections, and medical content formatting
+
+
+PDF Export with Layout Matching:
+
+Use HTML-to-PDF approach with exact CSS styling
+Create pixel-perfect reproduction of original medical forms
+Implement print-ready formatting with proper margins and spacing
+
+
+Template-Based Formatting:
+
+Build layout engine that matches original clinic templates
+Create Quebec-specific medical form layouts (RAMQ consultation forms, etc.)
+Implement responsive formatting that adapts to content length
+
+
+Professional Medical Document Standards:
+
+Research Quebec medical documentation visual standards
+Implement proper medical document typography and layout
+Add letterhead and professional formatting options
+
+
+
+
+Integration & System Architecture
+Unified Processing Pipeline:
+
+Mode Selection System:
+
+Create UI controls for switching between word-for-word, smart, and ambient modes
+Implement session state management across different transcription modes
+Build unified audio input system that supports all modes
+
+
+Session Management Enhancement:
+
+Extend existing session system to handle multiple transcription modes
+Implement session recovery and pause/resume functionality
+Add session metadata tracking for compliance audit logs
+
+
+Export Integration:
+
+Create seamless workflow from transcription → template application → export
+Implement batch processing for multiple document formats
+Add preview system before final export
+
+
+
+Zero Retention Compliance Integration:
+
+Audit all new features against the compliance checklist
+Implement automatic cleanup procedures for all processing stages
+Add compliance logging for audit trail (without storing patient data)
+Ensure French language support across all features
+
+
+Implementation Priority & Dependencies
+Phase 1: Word-for-Word Enhancement (Weeks 1-2)
+Dependencies: Current Whisper service, React audio components
+Focus: Enhance existing system rather than building from scratch
+Key Deliverable: Professional word-for-word dictation with French support
+Phase 2: Ambient Listening (Weeks 3-4)
+Dependencies: Enhanced audio pipeline from Phase 1
+Focus: Continuous listening and speaker identification
+Key Deliverable: Medical consultation transcription with speaker labels
+Phase 3: Template System (Weeks 5-6)
+Dependencies: Both transcription modes working
+Focus: Quebec medical standards and AI content extraction
+Key Deliverable: Professional medical note formatting
+Phase 4: Export System (Weeks 7-8)
+Dependencies: Template system and formatted content
+Focus: Professional document generation matching Quebec standards
+Key Deliverable: Pixel-perfect Word and PDF exports
+
+Technical Architecture Considerations
+Performance Optimization:
+
+Implement WebWorker for audio processing to avoid UI blocking
+Use WebAssembly for intensive audio processing if needed
+Optimize memory usage for continuous listening mode
+
+French Language Support:
+
+Implement comprehensive French UI translations
+Optimize speech recognition for Quebec French accents and medical terminology
+Create French medical terminology dictionary for improved accuracy
+
+Quebec Healthcare Integration:
+
+Research Quebec EMR integration requirements for future development
+Implement Quebec health card number validation format
+Create Quebec medical professional license integration hooks
+
+Compliance Automation:
+
+Integrate compliance checklist validation into build process
+Implement automated testing for zero retention principles
+Add compliance reporting for audit trail generation
+
+
+Success Metrics & Testing
+Feature Validation:
+
+Word-for-word accuracy compared to current smart dictation
+Ambient listening accuracy in noisy clinical environments
+Template matching accuracy for different medical note types
+Export document quality matching original clinic templates
+
+Performance Benchmarks:
+
+Real-time transcription latency under 500ms
+Memory usage optimization for continuous listening
+Battery impact minimal for mobile/tablet usage
+French language accuracy matching English performance
+
+Compliance Verification:
+
+Zero data retention confirmed through automated testing
+Audit log completeness without patient data leakage
+French language interface completeness
+Quebec medical standards compliance verification
+
+
+Risk Mitigation
+Technical Risks:
+
+Audio processing performance: Implement fallback to simpler processing if real-time performance degrades
+Memory management: Add explicit garbage collection and memory monitoring
+Browser compatibility: Test across Chrome, Firefox, Safari for audio API support
+
+Compliance Risks:
+
+Data retention violations: Implement automated checks for zero retention compliance
+Privacy violations: Add privacy impact assessment for each new feature
+Quebec regulations: Regular review of Quebec healthcare technology regulations
+
+Business Risks:
+
+User adoption: Implement gradual feature rollout with user feedback collection
+Competition: Monitor TGV-certified competitor feature releases
+Market changes: Track Quebec healthcare digitization policy changes
+
+
+Final Implementation Notes
+For the AI Development Agent:
+
+Always reference the compliance checklist before implementing any feature
+Test zero retention principles after every feature addition
+Prioritize French language support in all user-facing features
+Maintain existing TypeScript architecture and coding patterns
+Document all compliance decisions for future audit requirements
+
+Success Definition: Each feature should enhance CentomoMD's position as the most privacy-focused, Quebec-optimized AI medical scribe while maintaining professional medical documentation standards.
