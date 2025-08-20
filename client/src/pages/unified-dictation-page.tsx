@@ -35,6 +35,8 @@ import { useTranscriptionMode } from "@/hooks/use-transcription-mode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import { AmbientListeningPanel } from "@/components/ambient-listening-panel";
+import { AudioChunk } from "@shared/transcription-types";
 
 interface UnifiedDictationPageProps {
   language: "fr" | "en";
@@ -141,6 +143,9 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
   const [isInitializing, setIsInitializing] = useState(true);
   const [aiFormatting, setAiFormatting] = useState(false);
   
+  // Ambient listening state for transcribe mode
+  const [ambientListening, setAmbientListening] = useState(false);
+  
   const t = translations[currentLanguage];
 
   // Initialize from sessionStorage
@@ -202,6 +207,59 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
       }
     }
   }, [transcript, isProcessing, isRecording, currentLanguage]);
+
+  // Handle ambient listening audio chunks for transcribe mode
+  const handleAmbientAudioChunk = async (chunk: AudioChunk) => {
+    if (!selectedSection) return;
+    
+    try {
+      console.log(`🎙️ Processing ambient chunk: ${chunk.id} (${(chunk.data.size / 1024).toFixed(1)}KB)`);
+      
+      // Convert blob to base64 for API call
+      const arrayBuffer = await chunk.data.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let binaryString = '';
+      for (let i = 0; i < uint8Array.length; i++) {
+        binaryString += String.fromCharCode(uint8Array[i]);
+      }
+      const base64Audio = btoa(binaryString);
+      
+      // Send to Whisper API with transcribe mode settings
+      const response = await fetch('/api/transcribe-whisper-chunk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audio: base64Audio,
+          language: currentLanguage,
+          mode: 'transcribe',
+          temperature: 0.1, // Transcribe mode setting
+          chunkIndex: 1,
+          sessionId: `ambient-${Date.now()}`
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.text?.trim()) {
+          // Append transcribed text with speaker identification
+          const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const speakerLabel = result.speaker ? `[${result.speaker}]` : '';
+          const formattedText = `[${timestamp}]${speakerLabel} ${result.text.trim()}`;
+          
+          setEditableText(prev => {
+            const separator = prev ? "\n" : "";
+            return prev + separator + formattedText;
+          });
+          
+          console.log(`✅ Ambient transcription added: ${formattedText.substring(0, 50)}...`);
+        }
+      } else {
+        console.error('❌ Failed to transcribe ambient chunk:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error processing ambient chunk:', error);
+    }
+  };
 
   const handleStartRecording = () => {
     if (!selectedSection) {
@@ -608,6 +666,18 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                 </Button>
               </div>
             </div>
+
+            {/* Ambient Listening Panel - Show only for transcribe mode */}
+            {currentMode === 'transcribe' && (
+              <div className="mb-3">
+                <AmbientListeningPanel
+                  isActive={ambientListening}
+                  onToggle={() => setAmbientListening(!ambientListening)}
+                  onAudioChunk={handleAmbientAudioChunk}
+                  language={currentLanguage}
+                />
+              </div>
+            )}
 
             {/* Maximized Text Editor */}
             <div className="flex-1">

@@ -52,7 +52,18 @@ export interface TranscriptionSession {
     id: string;
     label: 'doctor' | 'patient' | 'unknown';
     confidence: number;
+    voiceProfile?: VoiceProfile; // For speaker identification
   }>;
+  
+  // Ambient listening state
+  ambientListening?: {
+    isActive: boolean;
+    voiceActivityThreshold: number;
+    silenceDetectionMs: number;
+    autoStopAfterSilenceMs: number;
+    lastVoiceActivityTime?: Date;
+    continuousChunks: number;
+  };
   
   // Compliance tracking (no patient data)
   complianceChecks: {
@@ -68,6 +79,56 @@ export interface WordLevelTranscription {
   end: number;
   confidence: number;
   speaker?: string; // for transcribe mode
+}
+
+// Voice Activity Detection types
+export interface VoiceActivityResult {
+  hasVoice: boolean;
+  confidence: number;
+  timestamp: number;
+  audioLevel: number;
+}
+
+// Speaker identification types  
+export interface VoiceProfile {
+  speakerId: string;
+  characteristics: {
+    pitch: number;
+    tempo: number;
+    frequency: number[];
+  };
+  confidence: number;
+  sampleCount: number;
+}
+
+export interface SpeakerSegment {
+  speakerId: string;
+  startTime: number;
+  endTime: number;
+  text: string;
+  confidence: number;
+  label?: 'doctor' | 'patient' | 'unknown';
+}
+
+// Audio processing types
+export interface AudioChunk {
+  id: string;
+  data: Blob;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  hasOverlap: boolean;
+  overlapDuration?: number;
+  voiceActivity?: VoiceActivityResult;
+}
+
+export interface ContinuousProcessingQueue {
+  pending: AudioChunk[];
+  processing: AudioChunk[];
+  completed: AudioChunk[];
+  failed: AudioChunk[];
+  maxQueueSize: number;
+  processingConcurrency: number;
 }
 
 export interface EnhancedTranscriptionResult {
