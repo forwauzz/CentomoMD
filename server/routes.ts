@@ -1245,6 +1245,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Ambient transcription endpoint for continuous listening mode
+  app.post("/api/transcribe-ambient-chunk", async (req, res) => {
+    try {
+      const {
+        audio: base64Audio,
+        language = "fr",
+        mode = "transcribe",
+        temperature = 0.1,
+        chunkIndex = 0,
+        sessionId
+      } = req.body;
+
+      if (!base64Audio) {
+        return res.status(400).json({ message: "Audio data is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({
+          message: "OpenAI API key not configured",
+          error: "API_KEY_MISSING",
+        });
+      }
+
+      console.log(`🎙️ Processing ambient chunk: ${chunkIndex} (${sessionId})`);
+
+      // Convert base64 to buffer
+      const audioBuffer = Buffer.from(base64Audio, 'base64');
+      
+      // Validate audio data
+      if (audioBuffer.length < 1024) {
+        return res.status(400).json({
+          message: `Audio data too small (${audioBuffer.length} bytes). Recording may have failed.`,
+          error: "AUDIO_DATA_TOO_SMALL",
+        });
+      }
+
+      // Create blob for transcription
+      const blob = new Blob([audioBuffer], { type: 'audio/webm' });
+
+      const result = await transcribeAudioChunk(blob, chunkIndex, {
+        language: language as "fr" | "en" | "auto",
+        enhanceText: false, // Transcribe mode uses minimal processing
+        sessionId,
+        temperature: temperature,
+      });
+
+      // Log voice activity for this chunk
+      logVoiceEvent('AMBIENT_TRANSCRIPTION', req.session?.userId, {
+        chunkIndex,
+        sessionId,
+        duration: result.duration,
+        textLength: result.text?.length || 0,
+        confidence: result.confidence || 0.95,
+        mode: 'transcribe'
+      });
+
+      res.json({
+        success: true,
+        text: result.text,
+        enhanced: result.enhanced,
+        duration: result.duration,
+        language: result.language,
+        confidence: result.confidence || 0.95,
+        chunkIndex,
+        speaker: result.speaker || null // Speaker identification if available
+      });
+
+    } catch (error) {
+      const { chunkIndex = 0, sessionId } = req.body;
+      console.error(`❌ Ambient transcription error (chunk ${chunkIndex}):`, error);
+
+      // Log the error
+      logVoiceEvent('AMBIENT_TRANSCRIPTION_ERROR', req.session?.userId, {
+        chunkIndex,
+        sessionId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+
+      res.status(500).json({
+        message: `Failed to transcribe ambient chunk ${chunkIndex}`,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
   // Enhanced logging endpoints with database search
   app.get("/api/logs/recent", requireAdmin, async (req, res) => {
     try {

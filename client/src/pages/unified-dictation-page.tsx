@@ -224,8 +224,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
       }
       const base64Audio = btoa(binaryString);
       
-      // Send to Whisper API with transcribe mode settings
-      const response = await fetch('/api/transcribe-whisper-chunk', {
+      // Send to ambient transcription API with transcribe mode settings
+      const response = await fetch('/api/transcribe-ambient-chunk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -240,6 +240,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
       
       if (response.ok) {
         const result = await response.json();
+        console.log('🔍 Ambient transcription result:', result);
+        
         if (result.text?.trim()) {
           // Append transcribed text with speaker identification
           const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -252,9 +254,12 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
           });
           
           console.log(`✅ Ambient transcription added: ${formattedText.substring(0, 50)}...`);
+        } else {
+          console.warn('⚠️ Ambient transcription returned empty text');
         }
       } else {
-        console.error('❌ Failed to transcribe ambient chunk:', response.status);
+        const errorText = await response.text();
+        console.error('❌ Failed to transcribe ambient chunk:', response.status, errorText);
       }
     } catch (error) {
       console.error('❌ Error processing ambient chunk:', error);

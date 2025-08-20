@@ -141,6 +141,7 @@ export interface WhisperTranscriptionOptions {
   prompt?: string;
   sessionId?: string;
   totalChunks?: number;
+  temperature?: number;
   // New unified mode support
   mode?: import('../shared/transcription-types').TranscriptionMode;
   realTimeHybrid?: boolean;
@@ -182,7 +183,7 @@ export async function transcribeAudioWithWhisper(
       file: file,
       model: 'whisper-1',
       response_format: modeConfig.settings.responseFormat,
-      temperature: modeConfig.settings.temperature,
+      temperature: options.temperature !== undefined ? options.temperature : modeConfig.settings.temperature,
     };
     
     // Set language if specified
