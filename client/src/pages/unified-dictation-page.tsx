@@ -185,6 +185,7 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     const initBrowserWhisperForAmbient = async () => {
       if (currentMode === 'transcribe') {
         try {
+          console.log('🔄 Initializing Browser Whisper for ambient mode...');
           setBrowserWhisperEnabled(true);
           setModelLoadingStatus('Initializing speech recognition...');
           
@@ -193,6 +194,7 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
           
           // Set up progress callback
           browserWhisper.onLoadingProgress((progress) => {
+            console.log(`📥 Browser Whisper progress: ${progress.message}`);
             setModelLoadingStatus(progress.message);
             setModelLoadingProgress(progress.progress || 0);
           });
