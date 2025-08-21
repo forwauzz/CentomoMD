@@ -22,21 +22,45 @@ export interface AudioConversionOptions {
  */
 export function webmToWavMono16k(input: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
+    // Validate input buffer
+    if (!input || input.length === 0) {
+      reject(new Error("Empty or invalid input buffer"));
+      return;
+    }
+
+    if (input.length < 1024) {
+      reject(new Error(`Input buffer too small: ${input.length} bytes`));
+      return;
+    }
+
     const inStream = Readable.from(input);
     const chunks: Buffer[] = [];
     
+    // Enhanced FFmpeg command with better error handling
     const conversion = ffmpeg(inStream)
       .inputFormat("webm")
+      .inputOptions([
+        '-f', 'webm',
+        '-analyzeduration', '10000000',  // 10 seconds analysis
+        '-probesize', '50000000'        // 50MB probe size
+      ])
       .noVideo()
       .audioChannels(1)        // Mono audio
       .audioFrequency(16000)   // 16kHz sample rate
+      .audioBitrate('128k')    // Sufficient bitrate
       .format("wav")           // WAV output format
+      .audioCodec('pcm_s16le') // Explicit PCM codec
       .on("error", (err: any) => {
-        console.error("🔴 FFmpeg conversion error:", err);
+        console.error("🔴 FFmpeg conversion error:", err.message);
         reject(new Error(`Audio conversion failed: ${err.message}`));
       })
       .on("start", (cmdline: string) => {
-        console.log("🎵 Starting audio conversion:", cmdline);
+        console.log("🎵 Starting audio conversion:", cmdline.substring(0, 200) + "...");
+      })
+      .on("progress", (progress: any) => {
+        if (progress.percent) {
+          console.log(`🔄 Conversion progress: ${progress.percent.toFixed(1)}%`);
+        }
       });
       
     const outputStream = conversion.pipe();
@@ -48,6 +72,12 @@ export function webmToWavMono16k(input: Buffer): Promise<Buffer> {
     outputStream.on("end", () => {
       const result = Buffer.concat(chunks);
       console.log(`✅ Audio conversion complete: ${input.length} bytes → ${result.length} bytes`);
+      
+      if (result.length === 0) {
+        reject(new Error("FFmpeg produced empty output - source audio may be corrupted"));
+        return;
+      }
+      
       resolve(result);
     });
     
@@ -55,6 +85,11 @@ export function webmToWavMono16k(input: Buffer): Promise<Buffer> {
       console.error("🔴 Output stream error:", err);
       reject(err);
     });
+
+    // Set timeout for conversion (30 seconds max)
+    setTimeout(() => {
+      reject(new Error("Audio conversion timeout - process took too long"));
+    }, 30000);
   });
 }
 
