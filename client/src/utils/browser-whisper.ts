@@ -286,7 +286,10 @@ export class BrowserWhisperProcessor {
         }
       }
       if (maxAmplitude < 0.001) {
-        console.warn('⚠️ Audio appears to be very quiet or silent');
+        console.warn('⚠️ Audio appears to be very quiet or silent', { maxAmplitude, samples: channelData.length });
+        // Still process quiet audio, but log the issue
+      } else {
+        console.log(`🔊 Audio quality check: max amplitude ${maxAmplitude.toFixed(4)}, ${channelData.length} samples`);
       }
       
       // Resample to 16kHz if needed
