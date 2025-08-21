@@ -859,6 +859,27 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                   )}
                 </div>
 
+                {/* Ambient Mode Recording Guidance */}
+                {currentMode === 'transcribe' && ambientListening && recordingDuration < 30000 && (
+                  <div className="text-xs text-muted-foreground text-center mt-2 p-2 bg-blue-50 dark:bg-blue-950 rounded-md">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-pulse h-2 w-2 bg-red-500 rounded-full"></div>
+                      <span>
+                        {currentLanguage === "fr" 
+                          ? `Écoute en cours... ${Math.max(0, Math.ceil((30000 - recordingDuration) / 1000))}s avant traitement`
+                          : `Listening... ${Math.max(0, Math.ceil((30000 - recordingDuration) / 1000))}s until processing`
+                        }
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 mt-2">
+                      <div 
+                        className="bg-blue-600 h-1 rounded-full transition-all duration-1000" 
+                        style={{ width: `${Math.min(100, (recordingDuration / 30000) * 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Processing Progress - Compact */}
                 {isProcessing && (
                   <div className="space-y-1">
