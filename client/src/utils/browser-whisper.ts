@@ -5,9 +5,11 @@
 
 import { pipeline, env } from '@xenova/transformers';
 
-// Configure transformers environment
+// Configure transformers environment for better model loading
 env.allowRemoteModels = true;
-env.allowLocalModels = true;
+env.allowLocalModels = false; // Force remote loading to avoid cache issues
+env.useBrowserCache = false; // Disable browser cache for now
+env.backends.onnx.wasm.numThreads = 1; // Single thread for stability
 
 export interface BrowserWhisperConfig {
   model: string;
@@ -41,7 +43,7 @@ export class BrowserWhisperProcessor {
 
   constructor(config: Partial<BrowserWhisperConfig> = {}) {
     this.modelConfig = {
-      model: 'Xenova/whisper-base', // 140MB, good balance
+      model: 'Xenova/whisper-tiny.en', // Smaller, more reliable model ~40MB
       language: undefined, // Auto-detect by default
       chunk_length_s: 30,
       stride_length_s: 5,
@@ -136,16 +138,30 @@ export class BrowserWhisperProcessor {
               'Re-downloading model (cache cleared)...'
           });
 
-          // Create the pipeline with progress tracking
+          // Create the pipeline with explicit configuration for better reliability
           this.pipeline = await pipeline('automatic-speech-recognition', this.modelConfig.model, {
+            // Configure for remote loading
+            local_files_only: false,
+            revision: 'main',
             // Configure progress callback
             progress_callback: (progress: any) => {
-              if (progress.status === 'downloading') {
+              console.log('📥 Download progress:', progress);
+              if (progress.status === 'downloading' && progress.total) {
                 const percent = Math.round((progress.loaded / progress.total) * 100);
                 this.notifyLoadingProgress({
                   phase: 'downloading',
                   progress: percent,
-                  message: `Downloading model... ${percent}%`
+                  message: `Downloading model... ${percent}% (${(progress.loaded / 1024 / 1024).toFixed(1)}MB)`
+                });
+              } else if (progress.status === 'loading') {
+                this.notifyLoadingProgress({
+                  phase: 'loading',
+                  message: 'Loading model into memory...'
+                });
+              } else if (progress.status === 'ready') {
+                this.notifyLoadingProgress({
+                  phase: 'ready',
+                  message: 'Model ready for transcription!'
                 });
               }
             }
