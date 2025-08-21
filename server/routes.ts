@@ -66,7 +66,7 @@ async function backupSessionToLocal(sessionData: any) {
       console.warn("Backup server responded with error:", response.status);
     }
   } catch (error) {
-    console.warn("🔍 DEBUG: Backup failed:", error.message);
+    console.warn("🔍 DEBUG: Backup failed:", error instanceof Error ? error.message : String(error));
   }
 }
 // Helper function for safe error handling
@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       logFormEvent('FORM_CREATE_ATTEMPT', 'new_form', {
         userId,
         fieldCount: Object.keys(validatedData).length,
-        hasContent: !!validatedData.patientName || !!validatedData.employerName
+        hasContent: !!validatedData.patientName
       });
       
       const newForm = await storage.createMedicalForm(validatedData);
@@ -629,7 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(500).json({
         message: "Failed to format text",
-        error: error.message || "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -673,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Format Section 8 error:", error);
 
       // Check if it's an OpenAI API error
-      if (error.message && error.message.includes("API")) {
+      if (error instanceof Error && error.message && error.message.includes("API")) {
         return res.status(500).json({
           message: "OpenAI API error - please check your API key",
           error: "API_ERROR",
@@ -682,7 +682,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(500).json({
         message: "Failed to format text",
-        error: error.message || "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -733,7 +733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Generate Section 11 error:", error);
       res.status(500).json({
         message: "Failed to generate conclusion",
-        error: error.message || "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -794,7 +794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("AI processing error:", error);
 
-      if (error.message && error.message.includes("API")) {
+      if (error instanceof Error && error.message && error.message.includes("API")) {
         return res.status(500).json({
           message: "OpenAI API error - please check your API key",
           error: "API_ERROR",
@@ -803,7 +803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(500).json({
         message: "Failed to process field with AI",
-        error: error.message || "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -917,7 +917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Section 8 distribution error:", error);
 
-      if (error.message && error.message.includes("API")) {
+      if (error instanceof Error && error.message && error.message.includes("API")) {
         return res.status(500).json({
           message: "OpenAI API error - please check your API key",
           error: "API_ERROR",
@@ -926,7 +926,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(500).json({
         message: "Failed to distribute Section 8 content",
-        error: error.message || "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -942,11 +942,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const formattedText = await enhancedFormatSection7Text(text, language);
       res.json({ formattedText });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Enhanced Section 7 formatting error:", error);
       res.status(500).json({
         message: "Failed to format Section 7 text",
-        error: error.message || "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
@@ -1083,7 +1083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString(),
         userId: req.session?.userId || "anonymous",
         error: {
-          message: error.message,
+          message: error instanceof Error ? error.message : "Unknown error",
           type: "transcription_error",
           processingTime: Date.now() - startTime,
         },
@@ -1111,7 +1111,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Whisper chunk transcription endpoint for long recordings
+  // Enhanced transcription monitoring endpoints
+  app.get("/api/transcription/health", async (req, res) => {
+    try {
+      const { transcriptionMonitoring } = await import('./transcription-monitoring');
+      const healthMetrics = transcriptionMonitoring.getHealthMetrics();
+      
+      res.json({
+        success: true,
+        metrics: healthMetrics,
+        status: healthMetrics.recentPerformance.successRate > 90 ? 'healthy' : 'degraded'
+      });
+    } catch (error) {
+      console.error("Health check error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get health metrics"
+      });
+    }
+  });
+
+  app.get("/api/transcription/status", async (req, res) => {
+    try {
+      const { transcriptionMonitoring } = await import('./transcription-monitoring');
+      const statusSummary = transcriptionMonitoring.getStatusSummary();
+      
+      res.json({
+        success: true,
+        status: statusSummary,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Status check error:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get status"
+      });
+    }
+  });
+
   // Whisper chunk transcription endpoint for long recordings
   app.post("/api/transcribe-whisper-chunk", async (req, res) => {
     try {
@@ -1303,13 +1341,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🎙️ Processing ambient chunk: ${chunkIndex} (${sessionId}) - ${(req.file.size / 1024).toFixed(1)}KB`);
 
+      // Enhanced audio validation
+      const { audioValidator } = await import('./enhanced-audio-validation');
+      const validationResult = audioValidator.validateAudioBuffer(req.file.buffer, req.file.mimetype);
+      
+      if (!validationResult.isValid) {
+        console.error(`❌ Audio validation failed for chunk ${chunkIndex}:`, validationResult.issues);
+        return res.status(400).json({
+          error: "INVALID_AUDIO",
+          message: `Audio validation failed: ${validationResult.issues.join(', ')}`,
+          recommendations: validationResult.recommendations
+        });
+      }
+      
+      console.log(`✅ Audio validation passed - Quality: ${validationResult.quality}, Duration: ${validationResult.estimatedDuration.toFixed(1)}s`);
+
       // Convert language format for Whisper API (fr/en only, not fr-CA/en-US)
       const whisperLanguage = language === 'fr-CA' || language === 'fr' ? 'fr' : 
                               language === 'en-US' || language === 'en' ? 'en' : 
                               'auto';
 
-      // Use new multipart transcription with format fallback
-      const result = await transcribeAudioWithWhisperMultipart({
+      // Use enhanced transcription service with circuit breaker and error recovery
+      const { enhancedWhisperService } = await import('./enhanced-whisper-service');
+      
+      const result = await enhancedWhisperService.transcribeWithRecovery({
         buffer: req.file.buffer,
         filename: req.file.originalname || `ambient-${sessionId}-${chunkIndex}.webm`,
         mimetype: req.file.mimetype,
@@ -1317,36 +1372,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
         temperature: 0.2, // Transcribe mode setting
         sessionId,
         chunkIndex: Number(chunkIndex),
-        mode: 'transcribe'
+        mode: 'transcribe',
+        retryAttempts: 2,
+        fallbackToLocal: true
       });
 
+      // Record performance metrics for monitoring
+      const { transcriptionMonitoring } = await import('./transcription-monitoring');
+      transcriptionMonitoring.recordTranscriptionAttempt(
+        true,
+        result.processingTime,
+        result.quality,
+        result.source
+      );
+
       // Audit logging (metadata only, no PHI)
-      logVoiceEvent('AMBIENT_TRANSCRIPTION', req.session?.userId || '', {
+      logVoiceEvent('AMBIENT_TRANSCRIPTION', {
         chunkIndex: Number(chunkIndex),
         sessionId,
         audioSize: req.file.size,
         textLength: result.text?.length || 0,
         mode: 'transcribe',
         success: true,
-        provider: 'openai'
+        provider: result.source,
+        quality: result.quality,
+        processingTime: result.processingTime,
+        userId: req.session?.userId || ''
       });
 
-      // Return text only; do NOT store
+      // Return enhanced result with quality indicators
       res.json({
         success: true,
         text: result.text,
-        chunkIndex: Number(chunkIndex)
+        chunkIndex: Number(chunkIndex),
+        source: result.source,
+        quality: result.quality,
+        processingTime: result.processingTime
       });
 
     } catch (error) {
       const { chunkIndex = 0, sessionId } = req.body;
       console.error(`❌ Ambient transcription error (chunk ${chunkIndex}):`, error);
 
+      // Record failure for monitoring
+      const { transcriptionMonitoring } = await import('./transcription-monitoring');
+      transcriptionMonitoring.recordTranscriptionAttempt(false, 0, 'low', 'whisper');
+
       // Log the error (no PHI in logs)
-      logVoiceEvent('AMBIENT_TRANSCRIPTION_ERROR', req.session?.userId || '', {
+      logVoiceEvent('AMBIENT_TRANSCRIPTION_ERROR', {
         chunkIndex: Number(chunkIndex),
         sessionId,
-        error: error instanceof Error ? error.message.slice(0, 120) : 'Unknown error'
+        error: error instanceof Error ? error.message.slice(0, 120) : 'Unknown error',
+        userId: req.session?.userId || ''
       });
 
       res.status(500).json({
