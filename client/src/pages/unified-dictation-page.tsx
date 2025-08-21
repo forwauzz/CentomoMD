@@ -322,8 +322,14 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
         }
       }
 
-      // SERVER FALLBACK: Use existing server processing if browser failed or disabled
-      if (!transcriptionResult) {
+      // SERVER FALLBACK: Use existing server processing if browser failed or disabled  
+      if (!transcriptionResult || !transcriptionResult.text?.trim()) {
+        console.log(`🔄 Browser processing failed or empty, falling back to server for chunk ${chunk.id}`);
+      } else {
+        console.log(`🎯 Using browser result for chunk ${chunk.id}, skipping server processing`);
+      }
+      
+      if (!transcriptionResult || !transcriptionResult.text?.trim()) {
         // Ensure the blob has correct MIME type and create proper multipart upload
         const audioBlob = new Blob([chunk.data], { type: 'audio/webm;codecs=opus' });
         
@@ -349,6 +355,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
           console.error('❌ Failed to transcribe ambient chunk:', response.status, errorText);
           return;
         }
+      } else {
+        console.log(`⚡ Skipping server processing - browser Whisper already succeeded for chunk ${chunk.id}`);
       }
 
       // Process transcription result (same for both browser and server)

@@ -20,7 +20,26 @@ Preferred communication style: Simple, everyday language.
 ## Development Workflow
 **Git Strategy Reference:** Follow `GIT_DEVELOPMENT_STRATEGY.md` for all development work including feature branches, security-first commits, and compliance validation workflows.
 
-## Recent Critical Fixes - Phase 2 Ambient Audio Reliability (August 21, 2025)
+## Recent Critical Fixes - Phase 3 Browser Whisper Implementation (August 21, 2025)
+**COMPLETED:** Successfully implemented browser-based Whisper transcription for ambient mode only:
+
+### Phase 3 Browser Whisper Implementation:
+1. **Browser Whisper Service**: `client/src/utils/browser-whisper.ts` - Local Whisper-tiny.en model processing with @xenova/transformers
+2. **Model Auto-Download**: 10MB Whisper model downloads automatically on first use with progress tracking
+3. **Ambient-Only Processing**: Browser Whisper exclusively handles "Transcribe" mode, maintaining server processing for Smart/Word-for-Word modes
+4. **Intelligent Fallback**: Automatic server fallback if browser processing fails, with clear success/failure logging
+5. **UI Indicators**: Real-time loading progress, "Local" vs "Server" badges, and [Local]/[Server] labels in transcripts
+6. **Race Condition Fix**: Prevents server processing from overwriting successful browser transcription results
+7. **Quebec CNESST Compliance**: Local processing reduces data transmission while maintaining zero retention policy
+
+### Technical Implementation:
+- **Browser Detection**: Automatic browser capability detection (WebAssembly, modern JS features)
+- **Progressive Loading**: Model download with detailed progress callbacks and retry logic
+- **Audio Processing**: WebM to Float32Array conversion for Whisper compatibility
+- **Memory Management**: Efficient audio buffer handling with automatic cleanup
+- **Error Recovery**: Comprehensive error handling with fallback to server processing
+
+## Previous Critical Fixes - Phase 2 Ambient Audio Reliability (August 21, 2025)
 **COMPLETED:** Ambient audio processing improvements with focused WebM conversion fixes:
 
 ### Phase 2 Ambient Audio Fixes Implemented:
