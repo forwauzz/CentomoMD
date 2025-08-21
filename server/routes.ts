@@ -1383,7 +1383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Step 2: Transcribe with simple retry logic
       const transcriptionResult = await simpleRetryHandler.executeWithRetry(
         async () => {
-          const { openai } = await import('./whisper-service');
+          const openai = (await import('./whisper-service')).openai;
           
           const result = await openai.audio.transcriptions.create({
             model: "whisper-1",
@@ -1429,7 +1429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       transcriptionMonitoring.recordTranscriptionAttempt(
         true,
         result.processingTime,
-        result.quality,
+        result.quality as "low" | "high" | "medium" | undefined,
         result.source
       );
 
