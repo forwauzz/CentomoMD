@@ -278,7 +278,13 @@ export class BrowserWhisperProcessor {
       }
       
       // Check for silent audio (might indicate a problem)
-      const maxAmplitude = Math.max(...Array.from(channelData).map(Math.abs));
+      let maxAmplitude = 0;
+      for (let i = 0; i < channelData.length; i++) {
+        const amplitude = Math.abs(channelData[i]);
+        if (amplitude > maxAmplitude) {
+          maxAmplitude = amplitude;
+        }
+      }
       if (maxAmplitude < 0.001) {
         console.warn('⚠️ Audio appears to be very quiet or silent');
       }
