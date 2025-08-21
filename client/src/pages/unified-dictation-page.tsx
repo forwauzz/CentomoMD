@@ -317,7 +317,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
           console.log(`✅ Browser Whisper completed chunk ${chunk.id}: "${result.text.substring(0, 50)}..."`);
           
         } catch (browserError: any) {
-          console.warn(`🔄 Browser Whisper failed for chunk ${chunk.id}, falling back to server:`, browserError.message);
+          console.error(`❌ Browser Whisper failed for chunk ${chunk.id}:`, browserError);
+          console.warn(`🔄 Browser Whisper failed for chunk ${chunk.id}, falling back to server:`, browserError?.message || 'Unknown error');
           // Fall through to server processing
         }
       }

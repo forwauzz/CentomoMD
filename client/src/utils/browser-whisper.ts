@@ -227,20 +227,61 @@ export class BrowserWhisperProcessor {
    * Convert audio blob to Float32Array for Whisper processing
    */
   private async audioToFloat32Array(audioBlob: Blob): Promise<Float32Array> {
-    // Create audio context
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
-      sampleRate: 16000 // Whisper expects 16kHz
-    });
-
+    let audioContext: AudioContext | null = null;
+    
     try {
+      // Validate blob first
+      if (!audioBlob || audioBlob.size === 0) {
+        throw new Error('Empty or invalid audio blob');
+      }
+      
+      console.log(`🎵 Converting audio blob: ${(audioBlob.size / 1024).toFixed(1)}KB, type: ${audioBlob.type}`);
+      
+      // Create audio context - try to reuse existing one if possible
+      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
+        sampleRate: 16000 // Whisper expects 16kHz
+      });
+
       // Convert blob to array buffer
       const arrayBuffer = await audioBlob.arrayBuffer();
       
-      // Decode audio data
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      if (arrayBuffer.byteLength === 0) {
+        throw new Error('Audio blob contains no data');
+      }
+      
+      console.log(`🔄 Decoding ${arrayBuffer.byteLength} bytes of audio data`);
+      
+      // Decode audio data with error handling
+      let audioBuffer: AudioBuffer;
+      try {
+        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      } catch (decodeError: any) {
+        console.warn('WebM decoding failed, trying with different approach:', decodeError.message);
+        
+        // Try to decode with a copy of the buffer (sometimes helps with WebM issues)
+        const bufferCopy = arrayBuffer.slice(0);
+        audioBuffer = await audioContext.decodeAudioData(bufferCopy);
+      }
+      
+      if (!audioBuffer || audioBuffer.length === 0) {
+        throw new Error('Decoded audio buffer is empty');
+      }
+      
+      console.log(`✅ Audio decoded: ${audioBuffer.duration.toFixed(1)}s, ${audioBuffer.sampleRate}Hz, ${audioBuffer.numberOfChannels} channels`);
       
       // Get the first channel (mono)
       const channelData = audioBuffer.getChannelData(0);
+      
+      // Validate audio data
+      if (!channelData || channelData.length === 0) {
+        throw new Error('No audio channel data found');
+      }
+      
+      // Check for silent audio (might indicate a problem)
+      const maxAmplitude = Math.max(...Array.from(channelData).map(Math.abs));
+      if (maxAmplitude < 0.001) {
+        console.warn('⚠️ Audio appears to be very quiet or silent');
+      }
       
       // Resample to 16kHz if needed
       if (audioBuffer.sampleRate !== 16000) {
@@ -253,17 +294,24 @@ export class BrowserWhisperProcessor {
           resampled[i] = channelData[srcIndex] || 0;
         }
         
+        console.log(`✅ Resampled to ${resampled.length} samples (${(resampled.length / 16000).toFixed(1)}s)`);
         return resampled;
       }
       
-      return channelData;
+      console.log(`✅ Audio ready: ${channelData.length} samples (${(channelData.length / 16000).toFixed(1)}s)`);
+      return new Float32Array(channelData); // Create copy to avoid memory issues
       
+    } catch (error: any) {
+      console.error('❌ Audio conversion failed:', error);
+      throw new Error(`Audio conversion failed: ${error.message}`);
     } finally {
       // Clean up audio context
-      try {
-        await audioContext.close();
-      } catch (error) {
-        console.warn('Failed to close audio context:', error);
+      if (audioContext) {
+        try {
+          await audioContext.close();
+        } catch (error) {
+          console.warn('Failed to close audio context:', error);
+        }
       }
     }
   }
@@ -277,22 +325,44 @@ export class BrowserWhisperProcessor {
   ): Promise<BrowserWhisperResult> {
     const startTime = Date.now();
 
+    // Ensure model is ready
     if (!this.isModelReady || !this.pipeline) {
-      throw new Error('Browser Whisper model not ready. Call ensureModelReady() first.');
+      console.log('🔄 Model not ready, attempting to reload...');
+      await this.ensureModelReady();
+      
+      if (!this.isModelReady || !this.pipeline) {
+        throw new Error('Browser Whisper model failed to load');
+      }
     }
 
     try {
       console.log(`🎙️ Browser Whisper processing: ${(audioBlob.size / 1024).toFixed(1)}KB`);
 
       // Convert audio to the format expected by Whisper
-      const audioArray = await this.audioToFloat32Array(audioBlob);
+      let audioArray = await this.audioToFloat32Array(audioBlob);
+      
+      // Validate audio array
+      if (!audioArray || audioArray.length === 0) {
+        throw new Error('Audio conversion produced empty array');
+      }
+      
+      // Check audio length (must be reasonable for processing)
+      const durationSeconds = audioArray.length / 16000;
+      if (durationSeconds > 300) { // 5 minutes max
+        console.warn(`⚠️ Audio is very long (${durationSeconds.toFixed(1)}s), truncating to 5 minutes`);
+        const maxSamples = 16000 * 300;
+        audioArray = audioArray.slice(0, maxSamples);
+      }
+      
+      console.log(`🎵 Processing ${(audioArray.length / 16000).toFixed(1)}s of audio data`);
       
       // Prepare transcription options
       const options: any = {
-        chunk_length_s: this.modelConfig.chunk_length_s,
-        stride_length_s: this.modelConfig.stride_length_s,
-        return_timestamps: false, // We don't need timestamps for ambient
-        temperature: 0.2 // Low temperature for consistency
+        chunk_length_s: Math.min(this.modelConfig.chunk_length_s!, 30), // Max 30s chunks
+        stride_length_s: Math.min(this.modelConfig.stride_length_s!, 5), // Max 5s stride
+        return_timestamps: false,
+        temperature: 0.1, // Very low temperature for consistency
+        condition_on_previous_text: false // Don't use previous context to avoid accumulating errors
       };
 
       // Set language if specified
@@ -300,16 +370,59 @@ export class BrowserWhisperProcessor {
         options.language = language === 'fr' ? 'french' : 'english';
       }
 
-      // Run transcription
-      const result = await this.pipeline(audioArray, options);
+      console.log(`🔧 Transcription options:`, { 
+        language: options.language, 
+        chunk_length: options.chunk_length_s,
+        audio_duration: durationSeconds.toFixed(1) 
+      });
+
+      // Run transcription with timeout
+      let result: any;
+      const transcriptionPromise = this.pipeline(audioArray, options);
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Transcription timeout after 15 seconds')), 15000);
+      });
+      
+      try {
+        result = await Promise.race([transcriptionPromise, timeoutPromise]);
+      } catch (transcriptionError: any) {
+        console.error('❌ Transcription failed, attempting model recovery:', transcriptionError.message);
+        
+        // Try to recover the model
+        this.isModelReady = false;
+        this.pipeline = null;
+        
+        throw transcriptionError;
+      }
       
       const processingTime = Date.now() - startTime;
-      const text = typeof result === 'string' ? result : result.text || '';
+      
+      // Extract text from result
+      let text = '';
+      if (typeof result === 'string') {
+        text = result;
+      } else if (result && typeof result === 'object') {
+        text = result.text || result.output || '';
+      }
+      
+      // Validate result
+      if (!text || typeof text !== 'string') {
+        throw new Error('Transcription returned invalid result format');
+      }
+      
+      text = text.trim();
+      
+      if (!text) {
+        console.warn('⚠️ Transcription returned empty text');
+        throw new Error('Transcription returned empty result');
+      }
 
       console.log(`✅ Browser Whisper completed in ${processingTime}ms: "${text.substring(0, 50)}..."`);
 
       return {
-        text: text.trim(),
+        text,
         source: 'browser-whisper',
         processingTime,
         modelUsed: this.modelConfig.model,
@@ -317,7 +430,15 @@ export class BrowserWhisperProcessor {
       };
 
     } catch (error: any) {
-      console.error('❌ Browser Whisper transcription failed:', error);
+      const processingTime = Date.now() - startTime;
+      console.error(`❌ Browser Whisper transcription failed after ${processingTime}ms:`, error);
+      
+      // Mark model as potentially corrupted for future recovery
+      if (error.message.includes('timeout') || error.message.includes('invalid')) {
+        console.warn('🔧 Marking model for potential reload due to error type');
+        this.isModelReady = false;
+      }
+      
       throw new Error(`Browser transcription failed: ${error.message}`);
     }
   }
