@@ -1,0 +1,88 @@
+TASK: Implement browser-based Whisper for ambient dictation only
+
+CRITICAL REQUIREMENTS:
+1. DO NOT modify existing smart dictation or word-for-word transcription workflows
+2. ONLY change the ambient scribe processing pipeline
+3. Keep all existing API endpoints (/api/transcribe, /api/transcribe-chunk) unchanged
+4. Add new local processing path ONLY for ambient mode
+
+IMPLEMENTATION APPROACH:
+1. Install @xenova/transformers for browser-based Whisper
+2. Modify only the ambient audio processor (continuous-audio-processor.ts)
+3. Add mode detection: if ambient → use local Whisper, else → use existing server flow
+4. Keep all existing error handling and retry logic for non-ambient modes
+5. Handle model loading/caching gracefully with user feedback
+
+TECHNICAL SPECS:
+- Use whisper-base model (140MB, good accuracy/speed balance)
+- Process audio in browser before sending anywhere
+- Add loading states for first-time model download
+- Implement cache validation and re-download if needed
+- Maintain existing session management and UI flows
+
+DO NOT CHANGE:
+- Server routes.ts transcription endpoints
+- Smart dictation components
+- Word-for-word processing
+- Authentication flows
+- Any existing API calls for non-ambient modes
+
+EDGE CASES TO HANDLE:
+- Model download failures (retry mechanism)
+- Cache clearing (automatic re-download)
+- Offline usage (model already cached)
+- Browser compatibility (fallback to server if needed)
+- Memory management (cleanup after processing)
+Potential Issues & Solutions
+Issue 1: Cache Clearing
+typescript// Auto-detection and re-download
+class ModelManager {
+  async ensureModelReady() {
+    try {
+      await this.loadCachedModel();
+    } catch (error) {
+      // Cache cleared or corrupted
+      await this.downloadModel(); // Shows progress bar again
+    }
+  }
+}
+Issue 2: Browser Compatibility
+typescript// Graceful fallback
+if (!this.browserSupportsLocalWhisper()) {
+  // Fall back to existing server pipeline
+  return this.processViaServer(audioChunk);
+}
+Issue 3: Memory Management
+typescript// Explicit cleanup after ambient processing
+async processAmbientAudio(chunk) {
+  try {
+    const result = await localWhisper.transcribe(chunk);
+    return result;
+  } finally {
+    // Force cleanup of audio data
+    chunk = null;
+    if (global.gc) global.gc();
+  }
+}
+Issue 4: Model Loading UX
+typescript// User-friendly loading states
+const ModelStatus = {
+  CHECKING: "Checking speech recognition...",
+  DOWNLOADING: "Downloading AI model... {progress}%",
+  READY: "Ready for ambient dictation",
+  ERROR: "Speech recognition unavailable, using fallback"
+};
+Pipeline Flow Chart
+Doctor starts dictation
+    ↓
+Mode detection: ambient vs smart/word-for-word?
+    ↓                              ↓
+AMBIENT MODE                   OTHER MODES
+    ↓                              ↓
+Check local model ready?       Use existing pipeline
+    ↓                              ↓
+Download if needed             Server → OpenAI API
+    ↓                              ↓
+Process locally                Return result
+    ↓
+Return result

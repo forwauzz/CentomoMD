@@ -6,6 +6,7 @@
 import { AudioChunk, ContinuousProcessingQueue, VoiceActivityResult } from '@shared/transcription-types';
 import { VoiceActivityDetector } from './voice-activity-detection';
 import { SpeakerIdentifier } from './speaker-identification';
+import { browserWhisper, BrowserWhisperResult, ModelLoadingProgress } from './browser-whisper';
 
 export interface ContinuousProcessorConfig {
   chunkDurationMs: number; // 30 seconds default
@@ -24,6 +25,8 @@ export interface ProcessingCallbacks {
   onQueueFull?: () => void;
   onVoiceActivity?: (result: VoiceActivityResult) => void;
   onSpeakerChange?: (speakerId: string, confidence: number) => void;
+  onModelLoading?: (progress: ModelLoadingProgress) => void;
+  onBrowserWhisperResult?: (chunk: AudioChunk, result: BrowserWhisperResult) => void;
 }
 
 export class ContinuousAudioProcessor {
@@ -35,6 +38,10 @@ export class ContinuousAudioProcessor {
   
   private vad: VoiceActivityDetector | null = null;
   private speakerIdentifier: SpeakerIdentifier | null = null;
+  
+  // Browser Whisper integration for ambient mode only
+  private useBrowserWhisper = false;
+  private isModelInitialized = false;
   
   private queue: ContinuousProcessingQueue = {
     pending: [],
@@ -68,6 +75,55 @@ export class ContinuousAudioProcessor {
       this.queue.maxQueueSize = this.config.maxQueueSize;
       this.queue.processingConcurrency = this.config.processingConcurrency;
     }
+  }
+
+  /**
+   * Enable browser-based Whisper for ambient mode only
+   * This replaces server-side processing with local transcription
+   */
+  async enableBrowserWhisper(language?: 'fr' | 'en'): Promise<void> {
+    try {
+      // Check browser compatibility first
+      if (!browserWhisper.getStatus().isSupported) {
+        console.warn('🚫 Browser Whisper not supported, falling back to server processing');
+        this.useBrowserWhisper = false;
+        return;
+      }
+
+      console.log('🚀 Initializing browser-based Whisper for ambient mode...');
+      this.useBrowserWhisper = true;
+
+      // Set up model loading progress callback
+      browserWhisper.onLoadingProgress((progress) => {
+        this.callbacks.onModelLoading?.(progress);
+      });
+
+      // Initialize the model
+      await browserWhisper.ensureModelReady();
+      this.isModelInitialized = true;
+
+      console.log('✅ Browser Whisper ready for ambient transcription');
+    } catch (error: any) {
+      console.error('❌ Failed to initialize browser Whisper:', error);
+      this.useBrowserWhisper = false;
+      this.isModelInitialized = false;
+      
+      // Notify UI of fallback
+      this.callbacks.onModelLoading?.({
+        phase: 'error',
+        message: 'Speech recognition unavailable, using server fallback',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * Disable browser Whisper and fall back to server processing
+   */
+  disableBrowserWhisper(): void {
+    this.useBrowserWhisper = false;
+    this.isModelInitialized = false;
+    console.log('🔄 Disabled browser Whisper, using server processing');
   }
 
   async initialize(stream: MediaStream): Promise<void> {
@@ -319,7 +375,27 @@ export class ContinuousAudioProcessor {
     try {
       console.log(`🔄 Processing chunk: ${chunk.id}`);
       
-      // Call processing callback
+      // BROWSER WHISPER INTEGRATION: Process locally if enabled and model ready
+      if (this.useBrowserWhisper && this.isModelInitialized) {
+        try {
+          console.log(`🎯 Processing chunk ${chunk.id} with browser Whisper...`);
+          
+          const result = await browserWhisper.transcribe(chunk.data, 'auto');
+          
+          // Notify callbacks of successful browser transcription
+          this.callbacks.onBrowserWhisperResult?.(chunk, result);
+          this.moveChunkToCompleted(chunk, result);
+          
+          console.log(`✅ Browser Whisper completed chunk ${chunk.id}: "${result.text.substring(0, 50)}..."`);
+          return;
+          
+        } catch (browserError: any) {
+          console.warn(`🔄 Browser Whisper failed for chunk ${chunk.id}, falling back to server:`, browserError.message);
+          // Fall through to server processing
+        }
+      }
+      
+      // FALLBACK: Use existing server processing if browser Whisper fails or disabled
       if (this.callbacks.onChunkReady) {
         await this.callbacks.onChunkReady(chunk);
       }

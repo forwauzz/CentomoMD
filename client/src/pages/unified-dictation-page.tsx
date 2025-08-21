@@ -155,6 +155,11 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
   const [ambientSessionId, setAmbientSessionId] = useState('');
   const [ambientTranscriptions, setAmbientTranscriptions] = useState<{[key: number]: string}>({});
   
+  // Browser Whisper state (ambient mode only)
+  const [browserWhisperEnabled, setBrowserWhisperEnabled] = useState(false);
+  const [modelLoadingStatus, setModelLoadingStatus] = useState<string>('');
+  const [modelLoadingProgress, setModelLoadingProgress] = useState<number>(0);
+  
   const t = translations[currentLanguage];
 
   // Helper function to get speech recognition language code
@@ -174,6 +179,48 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     sessionStorage.setItem("dictationLanguage", newLanguage);
     console.log(`🌐 Language changed to: ${newLanguage} (Speech: ${getSpeechRecognitionLanguage(newLanguage)}, Whisper: ${getWhisperLanguage(newLanguage)})`);
   };
+
+  // Initialize browser Whisper when mode changes to transcribe (ambient)
+  useEffect(() => {
+    const initBrowserWhisperForAmbient = async () => {
+      if (currentMode === 'transcribe') {
+        try {
+          setBrowserWhisperEnabled(true);
+          setModelLoadingStatus('Initializing speech recognition...');
+          
+          // Dynamically import browser Whisper to avoid loading it unnecessarily
+          const { browserWhisper } = await import('../utils/browser-whisper');
+          
+          // Set up progress callback
+          browserWhisper.onLoadingProgress((progress) => {
+            setModelLoadingStatus(progress.message);
+            setModelLoadingProgress(progress.progress || 0);
+          });
+          
+          // Initialize browser Whisper for ambient mode
+          await browserWhisper.ensureModelReady();
+          
+          setModelLoadingStatus('Speech recognition ready!');
+          console.log('✅ Browser Whisper ready for ambient mode');
+          
+        } catch (error: any) {
+          console.warn('⚠️ Browser Whisper initialization failed, using server fallback:', error.message);
+          setBrowserWhisperEnabled(false);
+          setModelLoadingStatus('Using server transcription');
+        }
+      } else {
+        // Disable browser Whisper for non-ambient modes
+        setBrowserWhisperEnabled(false);
+        setModelLoadingStatus('');
+        setModelLoadingProgress(0);
+      }
+    };
+
+    // Only initialize for ambient mode, skip for other modes
+    if (currentMode === 'transcribe') {
+      initBrowserWhisperForAmbient();
+    }
+  }, [currentMode]);
 
   // Initialize from sessionStorage and localStorage
   useEffect(() => {
@@ -241,71 +288,104 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     }
   }, [transcript, isProcessing, isRecording, currentLanguage]);
 
-  // Handle ambient listening audio chunks for transcribe mode
+  // Handle ambient listening audio chunks for transcribe mode with browser Whisper integration
   const handleAmbientAudioChunk = async (chunk: AudioChunk) => {
     if (!selectedSection) return;
     
     try {
       console.log(`🎙️ Processing ambient chunk: ${chunk.id} (${(chunk.data.size / 1024).toFixed(1)}KB)`);
       
-      // Ensure the blob has correct MIME type and create proper multipart upload
-      const audioBlob = new Blob([chunk.data], { type: 'audio/webm;codecs=opus' });
-      
-      const form = new FormData();
-      form.append("file", audioBlob, `ambient-${ambientSessionId}-${ambientChunkCounter}.webm`);
-      form.append("sessionId", ambientSessionId);
-      form.append("chunkIndex", String(ambientChunkCounter));
-      form.append("language", getWhisperLanguage(currentLanguage));
-      form.append("mode", "transcribe");
+      let transcriptionResult: any;
 
-      console.log(`📦 Uploading: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
-
-      const response = await fetch("/api/transcribe-ambient-chunk", {
-        method: "POST",
-        body: form,
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('🔍 Ambient transcription result:', result);
-        
-        if (result.text?.trim()) {
-          // Store chunk result in order for proper concatenation
-          console.log(`📝 Chunk ${ambientChunkCounter} transcription: "${result.text.trim()}"`);
+      // BROWSER WHISPER: Try local processing first if enabled
+      if (browserWhisperEnabled) {
+        try {
+          const { browserWhisper } = await import('../utils/browser-whisper');
           
-          setAmbientTranscriptions(prev => {
-            const updated = { ...prev, [ambientChunkCounter]: result.text.trim() };
-            console.log(`📊 Updated transcriptions:`, Object.keys(updated).map(k => `Chunk ${k}: "${updated[parseInt(k)].substring(0, 50)}..."`));
-            
-            // Concatenate all chunks in order to build final transcript
-            const orderedChunks = Object.keys(updated)
-              .map(k => parseInt(k))
-              .sort((a, b) => a - b)
-              .map(index => updated[index])
-              .filter(text => text?.trim());
-            
-            const finalTranscript = orderedChunks.join(' ');
-            console.log(`🔗 Final concatenated transcript (${orderedChunks.length} chunks): "${finalTranscript.substring(0, 100)}..."`);
-            
-            // Format with timestamp and speaker for display
-            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const speakerLabel = result.speaker ? `[${result.speaker}]` : '';
-            const formattedText = `[${timestamp}]${speakerLabel} ${finalTranscript}`;
-            
-            setEditableText(formattedText);
-            return updated;
-          });
+          const result = await browserWhisper.transcribe(
+            chunk.data, 
+            currentLanguage === 'fr' ? 'fr' : 'en'
+          );
           
-          // Increment chunk counter for next chunk
-          setAmbientChunkCounter(prev => prev + 1);
+          transcriptionResult = {
+            text: result.text,
+            source: 'browser-whisper',
+            processingTime: result.processingTime,
+            speaker: null // Speaker ID not available in browser Whisper yet
+          };
           
-          console.log(`✅ Chunk ${ambientChunkCounter} processed successfully`);
-        } else {
-          console.warn('⚠️ Ambient transcription returned empty text');
+          console.log(`✅ Browser Whisper completed chunk ${chunk.id}: "${result.text.substring(0, 50)}..."`);
+          
+        } catch (browserError: any) {
+          console.warn(`🔄 Browser Whisper failed for chunk ${chunk.id}, falling back to server:`, browserError.message);
+          // Fall through to server processing
         }
+      }
+
+      // SERVER FALLBACK: Use existing server processing if browser failed or disabled
+      if (!transcriptionResult) {
+        // Ensure the blob has correct MIME type and create proper multipart upload
+        const audioBlob = new Blob([chunk.data], { type: 'audio/webm;codecs=opus' });
+        
+        const form = new FormData();
+        form.append("file", audioBlob, `ambient-${ambientSessionId}-${ambientChunkCounter}.webm`);
+        form.append("sessionId", ambientSessionId);
+        form.append("chunkIndex", String(ambientChunkCounter));
+        form.append("language", getWhisperLanguage(currentLanguage));
+        form.append("mode", "transcribe");
+
+        console.log(`📦 Uploading to server: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+
+        const response = await fetch("/api/transcribe-ambient-chunk", {
+          method: "POST",
+          body: form,
+        });
+        
+        if (response.ok) {
+          transcriptionResult = await response.json();
+          console.log('🔍 Server ambient transcription result:', transcriptionResult);
+        } else {
+          const errorText = await response.text();
+          console.error('❌ Failed to transcribe ambient chunk:', response.status, errorText);
+          return;
+        }
+      }
+
+      // Process transcription result (same for both browser and server)
+      if (transcriptionResult?.text?.trim()) {
+        // Store chunk result in order for proper concatenation
+        console.log(`📝 Chunk ${ambientChunkCounter} transcription: "${transcriptionResult.text.trim()}"`);
+        
+        setAmbientTranscriptions(prev => {
+          const updated = { ...prev, [ambientChunkCounter]: transcriptionResult.text.trim() };
+          console.log(`📊 Updated transcriptions:`, Object.keys(updated).map(k => `Chunk ${k}: "${updated[parseInt(k)].substring(0, 50)}..."`));
+          
+          // Concatenate all chunks in order to build final transcript
+          const orderedChunks = Object.keys(updated)
+            .map(k => parseInt(k))
+            .sort((a, b) => a - b)
+            .map(index => updated[index])
+            .filter(text => text?.trim());
+          
+          const finalTranscript = orderedChunks.join(' ');
+          console.log(`🔗 Final concatenated transcript (${orderedChunks.length} chunks): "${finalTranscript.substring(0, 100)}..."`);
+          
+          // Format with timestamp, source, and speaker for display
+          const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const sourceLabel = transcriptionResult.source === 'browser-whisper' ? '[Local]' : '[Server]';
+          const speakerLabel = transcriptionResult.speaker ? `[${transcriptionResult.speaker}]` : '';
+          const formattedText = `[${timestamp}]${sourceLabel}${speakerLabel} ${finalTranscript}`;
+          
+          setEditableText(formattedText);
+          return updated;
+        });
+        
+        // Increment chunk counter for next chunk
+        setAmbientChunkCounter(prev => prev + 1);
+        
+        console.log(`✅ Chunk ${ambientChunkCounter} processed successfully via ${transcriptionResult.source || 'server'}`);
       } else {
-        const errorText = await response.text();
-        console.error('❌ Failed to transcribe ambient chunk:', response.status, errorText);
+        console.warn('⚠️ Ambient transcription returned empty text');
       }
     } catch (error) {
       console.error('❌ Error processing ambient chunk:', error);
@@ -669,8 +749,34 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                     <span className="ml-2 text-blue-600">
                       {currentLanguage.toUpperCase()}
                     </span>
+                    {/* Browser Whisper Status Badge */}
+                    {currentMode === 'transcribe' && browserWhisperEnabled && (
+                      <span className="ml-2 text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-1 rounded">
+                        Local
+                      </span>
+                    )}
                   </span>
                 </div>
+
+                {/* Browser Whisper Loading Status - Show only for transcribe mode */}
+                {currentMode === 'transcribe' && modelLoadingStatus && (
+                  <div className="text-xs text-muted-foreground p-2 bg-muted rounded-md">
+                    <div className="flex items-center justify-between">
+                      <span>{modelLoadingStatus}</span>
+                      {modelLoadingProgress > 0 && modelLoadingProgress < 100 && (
+                        <span className="text-xs">{modelLoadingProgress}%</span>
+                      )}
+                    </div>
+                    {modelLoadingProgress > 0 && modelLoadingProgress < 100 && (
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 mt-1">
+                        <div 
+                          className="bg-blue-600 h-1 rounded-full transition-all duration-300" 
+                          style={{ width: `${modelLoadingProgress}%` }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 <div className="flex gap-1">
                   {/* Unified Recording Button - adapts behavior based on mode */}
