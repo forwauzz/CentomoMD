@@ -1,75 +1,44 @@
 /**
- * Enhanced Ambient Audio Processing Tools
- * Provides robust audio processing with multiple fallback strategies
+ * Simple Audio Format Converter for Ambient Audio
+ * Focuses on fixing WebM conversion issues with minimal complexity
  */
 
-import { transcriptionCircuitBreaker } from './transcription-circuit-breaker';
-import { enhancedWhisperService } from './enhanced-whisper-service';
+import { webmToWavMono16k } from './audio-convert';
+import { toFile } from 'openai/uploads';
 
-export interface AmbientAudioChunk {
-  id: string;
-  buffer: Buffer;
-  size: number;
-  duration: number;
-  format: 'webm' | 'wav' | 'unknown';
-  chunkIndex: number;
-  sessionId: string;
-}
-
-export interface AmbientProcessingResult {
+export interface SimpleAudioProcessingResult {
   success: boolean;
-  text: string;
-  chunkIndex: number;
-  source: 'whisper' | 'fallback' | 'cache';
-  quality: 'high' | 'medium' | 'low';
-  processingTime: number;
-  fallbackUsed?: string;
+  convertedBuffer?: Buffer;
+  originalFormat: 'webm' | 'wav' | 'unknown';
+  targetFormat: 'wav';
   error?: string;
+  processingTimeMs: number;
 }
 
-export class AmbientAudioToolkit {
-  private static instance: AmbientAudioToolkit;
-  private processingQueue = new Map<string, Promise<AmbientProcessingResult>>();
-  private recentResults = new Map<string, AmbientProcessingResult>();
-  private circuitBreakerStatus = new Map<string, { 
-    failures: number; 
-    lastFailure: number; 
-    isOpen: boolean 
-  }>();
+export class SimpleAudioConverter {
+  private static instance: SimpleAudioConverter;
 
-  static getInstance(): AmbientAudioToolkit {
-    if (!AmbientAudioToolkit.instance) {
-      AmbientAudioToolkit.instance = new AmbientAudioToolkit();
+  static getInstance(): SimpleAudioConverter {
+    if (!SimpleAudioConverter.instance) {
+      SimpleAudioConverter.instance = new SimpleAudioConverter();
     }
-    return AmbientAudioToolkit.instance;
+    return SimpleAudioConverter.instance;
   }
 
   /**
-   * Smart audio format detector with advanced WebM validation
+   * Simple audio format detector
    */
-  detectAudioFormat(buffer: Buffer): 'webm' | 'wav' | 'unknown' {
+  detectFormat(buffer: Buffer): 'webm' | 'wav' | 'unknown' {
     if (buffer.length < 12) return 'unknown';
 
-    // WebM format detection (EBML header)
-    const webmSignatures = [
-      Buffer.from([0x1A, 0x45, 0xDF, 0xA3]), // EBML header
-      Buffer.from('webm', 'utf-8')
-    ];
-
-    // WAV format detection
-    const wavSignature = Buffer.from('RIFF', 'utf-8');
-    const waveSignature = Buffer.from('WAVE', 'utf-8');
-
-    // Check WebM signatures
-    for (const signature of webmSignatures) {
-      if (buffer.indexOf(signature) !== -1) {
-        return 'webm';
-      }
+    // WebM detection (EBML header)
+    if (buffer.slice(0, 4).equals(Buffer.from([0x1A, 0x45, 0xDF, 0xA3]))) {
+      return 'webm';
     }
 
-    // Check WAV signature
-    if (buffer.slice(0, 4).equals(wavSignature) && 
-        buffer.slice(8, 12).equals(waveSignature)) {
+    // WAV detection
+    if (buffer.slice(0, 4).equals(Buffer.from('RIFF', 'utf-8')) && 
+        buffer.slice(8, 12).equals(Buffer.from('WAVE', 'utf-8'))) {
       return 'wav';
     }
 
@@ -77,230 +46,134 @@ export class AmbientAudioToolkit {
   }
 
   /**
-   * Advanced audio quality assessment
+   * Convert WebM to WAV with simple error handling
    */
-  assessAudioQuality(buffer: Buffer): { 
-    score: number; 
-    quality: 'high' | 'medium' | 'low';
-    issues: string[];
-    recommendations: string[];
-  } {
-    const issues: string[] = [];
-    const recommendations: string[] = [];
-    let score = 100;
-
-    // Size-based quality assessment
-    if (buffer.length < 10000) { // Less than 10KB
-      issues.push('Very small audio file - may be empty or corrupted');
-      recommendations.push('Check microphone connection and recording settings');
-      score -= 40;
-    } else if (buffer.length < 50000) { // Less than 50KB
-      issues.push('Small audio file - very short duration');
-      recommendations.push('Consider longer recording duration for better accuracy');
-      score -= 20;
-    }
-
-    // Format-specific assessment
-    const format = this.detectAudioFormat(buffer);
-    if (format === 'unknown') {
-      issues.push('Unknown audio format detected');
-      recommendations.push('Use WebM or WAV format for best compatibility');
-      score -= 30;
-    }
-
-    // Determine quality level
-    let quality: 'high' | 'medium' | 'low';
-    if (score >= 80) quality = 'high';
-    else if (score >= 60) quality = 'medium';
-    else quality = 'low';
-
-    return { score, quality, issues, recommendations };
-  }
-
-  /**
-   * Process ambient audio with multiple fallback strategies
-   */
-  async processAmbientChunk(chunk: AmbientAudioChunk): Promise<AmbientProcessingResult> {
+  async convertWebMToWAV(buffer: Buffer): Promise<SimpleAudioProcessingResult> {
     const startTime = Date.now();
-    const chunkKey = `${chunk.sessionId}-${chunk.chunkIndex}`;
+    const originalFormat = this.detectFormat(buffer);
 
-    // Prevent duplicate processing
-    if (this.processingQueue.has(chunkKey)) {
-      console.log(`⏳ Ambient chunk ${chunk.chunkIndex} already processing, waiting...`);
-      return await this.processingQueue.get(chunkKey)!;
+    // Quick validation
+    if (buffer.length < 1024) {
+      return {
+        success: false,
+        originalFormat,
+        targetFormat: 'wav',
+        error: 'Audio buffer too small (less than 1KB)',
+        processingTimeMs: Date.now() - startTime
+      };
     }
 
-    // Check recent results cache
-    if (this.recentResults.has(chunkKey)) {
-      console.log(`📋 Using cached result for ambient chunk ${chunk.chunkIndex}`);
-      return this.recentResults.get(chunkKey)!;
-    }
-
-    // Start processing
-    const processingPromise = this.doProcessAmbientChunk(chunk, startTime);
-    this.processingQueue.set(chunkKey, processingPromise);
-
-    try {
-      const result = await processingPromise;
-      this.recentResults.set(chunkKey, result);
-      
-      // Keep only recent results (last 10)
-      if (this.recentResults.size > 10) {
-        const firstKey = this.recentResults.keys().next().value;
-        this.recentResults.delete(firstKey);
-      }
-      
-      return result;
-    } finally {
-      this.processingQueue.delete(chunkKey);
-    }
-  }
-
-  private async doProcessAmbientChunk(chunk: AmbientAudioChunk, startTime: number): Promise<AmbientProcessingResult> {
-    console.log(`🎙️ Processing ambient chunk ${chunk.chunkIndex}: ${(chunk.size / 1024).toFixed(1)}KB`);
-
-    // Quality assessment
-    const quality = this.assessAudioQuality(chunk.buffer);
-    console.log(`📊 Audio quality: ${quality.quality} (score: ${quality.score})`);
-
-    if (quality.issues.length > 0) {
-      console.log(`⚠️ Audio quality issues:`, quality.issues);
-    }
-
-    // Strategy 1: Enhanced Whisper Service (primary)
-    try {
-      console.log(`🔄 Strategy 1: Enhanced Whisper transcription`);
-      const result = await enhancedWhisperService.transcribeWithRecovery({
-        buffer: chunk.buffer,
-        filename: `ambient-${chunk.chunkIndex}.webm`,
-        mimetype: 'audio/webm;codecs=opus',
-        language: 'auto',
-        sessionId: chunk.sessionId,
-        chunkIndex: chunk.chunkIndex,
-        mode: 'transcribe'
-      });
-
+    // If already WAV, return as-is
+    if (originalFormat === 'wav') {
       return {
         success: true,
-        text: result.text,
-        chunkIndex: chunk.chunkIndex,
-        source: result.source as 'whisper' | 'fallback',
-        quality: result.quality as 'high' | 'medium' | 'low',
-        processingTime: Date.now() - startTime
+        convertedBuffer: buffer,
+        originalFormat,
+        targetFormat: 'wav',
+        processingTimeMs: Date.now() - startTime
       };
+    }
 
-    } catch (whisperError: any) {
-      console.error(`❌ Enhanced Whisper failed for chunk ${chunk.chunkIndex}:`, whisperError.message);
-
-      // Strategy 2: Circuit breaker fallback
+    // Convert WebM to WAV
+    if (originalFormat === 'webm') {
       try {
-        console.log(`🔄 Strategy 2: Circuit breaker with local fallback`);
-        const fallbackResult = await this.localAudioAnalysis(chunk);
+        console.log(`🔄 Converting WebM to WAV: ${(buffer.length / 1024).toFixed(1)}KB`);
+        const wavBuffer = await webmToWavMono16k(buffer);
         
+        if (wavBuffer.length === 0) {
+          return {
+            success: false,
+            originalFormat,
+            targetFormat: 'wav',
+            error: 'Conversion produced empty buffer',
+            processingTimeMs: Date.now() - startTime
+          };
+        }
+
+        console.log(`✅ WebM to WAV conversion successful: ${(wavBuffer.length / 1024).toFixed(1)}KB`);
         return {
           success: true,
-          text: fallbackResult.text,
-          chunkIndex: chunk.chunkIndex,
-          source: 'fallback',
-          quality: 'low',
-          processingTime: Date.now() - startTime,
-          fallbackUsed: 'local_analysis'
+          convertedBuffer: wavBuffer,
+          originalFormat,
+          targetFormat: 'wav',
+          processingTimeMs: Date.now() - startTime
         };
 
-      } catch (fallbackError: any) {
-        console.error(`❌ All processing strategies failed for chunk ${chunk.chunkIndex}`);
-
-        // Strategy 3: Graceful degradation
+      } catch (error: any) {
+        console.error('❌ WebM to WAV conversion failed:', error.message);
         return {
           success: false,
-          text: this.generateFallbackMessage(chunk, quality),
-          chunkIndex: chunk.chunkIndex,
-          source: 'fallback',
-          quality: 'low',
-          processingTime: Date.now() - startTime,
-          fallbackUsed: 'graceful_degradation',
-          error: `${whisperError.message} | ${fallbackError.message}`
+          originalFormat,
+          targetFormat: 'wav',
+          error: `Conversion failed: ${error.message}`,
+          processingTimeMs: Date.now() - startTime
         };
       }
     }
-  }
-
-  /**
-   * Local audio analysis fallback
-   */
-  private async localAudioAnalysis(chunk: AmbientAudioChunk): Promise<{ text: string }> {
-    // Implement basic audio analysis
-    const format = this.detectAudioFormat(chunk.buffer);
-    const sizeKB = (chunk.size / 1024).toFixed(1);
-    const estimatedDuration = Math.max(1, chunk.duration / 1000);
-
-    // Check for audio activity patterns
-    const hasContent = chunk.buffer.length > 50000; // Basic content detection
-    
-    if (hasContent) {
-      return {
-        text: `[Audio detected - ${sizeKB}KB, ~${estimatedDuration.toFixed(1)}s, ${format} format - Processing temporarily unavailable, please retry]`
-      };
-    } else {
-      return {
-        text: `[Silent audio segment - ${sizeKB}KB, ~${estimatedDuration.toFixed(1)}s]`
-      };
-    }
-  }
-
-  /**
-   * Generate informative fallback messages
-   */
-  private generateFallbackMessage(chunk: AmbientAudioChunk, quality: any): string {
-    const sizeKB = (chunk.size / 1024).toFixed(1);
-    const estimatedDuration = Math.max(1, chunk.duration / 1000);
-    
-    // Provide helpful context in fallback message
-    let message = `[Audio chunk ${chunk.chunkIndex + 1} - ${sizeKB}KB, ~${estimatedDuration.toFixed(1)}s`;
-    
-    if (quality.quality === 'low') {
-      message += ' - Low quality audio detected';
-    }
-    
-    message += ' - Service temporarily unavailable]';
-    
-    return message;
-  }
-
-  /**
-   * Get processing statistics
-   */
-  getProcessingStats(): {
-    queueSize: number;
-    cacheSize: number;
-    circuitBreakerStatus: Record<string, any>;
-    recentResults: Array<{ chunkIndex: number; success: boolean; source: string }>;
-  } {
-    const recentResults = Array.from(this.recentResults.values()).map(result => ({
-      chunkIndex: result.chunkIndex,
-      success: result.success,
-      source: result.source
-    }));
 
     return {
-      queueSize: this.processingQueue.size,
-      cacheSize: this.recentResults.size,
-      circuitBreakerStatus: transcriptionCircuitBreaker.getAllStatuses(),
-      recentResults
+      success: false,
+      originalFormat,
+      targetFormat: 'wav',
+      error: `Unsupported format: ${originalFormat}`,
+      processingTimeMs: Date.now() - startTime
     };
   }
 
   /**
-   * Reset circuit breakers and clear cache
+   * Create proper audio file with fallback strategies
    */
-  reset(): void {
-    this.processingQueue.clear();
-    this.recentResults.clear();
-    this.circuitBreakerStatus.clear();
-    transcriptionCircuitBreaker.reset();
-    console.log('🔄 Ambient audio toolkit reset');
+  async createAudioFileForAPI(buffer: Buffer, filename: string): Promise<{
+    file: any;
+    format: string;
+    success: boolean;
+    error?: string;
+  }> {
+    // Try conversion first
+    const conversionResult = await this.convertWebMToWAV(buffer);
+    
+    if (conversionResult.success && conversionResult.convertedBuffer) {
+      try {
+        const wavFile = await toFile(
+          conversionResult.convertedBuffer,
+          filename.replace(/\.webm$/i, '.wav'),
+          { type: 'audio/wav' }
+        );
+        
+        return {
+          file: wavFile,
+          format: 'wav',
+          success: true
+        };
+      } catch (error: any) {
+        console.error('❌ Failed to create WAV file object:', error.message);
+      }
+    }
+
+    // Fallback: try original buffer as WebM
+    try {
+      const webmFile = await toFile(
+        buffer,
+        filename,
+        { type: 'audio/webm;codecs=opus' }
+      );
+      
+      return {
+        file: webmFile,
+        format: 'webm',
+        success: true
+      };
+    } catch (error: any) {
+      console.error('❌ Failed to create WebM file object:', error.message);
+      return {
+        file: null,
+        format: 'unknown',
+        success: false,
+        error: `Failed to create audio file: ${error.message}`
+      };
+    }
   }
 }
 
 // Export singleton instance
-export const ambientAudioToolkit = AmbientAudioToolkit.getInstance();
+export const simpleAudioConverter = SimpleAudioConverter.getInstance();

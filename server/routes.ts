@@ -1361,21 +1361,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
                               language === 'en-US' || language === 'en' ? 'en' : 
                               'auto';
 
-      // Use enhanced transcription service with circuit breaker and error recovery
-      const { enhancedWhisperService } = await import('./enhanced-whisper-service');
+      // Use simple audio converter with retry logic
+      const { simpleAudioConverter } = await import('./ambient-audio-tools');
+      const { simpleRetryHandler } = await import('./simple-retry-handler');
       
-      const result = await enhancedWhisperService.transcribeWithRecovery({
-        buffer: req.file.buffer,
-        filename: req.file.originalname || `ambient-${sessionId}-${chunkIndex}.webm`,
-        mimetype: req.file.mimetype,
-        language: whisperLanguage as "fr" | "en" | "auto",
-        temperature: 0.2, // Transcribe mode setting
-        sessionId,
-        chunkIndex: Number(chunkIndex),
-        mode: 'transcribe',
-        retryAttempts: 2,
-        fallbackToLocal: true
-      });
+      // Step 1: Convert audio to compatible format
+      const audioFileResult = await simpleAudioConverter.createAudioFileForAPI(
+        req.file.buffer,
+        req.file.originalname || `ambient-${sessionId}-${chunkIndex}.webm`
+      );
+
+      if (!audioFileResult.success) {
+        return res.status(400).json({
+          error: "AUDIO_CONVERSION_FAILED",
+          message: audioFileResult.error || "Failed to prepare audio for processing"
+        });
+      }
+
+      console.log(`🎵 Audio prepared for API: ${audioFileResult.format} format`);
+
+      // Step 2: Transcribe with simple retry logic
+      const transcriptionResult = await simpleRetryHandler.executeWithRetry(
+        async () => {
+          const { openai } = await import('./whisper-service');
+          
+          const result = await openai.audio.transcriptions.create({
+            model: "whisper-1",
+            file: audioFileResult.file,
+            language: whisperLanguage !== 'auto' ? whisperLanguage : undefined,
+            temperature: 0.2,
+            response_format: "json",
+          });
+
+          return {
+            text: result.text,
+            language: result.language,
+            duration: (result as any).duration
+          };
+        },
+        `Ambient transcription chunk ${chunkIndex}`
+      );
+
+      if (!transcriptionResult.success) {
+        // Fallback message for user
+        const fallbackText = `[Audio chunk ${Number(chunkIndex) + 1} - ${(req.file.size / 1024).toFixed(1)}KB, ~${validationResult.estimatedDuration.toFixed(1)}s - Service temporarily unavailable]`;
+        
+        return res.json({
+          success: true,
+          text: fallbackText,
+          chunkIndex: Number(chunkIndex),
+          source: 'fallback',
+          quality: 'low',
+          processingTime: transcriptionResult.totalTimeMs,
+          error: transcriptionResult.error
+        });
+      }
+
+      const result = {
+        text: transcriptionResult.result!.text,
+        source: 'whisper',
+        quality: 'high',
+        processingTime: transcriptionResult.totalTimeMs
+      };
 
       // Record performance metrics for monitoring
       const { transcriptionMonitoring } = await import('./transcription-monitoring');
