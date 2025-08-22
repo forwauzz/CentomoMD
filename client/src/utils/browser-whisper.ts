@@ -70,7 +70,48 @@ export class BrowserWhisperProcessor {
     // Check for modern browser features needed by transformers.js
     const hasES2020 = typeof BigInt !== 'undefined';
     
-    return hasWebAssembly && hasArrayBuffer && hasWorker && hasES2020;
+    // Check for WebM audio codec support (critical for MediaRecorder output)
+    const hasWebMAudioSupport = this.checkWebMAudioSupport();
+    
+    const isSupported = hasWebAssembly && hasArrayBuffer && hasWorker && hasES2020 && hasWebMAudioSupport;
+    
+    if (!isSupported) {
+      console.warn('🚫 Browser Whisper not supported:', {
+        webAssembly: hasWebAssembly,
+        arrayBuffer: hasArrayBuffer,
+        worker: hasWorker,
+        es2020: hasES2020,
+        webmAudio: hasWebMAudioSupport
+      });
+    }
+    
+    return isSupported;
+  }
+
+  /**
+   * Check if browser can decode WebM audio format
+   */
+  private static checkWebMAudioSupport(): boolean {
+    try {
+      const audio = document.createElement('audio');
+      
+      // Check WebM audio support with Opus codec (what MediaRecorder produces)
+      const webmOpusSupport = audio.canPlayType('audio/webm; codecs="opus"');
+      const webmVorbisSupport = audio.canPlayType('audio/webm; codecs="vorbis"');
+      
+      const hasWebMSupport = webmOpusSupport !== '' || webmVorbisSupport !== '';
+      
+      console.log('🎵 WebM audio support check:', {
+        opus: webmOpusSupport,
+        vorbis: webmVorbisSupport,
+        supported: hasWebMSupport
+      });
+      
+      return hasWebMSupport;
+    } catch (error) {
+      console.warn('⚠️ Could not check WebM audio support:', error);
+      return false; // Conservative fallback
+    }
   }
 
   /**
@@ -279,16 +320,35 @@ export class BrowserWhisperProcessor {
         }
       }
       
-      // Decode audio data with error handling
+      // Decode audio data with error handling and WebM compatibility
       let audioBuffer: AudioBuffer;
       try {
         audioBuffer = await audioContext.decodeAudioData(bufferCopy);
       } catch (decodeError: any) {
         console.warn('WebM decoding failed, trying with different approach:', decodeError.message);
         
-        // Try again with another fresh copy
-        const secondCopy = arrayBuffer.slice(0);
-        audioBuffer = await audioContext.decodeAudioData(secondCopy);
+        try {
+          // Try with a completely fresh blob/buffer
+          const freshBlob = audioBlob.slice();
+          const freshArrayBuffer = await freshBlob.arrayBuffer();
+          audioBuffer = await audioContext.decodeAudioData(freshArrayBuffer);
+        } catch (secondError: any) {
+          console.error('❌ All WebM decoding attempts failed:', secondError.message);
+          
+          // Provide specific guidance based on browser
+          const userAgent = navigator.userAgent;
+          let browserGuidance = '';
+          
+          if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+            browserGuidance = ' Safari has limited WebM support - try Chrome or Firefox for better compatibility.';
+          } else if (userAgent.includes('Firefox')) {
+            browserGuidance = ' Try enabling WebM codecs in Firefox settings.';
+          } else {
+            browserGuidance = ' Try Chrome or Firefox for better WebM support.';
+          }
+          
+          throw new Error(`Unable to decode WebM audio data: ${secondError.message}.${browserGuidance}`);
+        }
       }
       
       if (!audioBuffer || audioBuffer.length === 0) {

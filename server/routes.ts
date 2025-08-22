@@ -1383,21 +1383,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Step 2: Transcribe with simple retry logic
       const transcriptionResult = await simpleRetryHandler.executeWithRetry(
         async () => {
-          const whisperService = await import('./whisper-service');
-          const openai = whisperService.openai;
+          const { transcribeAudioWithWhisperMultipart } = await import('./whisper-service');
           
-          const result = await openai.audio.transcriptions.create({
-            model: "whisper-1",
-            file: audioFileResult.file,
-            language: whisperLanguage !== 'auto' ? whisperLanguage : undefined,
-            temperature: 0.2,
-            response_format: "json",
+          // Create a File-like object for the API
+          const audioFile = new File([audioFileResult.file.buffer], audioFileResult.file.originalname, {
+            type: audioFileResult.file.mimetype
           });
-
+          
+          const result = await transcribeAudioWithWhisperMultipart(audioFile);
+          
           return {
-            text: result.text,
-            language: result.language,
-            duration: (result as any).duration
+            text: result.text || '',
+            language: whisperLanguage,
+            duration: 0
           };
         },
         `Ambient transcription chunk ${chunkIndex}`
