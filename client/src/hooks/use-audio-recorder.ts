@@ -303,7 +303,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
           console.error(`⚠️ Failed to process chunk ${chunk.chunkIndex + 1} after retries:`, error);
           
           // Add to failed chunks list
-          updateState(prev => ({
+          updateState((prev: AudioRecorderState) => ({
             ...prev,
             failedChunks: [...prev.failedChunks, chunk.chunkIndex]
           }));
@@ -456,7 +456,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
         } else {
           console.error(`💥 No valid audio chunks found from ${chunks.length} total chunks`);
           updateState({ 
-            error: currentLanguage === "fr"
+            error: language === "fr"
               ? 'Enregistrement échoué - aucune donnée audio valide. Réessayez l\'enregistrement.'
               : 'Recording failed - no valid audio data captured. Please try recording again.',
             isRecording: false,
@@ -489,7 +489,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
           if (blob.size < minValidSize) {
             console.error(`💥 Invalid chunk created: ${blob.size} bytes (min: ${minValidSize})`);
             updateState({ 
-              error: currentLanguage === "fr" 
+              error: language === "fr" 
                 ? 'Enregistrement échoué - chunk audio invalide. Redémarrez l\'enregistrement.'
                 : 'Recording failed - invalid audio chunk. Please restart recording.',
               isRecording: false 
@@ -779,9 +779,9 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
             retryResults.push(result);
             
             // Remove from failed chunks
-            updateState(prev => ({
+            updateState((prev: AudioRecorderState) => ({
               ...prev,
-              failedChunks: prev.failedChunks.filter(idx => idx !== chunkIndex)
+              failedChunks: prev.failedChunks.filter((idx: number) => idx !== chunkIndex)
             }));
             
             console.log(`✅ Retry successful for chunk ${chunkIndex + 1}`);
@@ -794,7 +794,7 @@ export function useAudioRecorder(options: AudioRecorderOptions = {}) {
       // Update transcript with retry results
       if (retryResults.length > 0) {
         const newTranscript = retryResults.map(r => r.text).join(' ').trim();
-        updateState(prev => ({
+        updateState((prev: AudioRecorderState) => ({
           ...prev,
           transcript: prev.transcript + ' ' + newTranscript
         }));
