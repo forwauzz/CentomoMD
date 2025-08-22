@@ -1,0 +1,183 @@
+// Redesigned approach for real-time ambient transcription
+// Key change: Short chunks (2-3 seconds) with immediate processing
+
+class StreamingAmbientProcessor {
+private config = {
+chunkDurationMs: 3000,        // 3 seconds instead of 30
+overlapMs: 500,               // 0.5 second overlap
+maxConcurrentChunks: 2,       // Process max 2 chunks simultaneously
+silenceThreshold: 0.01,       // VAD threshold
+minChunkDuration: 1000        // Minimum 1 second before processing
+};
+
+private activeChunks = new Map<string, AudioChunk>();
+private transcriptionBuffer: TranscriptionSegment[] = [];
+private isRecording = false;
+private currentRecorder: MediaRecorder | null = null;
+
+async startAmbientListening(): Promise<void> {
+const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+```
+// Use timeslice for regular chunk generation
+this.currentRecorder = new MediaRecorder(stream, {
+  mimeType: 'audio/webm;codecs=opus'
+});
+
+// Key change: Use timeslice for automatic chunking
+this.currentRecorder.start(this.config.chunkDurationMs); // 3-second chunks
+
+this.currentRecorder.ondataavailable = (event) => {
+  if (event.data.size > 0) {
+    this.processAudioChunk(event.data);
+  }
+};
+
+this.isRecording = true;
+```
+
+}
+
+private async processAudioChunk(audioBlob: Blob): Promise<void> {
+const chunkId = `chunk-${Date.now()}`;
+
+```
+// Quick VAD check to avoid processing silence
+if (await this.containsSpeech(audioBlob)) {
+  this.activeChunks.set(chunkId, {
+    id: chunkId,
+    data: audioBlob,
+    timestamp: Date.now()
+  });
+
+  // Process immediately - don't wait
+  this.transcribeChunk(chunkId, audioBlob);
+}
+```
+
+}
+
+private async transcribeChunk(chunkId: string, audioBlob: Blob): Promise<void> {
+try {
+// Try browser Whisper first (should be fast for 3-second chunks)
+const result = await this.browserWhisper.transcribe(audioBlob);
+
+```
+  if (result.text.trim()) {
+    this.addTranscriptionSegment({
+      id: chunkId,
+      text: result.text,
+      timestamp: Date.now(),
+      source: 'browser-whisper',
+      confidence: result.confidence || 0.8
+    });
+  }
+} catch (error) {
+  console.log(`Browser Whisper failed for ${chunkId}, using server fallback`);
+  // Server fallback for failed chunks
+  this.transcribeChunkOnServer(chunkId, audioBlob);
+} finally {
+  this.activeChunks.delete(chunkId);
+}
+```
+
+}
+
+private addTranscriptionSegment(segment: TranscriptionSegment): void {
+this.transcriptionBuffer.push(segment);
+
+```
+// Immediately update UI - this is the key difference
+this.callbacks.onTranscriptionUpdate?.(segment);
+
+// Clean old segments (keep last 50 for context)
+if (this.transcriptionBuffer.length > 50) {
+  this.transcriptionBuffer = this.transcriptionBuffer.slice(-50);
+}
+```
+
+}
+
+private async containsSpeech(audioBlob: Blob): Promise<boolean> {
+// Simple VAD - you could use WebRTC VAD or energy-based detection
+// For now, just check if the blob has reasonable size
+return audioBlob.size > 1000; // Rough threshold
+}
+}
+
+// UI Component for real-time display
+interface AmbientTranscriptionDisplayProps {
+segments: TranscriptionSegment[];
+isListening: boolean;
+}
+
+function AmbientTranscriptionDisplay({ segments, isListening }: AmbientTranscriptionDisplayProps) {
+const [displayText, setDisplayText] = useState(’’);
+
+useEffect(() => {
+// Build display text from segments
+const recentSegments = segments.slice(-10); // Show last 10 segments
+const text = recentSegments
+.map(segment => {
+const time = new Date(segment.timestamp).toLocaleTimeString();
+const sourceIcon = segment.source === ‘browser-whisper’ ? ‘🔵’ : ‘🔴’;
+return `[${time}] ${sourceIcon} ${segment.text}`;
+})
+.join(’\n’);
+
+```
+setDisplayText(text);
+```
+
+}, [segments]);
+
+return (
+<div className="ambient-transcription-display">
+{isListening && (
+<div className="listening-indicator">
+<div className="pulse-dot" />
+<span>Listening…</span>
+</div>
+)}
+
+```
+  <div className="transcription-text">
+    <pre>{displayText}</pre>
+    {isListening && <span className="cursor-blink">|</span>}
+  </div>
+</div>
+```
+
+);
+}
+
+// Alternative approach: Use WebRTC VAD for even better experience
+class VADEnhancedProcessor extends StreamingAmbientProcessor {
+private vadProcessor: any = null;
+
+async initializeVAD(): Promise<void> {
+// You could integrate @ricky0123/vad-web for browser VAD
+// This would only transcribe when speech is detected
+try {
+const { MicVAD } = await import(’@ricky0123/vad-web’);
+
+```
+  this.vadProcessor = await MicVAD.new({
+    onSpeechStart: () => {
+      console.log('Speech detected - starting transcription');
+    },
+    onSpeechEnd: (audio) => {
+      // Only transcribe actual speech segments
+      this.processAudioChunk(new Blob([audio], { type: 'audio/wav' }));
+    },
+    onVADMisfire: () => {
+      console.log('False positive speech detection');
+    }
+  });
+} catch (error) {
+  console.log('VAD not available, falling back to timed chunks');
+}
+```
+
+}
+}

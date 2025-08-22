@@ -56,11 +56,16 @@ export class ContinuousAudioProcessor {
     chunkDurationMs: 3000, // 3 seconds - CHANGED FROM 30000 for faster user feedback
     overlapMs: 500, // CHANGED FROM 2000 - shorter overlap for faster chunks
     maxQueueSize: 10,
-    processingConcurrency: 2,
+    processingConcurrency: 2, // Max 2 concurrent chunks as recommended
     autoCleanup: true,
     vadEnabled: true,
     speakerIdEnabled: true
   };
+
+  // Claude's recommendations: Enhanced processing controls
+  private minChunkDuration = 1000; // Minimum 1 second before processing
+  private silenceThreshold = 0.01; // VAD threshold for speech detection
+  private readonly maxConcurrentChunks = 2; // Limit concurrent processing
   
   private callbacks: ProcessingCallbacks = {};
   
@@ -227,24 +232,38 @@ export class ContinuousAudioProcessor {
     if (!this.mediaRecorder) return;
 
     // Process automatic 3-second chunks from MediaRecorder timeslice
-    this.mediaRecorder.ondataavailable = (event) => {
+    this.mediaRecorder.ondataavailable = async (event) => {
       if (event.data.size > 0 && this.isRecording) {
-        console.log(`🎵 Creating chunk ${this.chunkCounter} from automatic timeslice (${(event.data.size / 1024).toFixed(1)}KB)`);
+        const now = Date.now();
+        const actualDuration = now - this.lastChunkTime;
         
-        const chunk: AudioChunk = {
-          id: `chunk-${this.chunkCounter}`,
-          data: event.data, // Direct use of the 3-second chunk
-          startTime: this.lastChunkTime,
-          endTime: Date.now(),
-          duration: this.config.chunkDurationMs,
-          hasOverlap: false, // No manual overlap needed with automatic chunking
-          overlapDuration: undefined
-        };
+        // Claude's recommendation: Check minimum duration and speech detection
+        if (actualDuration < this.minChunkDuration) {
+          console.log(`⏭️ Chunk too short (${actualDuration}ms), skipping`);
+          return;
+        }
         
-        this.chunkCounter++;
-        this.lastChunkTime = Date.now();
-        
-        this.addChunkToQueue(chunk);
+        // Claude's recommendation: Quick speech detection to avoid processing silence
+        if (await this.containsSpeech(event.data)) {
+          console.log(`🎵 Creating chunk ${this.chunkCounter} from automatic timeslice (${(event.data.size / 1024).toFixed(1)}KB)`);
+          
+          const chunk: AudioChunk = {
+            id: `chunk-${this.chunkCounter}`,
+            data: event.data, // Direct use of the 3-second chunk
+            startTime: this.lastChunkTime,
+            endTime: now,
+            duration: actualDuration,
+            hasOverlap: false, // No manual overlap needed with automatic chunking
+            overlapDuration: undefined
+          };
+          
+          this.chunkCounter++;
+          this.lastChunkTime = now;
+          
+          this.addChunkToQueue(chunk);
+        } else {
+          console.log(`🔇 Chunk contains mostly silence, skipping transcription`);
+        }
       } else if (event.data.size === 0) {
         console.log('⚠️ Received empty data event');
       }
@@ -259,6 +278,29 @@ export class ContinuousAudioProcessor {
       console.error('❌ MediaRecorder error:', event);
       this.isRecording = false;
     };
+  }
+
+  // Claude's recommendation: Simple speech detection to avoid processing silence
+  private async containsSpeech(audioBlob: Blob): Promise<boolean> {
+    try {
+      // Simple heuristic: if blob is too small, likely silence
+      if (audioBlob.size < 1000) {
+        return false;
+      }
+      
+      // If VAD is available, use it for better detection
+      if (this.vad) {
+        // VAD already tracks voice activity, so if we got here, there was likely speech
+        return true;
+      }
+      
+      // Fallback: assume chunks of reasonable size contain speech
+      // This could be enhanced with energy-based detection in the future
+      return audioBlob.size > 5000; // Rough threshold for 3-second speech
+    } catch (error) {
+      console.warn('⚠️ Speech detection failed, assuming speech present:', error);
+      return true; // Fail-safe: process anyway
+    }
   }
 
   // FIXED: Create chunks from accumulated data instead of individual fragments
