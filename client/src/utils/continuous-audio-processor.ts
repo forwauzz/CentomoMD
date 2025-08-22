@@ -53,8 +53,8 @@ export class ContinuousAudioProcessor {
   };
   
   private config: ContinuousProcessorConfig = {
-    chunkDurationMs: 30000, // 30 seconds
-    overlapMs: 2000, // 2 seconds overlap
+    chunkDurationMs: 3000, // 3 seconds - CHANGED FROM 30000 for faster user feedback
+    overlapMs: 500, // CHANGED FROM 2000 - shorter overlap for faster chunks
     maxQueueSize: 10,
     processingConcurrency: 2,
     autoCleanup: true,
@@ -64,9 +64,6 @@ export class ContinuousAudioProcessor {
   
   private callbacks: ProcessingCallbacks = {};
   
-  // FIXED: Accumulative recording strategy
-  private allRecordedData: Blob[] = [];
-  private chunkingInterval: NodeJS.Timeout | null = null;
   private lastChunkTime = 0;
 
   constructor(config?: Partial<ContinuousProcessorConfig>) {
@@ -187,7 +184,6 @@ export class ContinuousAudioProcessor {
     this.startTime = Date.now();
     this.lastChunkTime = this.startTime;
     this.chunkCounter = 0;
-    this.allRecordedData = [];
     
     // Start VAD if enabled
     if (this.vad) {
@@ -195,20 +191,10 @@ export class ContinuousAudioProcessor {
     }
     
     try {
-      // FIXED: Start CONTINUOUS recording (no time slicing)
-      this.mediaRecorder.start();
+      // Use automatic chunking with MediaRecorder timeslice for 3-second chunks
+      this.mediaRecorder.start(this.config.chunkDurationMs);
       
-      // FIXED: Set up manual chunking interval with data request
-      this.chunkingInterval = setInterval(() => {
-        // Request data from MediaRecorder to trigger ondataavailable
-        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-          console.log(`🔄 Requesting data from MediaRecorder (state: ${this.mediaRecorder.state})`);
-          this.mediaRecorder.requestData();
-        }
-        this.createChunkFromAccumulatedData();
-      }, this.config.chunkDurationMs);
-      
-      console.log(`🔴 Continuous recording started with ${this.config.chunkDurationMs}ms manual chunking`);
+      console.log(`🔴 Continuous recording started with ${this.config.chunkDurationMs}ms automatic chunking`);
     } catch (error) {
       console.error('❌ Failed to start MediaRecorder:', error);
       this.isRecording = false;
@@ -226,12 +212,6 @@ export class ContinuousAudioProcessor {
 
     this.isRecording = false;
     
-    // Clear chunking interval
-    if (this.chunkingInterval) {
-      clearInterval(this.chunkingInterval);
-      this.chunkingInterval = null;
-    }
-    
     // Stop MediaRecorder
     this.mediaRecorder.stop();
     
@@ -246,11 +226,25 @@ export class ContinuousAudioProcessor {
   private setupMediaRecorderEvents(): void {
     if (!this.mediaRecorder) return;
 
-    // FIXED: Accumulate ALL data instead of processing individual chunks
+    // Process automatic 3-second chunks from MediaRecorder timeslice
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0 && this.isRecording) {
-        console.log(`📦 Accumulating data: ${(event.data.size / 1024).toFixed(1)}KB (total pieces: ${this.allRecordedData.length + 1})`);
-        this.allRecordedData.push(event.data);
+        console.log(`🎵 Creating chunk ${this.chunkCounter} from automatic timeslice (${(event.data.size / 1024).toFixed(1)}KB)`);
+        
+        const chunk: AudioChunk = {
+          id: `chunk-${this.chunkCounter}`,
+          data: event.data, // Direct use of the 3-second chunk
+          startTime: this.lastChunkTime,
+          endTime: Date.now(),
+          duration: this.config.chunkDurationMs,
+          hasOverlap: false, // No manual overlap needed with automatic chunking
+          overlapDuration: undefined
+        };
+        
+        this.chunkCounter++;
+        this.lastChunkTime = Date.now();
+        
+        this.addChunkToQueue(chunk);
       } else if (event.data.size === 0) {
         console.log('⚠️ Received empty data event');
       }
@@ -258,10 +252,7 @@ export class ContinuousAudioProcessor {
 
     this.mediaRecorder.onstop = () => {
       console.log('⏹️ MediaRecorder stopped');
-      // Process any remaining accumulated data as final chunk
-      if (this.allRecordedData.length > 0) {
-        this.createFinalChunkFromAccumulatedData();
-      }
+      // With automatic chunking, final data will be sent via ondataavailable
     };
 
     this.mediaRecorder.onerror = (event) => {
