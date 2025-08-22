@@ -128,12 +128,6 @@ const templateOptions = [
   { value: "assessment", labelFr: "Évaluation complète", labelEn: "Complete Assessment" },
 ];
 
-const languageOptions = [
-  { value: "fr", labelFr: "Français (FR)", labelEn: "French (FR)" },
-  { value: "en", labelFr: "Anglais (EN)", labelEn: "English (EN)" },
-  { value: "auto", labelFr: "Détection automatique (Bientôt)", labelEn: "Auto-detect (Coming Soon)", disabled: true },
-];
-
 export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDictationPageProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -151,92 +145,16 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
   
   // Ambient listening state for transcribe mode
   const [ambientListening, setAmbientListening] = useState(false);
-  const [ambientChunkCounter, setAmbientChunkCounter] = useState(0);
-  const [ambientSessionId, setAmbientSessionId] = useState('');
-  const [ambientTranscriptions, setAmbientTranscriptions] = useState<{[key: number]: string}>({});
-  
-  // Browser Whisper state (ambient mode only)
-  const [browserWhisperEnabled, setBrowserWhisperEnabled] = useState(false);
-  const [modelLoadingStatus, setModelLoadingStatus] = useState<string>('');
-  const [modelLoadingProgress, setModelLoadingProgress] = useState<number>(0);
   
   const t = translations[currentLanguage];
 
-  // Helper function to get speech recognition language code
-  const getSpeechRecognitionLanguage = (lang: "fr" | "en") => {
-    return lang === "fr" ? "fr-CA" : "en-US";
-  };
-
-  // Helper function to get Whisper API language code
-  const getWhisperLanguage = (lang: "fr" | "en") => {
-    return lang === "fr" ? "fr" : "en";
-  };
-
-  // Save language preference to localStorage for persistence
-  const handleLanguageChange = (newLanguage: "fr" | "en") => {
-    setCurrentLanguage(newLanguage);
-    localStorage.setItem("userLanguagePreference", newLanguage);
-    sessionStorage.setItem("dictationLanguage", newLanguage);
-    console.log(`🌐 Language changed to: ${newLanguage} (Speech: ${getSpeechRecognitionLanguage(newLanguage)}, Whisper: ${getWhisperLanguage(newLanguage)})`);
-  };
-
-  // Initialize browser Whisper when mode changes to transcribe (ambient)
-  useEffect(() => {
-    const initBrowserWhisperForAmbient = async () => {
-      if (currentMode === 'transcribe') {
-        try {
-          console.log('🔄 Initializing Browser Whisper for ambient mode...');
-          setBrowserWhisperEnabled(true);
-          setModelLoadingStatus('Initializing speech recognition...');
-          
-          // Dynamically import browser Whisper to avoid loading it unnecessarily
-          const { browserWhisper } = await import('../utils/browser-whisper');
-          
-          // Set up progress callback
-          browserWhisper.onLoadingProgress((progress) => {
-            console.log(`📥 Browser Whisper progress: ${progress.message}`);
-            setModelLoadingStatus(progress.message);
-            setModelLoadingProgress(progress.progress || 0);
-          });
-          
-          // Initialize browser Whisper for ambient mode
-          await browserWhisper.ensureModelReady();
-          
-          setModelLoadingStatus('Speech recognition ready!');
-          console.log('✅ Browser Whisper ready for ambient mode');
-          
-        } catch (error: any) {
-          console.warn('⚠️ Browser Whisper initialization failed, using server fallback:', error.message);
-          setBrowserWhisperEnabled(false);
-          setModelLoadingStatus('Using server transcription');
-        }
-      } else {
-        // Disable browser Whisper for non-ambient modes
-        setBrowserWhisperEnabled(false);
-        setModelLoadingStatus('');
-        setModelLoadingProgress(0);
-      }
-    };
-
-    // Only initialize for ambient mode, skip for other modes
-    if (currentMode === 'transcribe') {
-      initBrowserWhisperForAmbient();
-    }
-  }, [currentMode]);
-
-  // Initialize from sessionStorage and localStorage
+  // Initialize from sessionStorage
   useEffect(() => {
     const activeField = sessionStorage.getItem("activeField");
-    const sessionLanguage = sessionStorage.getItem("dictationLanguage") as "fr" | "en";
-    const preferredLanguage = localStorage.getItem("userLanguagePreference") as "fr" | "en";
+    const storedLanguage = sessionStorage.getItem("dictationLanguage") as "fr" | "en";
     
-    // Priority: sessionStorage (current session) > localStorage (user preference) > initialLanguage prop
-    const languageToUse = sessionLanguage || preferredLanguage || initialLanguage;
-    
-    if (languageToUse && languageToUse !== currentLanguage) {
-      setCurrentLanguage(languageToUse);
-      sessionStorage.setItem("dictationLanguage", languageToUse);
-      console.log(`🌐 Initialized with language: ${languageToUse}`);
+    if (storedLanguage) {
+      setCurrentLanguage(storedLanguage);
     }
     
     if (activeField) {
@@ -244,7 +162,7 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     }
     
     setTimeout(() => setIsInitializing(false), 1000);
-  }, [initialLanguage]);
+  }, []);
 
   // Configure audio recorder with current mode settings
   const {
@@ -266,7 +184,7 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     currentChunkIndex,
     getProgress,
   } = useAudioRecorder({
-    language: getSpeechRecognitionLanguage(currentLanguage), // Use proper speech recognition format
+    language: currentLanguage,
     chunkDuration: modeConfig.settings.chunkDuration,
     enhanceText: modeConfig.settings.enhanceText,
     realTimeHybrid: modeConfig.settings.realTimeDisplay,
@@ -290,113 +208,53 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
     }
   }, [transcript, isProcessing, isRecording, currentLanguage]);
 
-  // Handle ambient listening audio chunks for transcribe mode with browser Whisper integration
+  // Handle ambient listening audio chunks for transcribe mode
   const handleAmbientAudioChunk = async (chunk: AudioChunk) => {
     if (!selectedSection) return;
     
     try {
       console.log(`🎙️ Processing ambient chunk: ${chunk.id} (${(chunk.data.size / 1024).toFixed(1)}KB)`);
       
-      let transcriptionResult: any;
-
-      // BROWSER WHISPER: Try local processing first if enabled
-      if (browserWhisperEnabled) {
-        try {
-          const { browserWhisper } = await import('../utils/browser-whisper');
-          
-          const result = await browserWhisper.transcribe(
-            chunk.data, 
-            currentLanguage === 'fr' ? 'fr' : 'en'
-          );
-          
-          transcriptionResult = {
-            text: result.text,
-            source: 'browser-whisper',
-            processingTime: result.processingTime,
-            speaker: null // Speaker ID not available in browser Whisper yet
-          };
-          
-          console.log(`✅ Browser Whisper completed chunk ${chunk.id}: "${result.text.substring(0, 50)}..."`);
-          
-        } catch (browserError: any) {
-          console.error(`❌ Browser Whisper failed for chunk ${chunk.id}:`, browserError);
-          console.warn(`🔄 Browser Whisper failed for chunk ${chunk.id}, falling back to server:`, browserError?.message || 'Unknown error');
-          // Fall through to server processing
-        }
+      // Convert blob to base64 for API call
+      const arrayBuffer = await chunk.data.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let binaryString = '';
+      for (let i = 0; i < uint8Array.length; i++) {
+        binaryString += String.fromCharCode(uint8Array[i]);
       }
-
-      // SERVER FALLBACK: Use existing server processing if browser failed or disabled  
-      if (!transcriptionResult || !transcriptionResult.text?.trim()) {
-        console.log(`🔄 Browser processing failed or empty, falling back to server for chunk ${chunk.id}`);
-      } else {
-        console.log(`🎯 Using browser result for chunk ${chunk.id}, skipping server processing`);
-      }
+      const base64Audio = btoa(binaryString);
       
-      if (!transcriptionResult || !transcriptionResult.text?.trim()) {
-        // Ensure the blob has correct MIME type and create proper multipart upload
-        const audioBlob = new Blob([chunk.data], { type: 'audio/webm;codecs=opus' });
-        
-        const form = new FormData();
-        form.append("file", audioBlob, `ambient-${ambientSessionId}-${ambientChunkCounter}.webm`);
-        form.append("sessionId", ambientSessionId);
-        form.append("chunkIndex", String(ambientChunkCounter));
-        form.append("language", getWhisperLanguage(currentLanguage));
-        form.append("mode", "transcribe");
-
-        console.log(`📦 Uploading to server: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
-
-        const response = await fetch("/api/transcribe-ambient-chunk", {
-          method: "POST",
-          body: form,
-        });
-        
-        if (response.ok) {
-          transcriptionResult = await response.json();
-          console.log('🔍 Server ambient transcription result:', transcriptionResult);
-        } else {
-          const errorText = await response.text();
-          console.error('❌ Failed to transcribe ambient chunk:', response.status, errorText);
-          return;
+      // Send to Whisper API with transcribe mode settings
+      const response = await fetch('/api/transcribe-whisper-chunk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audio: base64Audio,
+          language: currentLanguage,
+          mode: 'transcribe',
+          temperature: 0.1, // Transcribe mode setting
+          chunkIndex: 1,
+          sessionId: `ambient-${Date.now()}`
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.text?.trim()) {
+          // Append transcribed text with speaker identification
+          const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const speakerLabel = result.speaker ? `[${result.speaker}]` : '';
+          const formattedText = `[${timestamp}]${speakerLabel} ${result.text.trim()}`;
+          
+          setEditableText(prev => {
+            const separator = prev ? "\n" : "";
+            return prev + separator + formattedText;
+          });
+          
+          console.log(`✅ Ambient transcription added: ${formattedText.substring(0, 50)}...`);
         }
       } else {
-        console.log(`⚡ Skipping server processing - browser Whisper already succeeded for chunk ${chunk.id}`);
-      }
-
-      // Process transcription result (same for both browser and server)
-      if (transcriptionResult?.text?.trim()) {
-        // Store chunk result in order for proper concatenation
-        console.log(`📝 Chunk ${ambientChunkCounter} transcription: "${transcriptionResult.text.trim()}"`);
-        
-        setAmbientTranscriptions(prev => {
-          const updated = { ...prev, [ambientChunkCounter]: transcriptionResult.text.trim() };
-          console.log(`📊 Updated transcriptions:`, Object.keys(updated).map(k => `Chunk ${k}: "${updated[parseInt(k)].substring(0, 50)}..."`));
-          
-          // Concatenate all chunks in order to build final transcript
-          const orderedChunks = Object.keys(updated)
-            .map(k => parseInt(k))
-            .sort((a, b) => a - b)
-            .map(index => updated[index])
-            .filter(text => text?.trim());
-          
-          const finalTranscript = orderedChunks.join(' ');
-          console.log(`🔗 Final concatenated transcript (${orderedChunks.length} chunks): "${finalTranscript.substring(0, 100)}..."`);
-          
-          // Format with timestamp, source, and speaker for display
-          const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          const sourceLabel = transcriptionResult.source === 'browser-whisper' ? '[Local]' : '[Server]';
-          const speakerLabel = transcriptionResult.speaker ? `[${transcriptionResult.speaker}]` : '';
-          const formattedText = `[${timestamp}]${sourceLabel}${speakerLabel} ${finalTranscript}`;
-          
-          setEditableText(formattedText);
-          return updated;
-        });
-        
-        // Increment chunk counter for next chunk
-        setAmbientChunkCounter(prev => prev + 1);
-        
-        console.log(`✅ Chunk ${ambientChunkCounter} processed successfully via ${transcriptionResult.source || 'server'}`);
-      } else {
-        console.warn('⚠️ Ambient transcription returned empty text');
+        console.error('❌ Failed to transcribe ambient chunk:', response.status);
       }
     } catch (error) {
       console.error('❌ Error processing ambient chunk:', error);
@@ -412,32 +270,11 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
       });
       return;
     }
-
-    if (currentMode === 'transcribe') {
-      // Initialize ambient session for transcribe mode
-      const sessionId = `ambient-${Date.now()}`;
-      setAmbientSessionId(sessionId);
-      setAmbientChunkCounter(0);
-      setAmbientTranscriptions({});
-      console.log(`🎙️ Starting ambient session: ${sessionId}`);
-      
-      // Start ambient listening for transcribe mode
-      setAmbientListening(true);
-    } else {
-      // Start traditional recording for smart/word-for-word modes
-      startRecording();
-    }
+    startRecording();
   };
 
   const handleStopRecording = () => {
-    if (currentMode === 'transcribe') {
-      // Stop ambient listening and log final results
-      console.log(`🏁 Stopping ambient session: ${ambientSessionId} with ${Object.keys(ambientTranscriptions).length} chunks`);
-      setAmbientListening(false);
-    } else {
-      // Stop traditional recording
-      stopRecording();
-    }
+    stopRecording();
   };
 
   const handleSaveToSection = async () => {
@@ -723,75 +560,18 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                 </div>
               </div>
 
-              {/* Language Selection - New */}
-              <div className="space-y-2">
-                <div className="text-xs font-medium">Langue / Language</div>
-                <Select value={currentLanguage} onValueChange={handleLanguageChange}>
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languageOptions.map((option) => (
-                      <SelectItem 
-                        key={option.value} 
-                        value={option.value}
-                        disabled={option.disabled}
-                      >
-                        {currentLanguage === "fr" ? option.labelFr : option.labelEn}
-                        {option.disabled && " ⏳"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Recording Controls - Compact */}
               <div className="space-y-2">
                 <div className="text-xs font-medium flex items-center justify-between">
-                  <span>
-                    {currentMode === 'transcribe' && ambientListening 
-                      ? (currentLanguage === "fr" ? "Écoute Ambiante" : "Ambient Listening")
-                      : "Recording"
-                    }
-                  </span>
+                  <span>Recording</span>
                   <span className="text-muted-foreground">
                     {formatDuration(recordingDuration)}
                     {chunkCount > 0 && ` • ${chunkCount}`}
-                    <span className="ml-2 text-blue-600">
-                      {currentLanguage.toUpperCase()}
-                    </span>
-                    {/* Browser Whisper Status Badge */}
-                    {currentMode === 'transcribe' && browserWhisperEnabled && (
-                      <span className="ml-2 text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-1 rounded">
-                        Local
-                      </span>
-                    )}
                   </span>
                 </div>
-
-                {/* Browser Whisper Loading Status - Show only for transcribe mode */}
-                {currentMode === 'transcribe' && modelLoadingStatus && (
-                  <div className="text-xs text-muted-foreground p-2 bg-muted rounded-md">
-                    <div className="flex items-center justify-between">
-                      <span>{modelLoadingStatus}</span>
-                      {modelLoadingProgress > 0 && modelLoadingProgress < 100 && (
-                        <span className="text-xs">{modelLoadingProgress}%</span>
-                      )}
-                    </div>
-                    {modelLoadingProgress > 0 && modelLoadingProgress < 100 && (
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 mt-1">
-                        <div 
-                          className="bg-blue-600 h-1 rounded-full transition-all duration-300" 
-                          style={{ width: `${modelLoadingProgress}%` }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
-                )}
                 
                 <div className="flex gap-1">
-                  {/* Unified Recording Button - adapts behavior based on mode */}
-                  {!(isRecording || ambientListening) ? (
+                  {!isRecording ? (
                     <Button
                       onClick={handleStartRecording}
                       disabled={!selectedSection || isProcessing}
@@ -799,86 +579,41 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
                       className="flex-1 h-9"
                     >
                       <Mic className="h-3 w-3 mr-1" />
-                      <span className="text-xs">
-                        {currentMode === 'transcribe' 
-                          ? (currentLanguage === "fr" ? "Démarrer Écoute Ambiante" : "Start Ambient Listening")
-                          : t.startRecording
-                        }
-                      </span>
+                      <span className="text-xs">{t.startRecording}</span>
                     </Button>
                   ) : (
                     <>
-                      {/* Show different controls based on recording type */}
-                      {currentMode === 'transcribe' ? (
-                        // Transcribe mode - only stop button for ambient listening
+                      {!isPaused ? (
                         <Button
-                          onClick={handleStopRecording}
-                          variant="destructive"
+                          onClick={pauseRecording}
+                          variant="outline"
                           size="sm"
                           className="flex-1 h-9"
                         >
-                          <MicOff className="h-3 w-3 mr-1" />
-                          <span className="text-xs">
-                            {currentLanguage === "fr" ? "Arrêter Écoute" : "Stop Listening"}
-                          </span>
+                          <span className="text-xs">{t.pauseRecording}</span>
                         </Button>
                       ) : (
-                        // Smart/Word-for-Word modes - traditional controls
-                        <>
-                          {!isPaused ? (
-                            <Button
-                              onClick={pauseRecording}
-                              variant="outline"
-                              size="sm"
-                              className="flex-1 h-9"
-                            >
-                              <span className="text-xs">{t.pauseRecording}</span>
-                            </Button>
-                          ) : (
-                            <Button
-                              onClick={resumeRecording}
-                              variant="default"
-                              size="sm"
-                              className="flex-1 h-9"
-                            >
-                              <span className="text-xs">{t.resumeRecording}</span>
-                            </Button>
-                          )}
-                          <Button
-                            onClick={handleStopRecording}
-                            variant="destructive"
-                            size="sm"
-                            className="flex-1 h-9"
-                          >
-                            <MicOff className="h-3 w-3 mr-1" />
-                            <span className="text-xs">{t.stopRecording}</span>
-                          </Button>
-                        </>
+                        <Button
+                          onClick={resumeRecording}
+                          variant="default"
+                          size="sm"
+                          className="flex-1 h-9"
+                        >
+                          <span className="text-xs">{t.resumeRecording}</span>
+                        </Button>
                       )}
+                      <Button
+                        onClick={handleStopRecording}
+                        variant="destructive"
+                        size="sm"
+                        className="flex-1 h-9"
+                      >
+                        <MicOff className="h-3 w-3 mr-1" />
+                        <span className="text-xs">{t.stopRecording}</span>
+                      </Button>
                     </>
                   )}
                 </div>
-
-                {/* Ambient Mode Recording Guidance */}
-                {currentMode === 'transcribe' && ambientListening && recordingDuration < 3000 && (
-                  <div className="text-xs text-muted-foreground text-center mt-2 p-2 bg-blue-50 dark:bg-blue-950 rounded-md">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="animate-pulse h-2 w-2 bg-red-500 rounded-full"></div>
-                      <span>
-                        {currentLanguage === "fr" 
-                          ? `Écoute en cours... ${Math.max(0, Math.ceil((3000 - recordingDuration) / 1000))}s avant traitement`
-                          : `Listening... ${Math.max(0, Math.ceil((3000 - recordingDuration) / 1000))}s until processing`
-                        }
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 mt-2">
-                      <div 
-                        className="bg-blue-600 h-1 rounded-full transition-all duration-300" 
-                        style={{ width: `${Math.min(100, (recordingDuration / 3000) * 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Processing Progress - Compact */}
                 {isProcessing && (
@@ -932,8 +667,8 @@ export function UnifiedDictationPage({ language: initialLanguage }: UnifiedDicta
               </div>
             </div>
 
-            {/* Ambient Listening Panel - Show only when active in transcribe mode */}
-            {currentMode === 'transcribe' && ambientListening && (
+            {/* Ambient Listening Panel - Show only for transcribe mode */}
+            {currentMode === 'transcribe' && (
               <div className="mb-3">
                 <AmbientListeningPanel
                   isActive={ambientListening}

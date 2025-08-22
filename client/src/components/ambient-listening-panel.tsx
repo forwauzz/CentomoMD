@@ -63,7 +63,7 @@ export function AmbientListeningPanel({
 
   const [config, setConfig] = useState({
     vadThreshold: 25,
-    chunkDuration: 3000, // 3 seconds - FASTER USER FEEDBACK
+    chunkDuration: 30000, // 30 seconds
     maxSilence: 5000, // 5 seconds
     speakerIdEnabled: true
   });
@@ -134,13 +134,9 @@ export function AmbientListeningPanel({
         await speakerIdRef.current.initialize(audioContext);
       }
 
-      // Initialize Continuous Processor with 3-second chunks
+      // Initialize Continuous Processor
       processorRef.current = createContinuousAudioProcessor({
-        chunkDurationMs: config.chunkDuration, // Now 3000ms for faster feedback
-        overlapMs: 500, // Reduced overlap for faster chunks  
-        maxQueueSize: 10,
-        processingConcurrency: 2,
-        autoCleanup: true,
+        chunkDurationMs: config.chunkDuration,
         vadEnabled: true,
         speakerIdEnabled: config.speakerIdEnabled
       });

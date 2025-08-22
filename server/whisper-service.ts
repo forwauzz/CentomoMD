@@ -1,6 +1,5 @@
-import OpenAI, { toFile } from 'openai';
+import OpenAI from 'openai';
 import { enhanceVoiceInput } from './ai-formatter';
-import { webmToWavMono16k, validateAudioBuffer } from './audio-convert';
 import { 
   TranscriptionMode, 
   TRANSCRIPTION_MODE_CONFIGS, 
@@ -142,89 +141,11 @@ export interface WhisperTranscriptionOptions {
   prompt?: string;
   sessionId?: string;
   totalChunks?: number;
-  temperature?: number;
   // New unified mode support
   mode?: import('../shared/transcription-types').TranscriptionMode;
   realTimeHybrid?: boolean;
   wordLevelTimestamps?: boolean;
   speakerIdentification?: boolean;
-}
-
-// New enhanced transcription function with format fallback
-export async function transcribeAudioWithWhisperMultipart(args: {
-  buffer: Buffer;
-  filename: string;
-  mimetype?: string;
-  language?: "en" | "fr" | "auto";
-  temperature?: number;
-  sessionId?: string;
-  chunkIndex?: number;
-  mode: "transcribe" | "smart" | "word-for-word";
-}): Promise<{ text: string; chunkIndex?: number }> {
-  const { buffer, filename, mimetype, language, temperature = 0.2, mode } = args;
-
-  // Validate audio buffer
-  if (!validateAudioBuffer(buffer)) {
-    throw new Error("Invalid audio buffer provided");
-  }
-
-  console.log(`🎵 Processing ${(buffer.length / 1024).toFixed(1)}KB audio file: ${filename}`);
-
-  // Force WAV conversion for reliability (WebM/Opus has compatibility issues)
-  console.log(`🔄 Converting to WAV for reliable transcription...`);
-  
-  try {
-    // Always convert WebM to WAV first
-    const wavBuffer = await webmToWavMono16k(buffer);
-    
-    if (wavBuffer.length === 0) {
-      throw new Error('Audio conversion produced empty buffer - source may be corrupted');
-    }
-    
-    const wavFile = await toFile(
-      wavBuffer, 
-      filename.replace(/\.webm$/i, ".wav"), 
-      { type: "audio/wav" }
-    );
-    
-    const result = await openai.audio.transcriptions.create({
-      model: "whisper-1",
-      file: wavFile,
-      ...(language && language !== "auto" ? { language } : {}),
-      temperature,
-      response_format: "json",
-    });
-    
-    console.log(`✅ WAV transcription successful: "${result.text.substring(0, 50)}..."`);
-    return { text: result.text, chunkIndex: args.chunkIndex };
-    
-  } catch (conversionError: any) {
-    console.error("🔴 WAV conversion/transcription failed:", conversionError);
-    
-    // Fallback to direct WebM upload as last resort
-    console.log(`🔄 Attempting direct WebM upload as fallback...`);
-    
-    try {
-      const file = await toFile(buffer, filename, { type: mimetype ?? "audio/webm" });
-      
-      const result = await openai.audio.transcriptions.create({
-        model: "whisper-1",
-        file,
-        ...(language && language !== "auto" ? { language } : {}),
-        temperature,
-        response_format: "json",
-      });
-      
-      console.log(`✅ Direct WebM fallback successful: "${result.text.substring(0, 50)}..."`);
-      return { text: result.text, chunkIndex: args.chunkIndex };
-      
-    } catch (webmError: any) {
-      console.error("🔴 Both WAV and WebM transcription attempts failed:", webmError);
-      throw new Error(`All transcription methods failed: ${webmError.message}`);
-    }
-  }
-
-
 }
 
 export async function transcribeAudioWithWhisper(
@@ -249,11 +170,8 @@ export async function transcribeAudioWithWhisper(
     }
     
     // Create a File-like object for the API with proper audio format
-    // Detect format based on buffer or use webm for ambient chunks
-    const isWebM = audioBuffer.slice(0, 4).toString('hex').startsWith('1a45dfa3');
-    const fileName = isWebM ? 'audio.webm' : 'audio.wav';
-    const mimeType = isWebM ? 'audio/webm' : 'audio/wav';
-    const file = new File([audioBuffer], fileName, { type: mimeType });
+    // Use wav format for better compatibility with Whisper
+    const file = new File([audioBuffer], 'audio.wav', { type: 'audio/wav' });
     
     // Determine mode configuration
     const mode = options.mode || 'smart';
@@ -264,7 +182,7 @@ export async function transcribeAudioWithWhisper(
       file: file,
       model: 'whisper-1',
       response_format: modeConfig.settings.responseFormat,
-      temperature: options.temperature !== undefined ? options.temperature : modeConfig.settings.temperature,
+      temperature: modeConfig.settings.temperature,
     };
     
     // Set language if specified

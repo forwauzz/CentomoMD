@@ -20,60 +20,7 @@ Preferred communication style: Simple, everyday language.
 ## Development Workflow
 **Git Strategy Reference:** Follow `GIT_DEVELOPMENT_STRATEGY.md` for all development work including feature branches, security-first commits, and compliance validation workflows.
 
-## Recent Critical Fixes - Phase 3 Browser Whisper Implementation (August 21, 2025)
-**COMPLETED:** Successfully implemented browser-based Whisper transcription for ambient mode only:
-
-### Phase 3 Browser Whisper Implementation:
-1. **Browser Whisper Service**: `client/src/utils/browser-whisper.ts` - Local Whisper-tiny.en model processing with @xenova/transformers
-2. **Model Auto-Download**: 10MB Whisper model downloads automatically on first use with progress tracking
-3. **Ambient-Only Processing**: Browser Whisper exclusively handles "Transcribe" mode, maintaining server processing for Smart/Word-for-Word modes
-4. **Intelligent Fallback**: Automatic server fallback if browser processing fails, with clear success/failure logging
-5. **UI Indicators**: Real-time loading progress, "Local" vs "Server" badges, and [Local]/[Server] labels in transcripts
-6. **Race Condition Fix**: Prevents server processing from overwriting successful browser transcription results
-7. **Quebec CNESST Compliance**: Local processing reduces data transmission while maintaining zero retention policy
-
-### Technical Implementation:
-- **Browser Detection**: Automatic browser capability detection (WebAssembly, modern JS features)
-- **Progressive Loading**: Model download with detailed progress callbacks and retry logic
-- **Audio Processing**: WebM to Float32Array conversion for Whisper compatibility
-- **Memory Management**: Efficient audio buffer handling with automatic cleanup
-- **Error Recovery**: Comprehensive error handling with fallback to server processing
-
-## Previous Critical Fixes - Phase 2 Ambient Audio Reliability (August 21, 2025)
-**COMPLETED:** Ambient audio processing improvements with focused WebM conversion fixes:
-
-### Phase 2 Ambient Audio Fixes Implemented:
-1. **Simple Audio Format Converter**: `server/ambient-audio-tools.ts` - Focused WebM to WAV conversion with fallback strategies
-2. **Simple Retry Handler**: `server/simple-retry-handler.ts` - Clean retry logic with exponential backoff (3 attempts max)
-3. **Updated Ambient Route**: Modified `/api/transcribe-ambient-chunk` to use new converter and retry system
-4. **Reduced Complexity**: Replaced complex circuit breaker system with straightforward error handling
-5. **Quebec CNESST Compliance**: Maintained zero data retention while improving audio conversion reliability
-
-## Previous Critical Fixes - Phase 1 Transcription Enhancement (August 21, 2025)
-**COMPLETED:** Critical transcription system fixes and enhanced error recovery implementation:
-
-### Phase 1 Critical Fixes Implemented:
-1. **LSP Error Resolution**: Fixed all 16 TypeScript errors in server/routes.ts for improved code quality and type safety
-2. **Enhanced Transcription Service**: Implemented circuit breaker pattern with intelligent error recovery and fallback strategies
-3. **Audio Validation System**: Added comprehensive audio buffer validation with quality assessment and format detection
-4. **Real-time Monitoring**: Deployed transcription performance monitoring with health metrics and status tracking
-5. **Quebec CNESST Compliance**: Maintained zero data retention policy while improving transcription accuracy
-
-### Technical Infrastructure Added:
-- **Circuit Breaker Pattern**: `server/transcription-circuit-breaker.ts` - Prevents cascade failures with automatic recovery
-- **Enhanced Whisper Service**: `server/enhanced-whisper-service.ts` - Retry logic, quality assessment, and fallback handling
-- **Audio Validation**: `server/enhanced-audio-validation.ts` - Format validation, quality scoring, and recommendation system
-- **Performance Monitoring**: `server/transcription-monitoring.ts` - Real-time metrics and health dashboard
-- **Health Endpoints**: `/api/transcription/health` and `/api/transcription/status` for system monitoring
-
-### Quality Improvements:
-- **Smart Retry Logic**: Exponential backoff with up to 3 retry attempts for failed transcriptions
-- **Fallback Strategies**: Local fallback when primary service fails, maintaining system availability
-- **Quality Scoring**: Audio validation with high/medium/low quality assessment and processing recommendations
-- **Error Recovery**: Comprehensive error handling with informative user feedback and system status tracking
-- **Cache Management**: Short-term transcription caching to prevent duplicate processing of identical audio chunks
-
-## Previous Major Update - TGV Transcription Modes (January 20, 2025)
+## Recent Major Update - TGV Transcription Modes (January 20, 2025)
 **COMPLETED:** Unified TGV-compliant transcription system with three distinct modes:
 
 ### Three Transcription Modes:
@@ -97,33 +44,6 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Whisper Service**: `server/whisper-service.ts` supports mode-specific temperature and processing settings
 - **Unified Component**: `client/src/components/unified-dictation-modes.tsx` provides seamless mode switching
 - **Navigation Integration**: Added to main app routing and form selector with "NEW" badge
-
-## Audio Transcription Fix - Phase 1 Complete (August 20, 2025)
-**RESOLVED:** WebM/Opus format compatibility issue with OpenAI Whisper API
-
-### Problem Identified:
-- MediaRecorder WebM/Opus output incompatible with OpenAI Whisper API
-- "Audio file could not be decoded" errors preventing transcription
-- Base64 audio transmission causing performance and format issues
-
-### Phase 1 Solution Implemented:
-- **Multipart Upload System**: Replaced base64 JSON with FormData multipart uploads
-- **Audio Format Fallback**: WebM → 16kHz WAV conversion using FFmpeg when needed
-- **Security Enhancements**: Added rate limiting, file validation, and proper error handling
-- **Zero Data Retention**: All audio processing happens in-memory with immediate cleanup
-
-### Technical Changes:
-- **Enhanced Whisper Service**: `server/whisper-service.ts` - Added `transcribeAudioWithWhisperMultipart()` function
-- **Audio Conversion**: `server/audio-convert.ts` - FFmpeg-based WebM to WAV conversion utilities
-- **Security Middleware**: `server/security.ts` - Rate limiting and file validation for audio uploads
-- **API Endpoint**: `server/routes.ts` - Updated `/api/transcribe-ambient-chunk` for multipart uploads
-- **Frontend Update**: `client/src/pages/unified-dictation-page.tsx` - FormData instead of base64 transmission
-
-### Performance Strategy:
-1. **Fast Path**: Attempt direct WebM transcription first
-2. **Fallback Path**: Convert to 16kHz mono WAV if WebM fails
-3. **Error Handling**: Comprehensive logging without PHI retention
-4. **Memory Management**: Explicit garbage collection after processing
 
 ## Logging Infrastructure
 **Phase 1 Complete (January 20, 2025):** 
