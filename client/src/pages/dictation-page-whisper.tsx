@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import { useSimpleAudioRecorder } from "@/hooks/use-simple-audio-recorder";
 import {
   Mic,
   MicOff,
@@ -128,14 +128,12 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     isPaused,
     isProcessing,
     transcript,
-    chunks,
     recordingDuration,
     chunkCount,
     currentChunkIndex,
     error,
     isSupported,
     audioLevel,
-    isListening,
     startRecording,
     stopRecording,
     pauseRecording,
@@ -143,17 +141,21 @@ export default function DictationPageWhisper({ language: propLanguage }: Dictati
     reset,
     formatDuration,
     getProgress,
-    getStorageUsage,
-    getStorageWarning,
-    failedChunks,
-    retryCount,
-    retryFailedChunks,
-    hasFailedChunks
-  } = useAudioRecorder({
+    confidence
+  } = useSimpleAudioRecorder({
     language: currentLanguage === "fr" ? "fr" : "en",
-    chunkDuration: CHUNK_DURATION,
     enhanceText: true,
   });
+
+  // Add missing properties for compatibility
+  const isListening = audioLevel > 5;
+  const chunks = [];
+  const getStorageUsage = () => ({ used: 0, limit: 1000000, percentage: 0 });
+  const getStorageWarning = () => null;
+  const failedChunks: number[] = [];
+  const retryCount = 0;
+  const retryFailedChunks = async () => {};
+  const hasFailedChunks = false;
 
   // Initialize component and check for return section
   useEffect(() => {
