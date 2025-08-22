@@ -303,72 +303,153 @@ export class ContinuousAudioProcessor {
     }
   }
 
-  // FIXED: Create chunks from accumulated data instead of individual fragments
-  private createChunkFromAccumulatedData(): void {
-    if (this.allRecordedData.length === 0) {
-      console.log('⚠️ No accumulated data to chunk');
-      return;
+  // ✨ NEW: Section 8 context detection based on current form location
+  private detectSection8Context(): boolean {
+    try {
+      // Check if we're currently in Section 8 context
+      const currentPath = window.location.pathname;
+      const currentSection = sessionStorage.getItem('current_section');
+      const lastActiveField = sessionStorage.getItem('last_active_field');
+      
+      // Check various indicators for Section 8 context
+      const section8Indicators = [
+        currentSection === 'section8',
+        currentPath.includes('section8'),
+        lastActiveField?.includes('section8'),
+        lastActiveField?.includes('appreciationEvolution'),
+        lastActiveField?.includes('plaintesproblemes'),
+        lastActiveField?.includes('impactAvq'),
+        document.querySelector('[data-section="section8"]')?.classList.contains('active'),
+        (document.querySelector('#section8')?.getBoundingClientRect()?.top ?? 1000) < 100
+      ];
+      
+      const isSection8 = section8Indicators.some(indicator => indicator);
+      
+      if (isSection8) {
+        console.log('📋 Section 8 context detected via:', {
+          currentSection,
+          currentPath,
+          lastActiveField,
+          visibleSection: (document.querySelector('#section8')?.getBoundingClientRect()?.top ?? 1000) < 100
+        });
+      }
+      
+      return isSection8;
+    } catch (error) {
+      console.warn('⚠️ Section 8 context detection failed:', error);
+      return false; // Default to false if detection fails
     }
-
-    const now = Date.now();
-    
-    // FIXED: Create complete WebM file from all accumulated data
-    const completeWebM = new Blob(this.allRecordedData, { type: 'audio/webm;codecs=opus' });
-    
-    console.log(`🎵 Creating chunk ${this.chunkCounter} from ${this.allRecordedData.length} data pieces (${(completeWebM.size / 1024).toFixed(1)}KB)`);
-    
-    const chunk: AudioChunk = {
-      id: `chunk-${this.chunkCounter}`,
-      data: completeWebM,
-      startTime: this.lastChunkTime,
-      endTime: now,
-      duration: now - this.lastChunkTime,
-      hasOverlap: this.chunkCounter > 0,
-      overlapDuration: this.chunkCounter > 0 ? this.config.overlapMs : undefined
-    };
-    
-    this.chunkCounter++;
-    
-    this.addChunkToQueue(chunk);
-    
-    // FIXED: Reset accumulated data for next chunk (or keep overlap if needed)
-    if (this.config.overlapMs > 0 && this.chunkCounter > 1) {
-      // Keep some overlap data for context (only after first chunk)
-      const overlapRatio = this.config.overlapMs / this.config.chunkDurationMs;
-      const keepCount = Math.max(1, Math.floor(this.allRecordedData.length * overlapRatio));
-      this.allRecordedData = this.allRecordedData.slice(-keepCount);
-      console.log(`🔗 Keeping ${keepCount} data pieces for overlap`);
-    } else {
-      // No overlap for first chunk - clear all data
-      this.allRecordedData = [];
-      console.log(`🧹 Cleared accumulated data (chunk ${this.chunkCounter - 1})`);
-    }
-    
-    this.lastChunkTime = now - this.config.overlapMs;
   }
 
-  private createFinalChunkFromAccumulatedData(): void {
-    if (this.allRecordedData.length === 0) return;
-    
-    const finalWebM = new Blob(this.allRecordedData, { type: 'audio/webm;codecs=opus' });
-    const now = Date.now();
-    
-    console.log(`🎵 Creating final chunk from ${this.allRecordedData.length} data pieces (${(finalWebM.size / 1024).toFixed(1)}KB)`);
-    
-    const chunk: AudioChunk = {
-      id: `chunk-final-${this.chunkCounter}`,
-      data: finalWebM,
-      startTime: this.lastChunkTime,
-      endTime: now,
-      duration: now - this.lastChunkTime,
-      hasOverlap: false
+  // ✨ NEW: Enhanced Section 8 transcript processing with Quebec medical terminology
+  private async enhanceSection8Transcript(transcript: string): Promise<{
+    formatted: string;
+    suggestions?: string[];
+    voiceCorrections?: string[];
+  }> {
+    try {
+      // Apply Quebec medical terminology corrections
+      let enhanced = this.applyQuebecMedicalCorrections(transcript);
+      
+      // Apply Section 8 specific voice patterns
+      enhanced = this.applySection8VoicePatterns(enhanced);
+      
+      // For now, return enhanced text with basic corrections
+      // This could be extended to call the server-side Section 8 enhancement API
+      return {
+        formatted: enhanced,
+        suggestions: [],
+        voiceCorrections: this.getAppliedCorrections(transcript, enhanced)
+      };
+      
+    } catch (error) {
+      console.error('⚠️ Section 8 transcript enhancement failed:', error);
+      return {
+        formatted: transcript,
+        suggestions: ['Section 8 enhancement failed'],
+        voiceCorrections: []
+      };
+    }
+  }
+
+  // ✨ NEW: Apply Quebec French medical terminology corrections
+  private applyQuebecMedicalCorrections(text: string): string {
+    const corrections: Record<string, string> = {
+      // Common voice recognition errors for Quebec medical terms
+      'appreciation subjective': 'appréciation subjective',
+      'appreciation subjectives': 'appréciation subjective',
+      'amelioration': 'amélioration',
+      'plateau therapeutique': 'plateau thérapeutique',
+      'tolerance a l effort': 'tolérance à l\'effort',
+      'tolerance à l effort': 'tolérance à l\'effort',
+      'activite de la vie quotidienne': 'activités de la vie quotidienne',
+      'activites de la vie quotidienne': 'activités de la vie quotidienne',
+      'avq avd': 'AVQ/AVD',
+      'la travailleuse rapport': 'La travailleuse rapporte',
+      'elle rapport': 'Elle rapporte',
+      'elle ne rapport pas': 'Elle ne rapporte pas',
+      'sensations de brulure': 'sensations de brûlure',
+      'elements declencheurs': 'éléments déclencheurs',
+      'raideurs matinales': 'raideurs matinales',
+      'changements barometriques': 'changements barométriques'
     };
     
-    this.chunkCounter++;
+    let corrected = text;
+    for (const [error, correction] of Object.entries(corrections)) {
+      const regex = new RegExp(error, 'gi');
+      corrected = corrected.replace(regex, correction);
+    }
     
-    this.addChunkToQueue(chunk);
-    this.allRecordedData = [];
+    return corrected;
   }
+
+  // ✨ NEW: Apply Section 8 specific voice patterns
+  private applySection8VoicePatterns(text: string): string {
+    // Common Section 8 patterns from Dr. Centomo's practice
+    const patterns: Array<[RegExp, string]> = [
+      // Start sentences properly
+      [/^la travailleuse/i, 'La travailleuse'],
+      [/^elle rapport/i, 'Elle rapporte'],
+      [/^elle ne rapport/i, 'Elle ne rapporte'],
+      
+      // Fix common phrase structures
+      [/rapport avoir/gi, 'rapporte avoir'],
+      [/rapport une/gi, 'rapporte une'],
+      [/rapport des/gi, 'rapporte des'],
+      
+      // Ensure proper punctuation
+      [/([.!?])\s*([a-z])/g, '$1 $2'.replace(/([.!?])\s*([a-z])/, (_, punct, letter) => punct + ' ' + letter.toUpperCase())],
+    ];
+    
+    let enhanced = text;
+    for (const [pattern, replacement] of patterns) {
+      enhanced = enhanced.replace(pattern, replacement);
+    }
+    
+    return enhanced;
+  }
+
+  // ✨ NEW: Track what corrections were applied
+  private getAppliedCorrections(original: string, corrected: string): string[] {
+    const corrections: string[] = [];
+    
+    if (original !== corrected) {
+      corrections.push('Quebec medical terminology corrections applied');
+      
+      // Could add more specific correction tracking here
+      if (corrected.includes('appréciation subjective') && !original.includes('appréciation subjective')) {
+        corrections.push('Fixed: "appreciation subjective" → "appréciation subjective"');
+      }
+      
+      if (corrected.includes('amélioration') && !original.includes('amélioration')) {
+        corrections.push('Fixed: "amelioration" → "amélioration"');
+      }
+    }
+    
+    return corrections;
+  }
+
+  // Note: Legacy accumulation methods removed - we now use MediaRecorder automatic chunking
 
   private addChunkToQueue(chunk: AudioChunk): void {
     // Check queue capacity
@@ -414,6 +495,37 @@ export class ContinuousAudioProcessor {
           console.log(`🎯 Processing chunk ${chunk.id} with browser Whisper...`);
           
           const result = await browserWhisper.transcribe(chunk.data, 'auto');
+          
+          // ✨ NEW: Section 8 context detection and enhanced processing
+          const isSection8Context = this.detectSection8Context();
+          if (isSection8Context && result.text.trim()) {
+            console.log(`📋 Section 8 context detected for chunk ${chunk.id}, applying specialized processing...`);
+            
+            try {
+              // Apply Section 8 voice corrections and medical terminology
+              const enhancedResult = await this.enhanceSection8Transcript(result.text);
+              
+              // Create enhanced result with Section 8 indicator
+              const section8Result = {
+                ...result,
+                text: enhancedResult.formatted,
+                confidence: (result as any).confidence || 0.9,
+                processingType: 'section8_local' as const,
+                suggestions: enhancedResult.suggestions || [],
+                voiceCorrections: enhancedResult.voiceCorrections || []
+              };
+              
+              this.callbacks.onBrowserWhisperResult?.(chunk, section8Result);
+              this.moveChunkToCompleted(chunk, section8Result);
+              
+              console.log(`✅ Section 8 enhanced chunk ${chunk.id}: "${section8Result.text.substring(0, 50)}..."`);
+              return;
+              
+            } catch (section8Error) {
+              console.warn(`⚠️ Section 8 enhancement failed for chunk ${chunk.id}, using basic result:`, section8Error);
+              // Fall through to basic browser result
+            }
+          }
           
           // Notify callbacks of successful browser transcription
           this.callbacks.onBrowserWhisperResult?.(chunk, result);
@@ -494,7 +606,7 @@ export class ContinuousAudioProcessor {
       failedChunks: this.queue.failed.length,
       isRecording: this.isRecording,
       recordingDuration: this.isRecording ? Date.now() - this.startTime : 0,
-      accumulatedDataPieces: this.allRecordedData.length
+      accumulatedDataPieces: 0 // Legacy property, now using automatic chunking
     };
   }
 
@@ -509,10 +621,7 @@ export class ContinuousAudioProcessor {
     this.stopContinuousRecording();
     this.clearQueue();
     
-    if (this.chunkingInterval) {
-      clearInterval(this.chunkingInterval);
-      this.chunkingInterval = null;
-    }
+    // Legacy chunking interval removed - now using MediaRecorder automatic chunking
     
     if (this.vad) {
       this.vad.cleanup();
@@ -530,7 +639,6 @@ export class ContinuousAudioProcessor {
     }
     
     this.mediaRecorder = null;
-    this.allRecordedData = [];
     
     console.log('🧹 Continuous Audio Processor cleaned up');
   }
