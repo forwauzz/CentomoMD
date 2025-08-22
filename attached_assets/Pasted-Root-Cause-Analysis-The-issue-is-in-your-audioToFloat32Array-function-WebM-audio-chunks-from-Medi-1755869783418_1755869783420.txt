@@ -1,0 +1,297 @@
+Root Cause Analysis
+The issue is in your audioToFloat32Array() function. WebM audio chunks from MediaRecorder often have encoding/format issues that break the Web Audio API's decodeAudioData(). Here's the fix:
+🚀 Solution 1: Enhanced Audio Conversion with Error Recovery
+typescript// client/src/utils/browser-whisper.ts - Enhanced audio conversion
+class BrowserWhisperProcessor {
+  private async audioToFloat32Array(audioBlob: Blob): Promise<Float32Array> {
+    console.log(`🎵 Converting audio blob: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+    
+    try {
+      // Method 1: Direct Web Audio API (current approach)
+      return await this.directWebAudioConversion(audioBlob);
+    } catch (error) {
+      console.warn('🔄 Direct conversion failed, trying alternative methods:', error);
+      
+      try {
+        // Method 2: MediaStream conversion approach
+        return await this.mediaStreamConversion(audioBlob);
+      } catch (error2) {
+        console.warn('🔄 MediaStream conversion failed, trying format conversion:', error2);
+        
+        try {
+          // Method 3: Format conversion via HTMLAudioElement
+          return await this.htmlAudioConversion(audioBlob);
+        } catch (error3) {
+          console.error('❌ All audio conversion methods failed:', error3);
+          throw new Error(`Audio conversion failed: ${error3.message}`);
+        }
+      }
+    }
+  }
+
+  private async directWebAudioConversion(audioBlob: Blob): Promise<Float32Array> {
+    const audioBuffer = await audioBlob.arrayBuffer();
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Add explicit format validation
+    if (audioBuffer.byteLength < 100) {
+      throw new Error('Audio buffer too small (likely invalid WebM)');
+    }
+    
+    const decodedAudio = await audioContext.decodeAudioData(audioBuffer);
+    const float32Data = decodedAudio.getChannelData(0);
+    
+    // Validate the decoded audio
+    if (float32Data.length === 0) {
+      throw new Error('Decoded audio is empty');
+    }
+    
+    audioContext.close();
+    return float32Data;
+  }
+
+  private async mediaStreamConversion(audioBlob: Blob): Promise<Float32Array> {
+    // Alternative method using createObjectURL
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    
+    return new Promise((resolve, reject) => {
+      audio.onloadeddata = async () => {
+        try {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioContext.createMediaElementSource(audio);
+          const analyser = audioContext.createAnalyser();
+          source.connect(analyser);
+          
+          // Wait for audio to be ready
+          await new Promise(r => setTimeout(r, 100));
+          
+          const bufferLength = analyser.frequencyBinCount;
+          const dataArray = new Float32Array(bufferLength);
+          analyser.getFloatTimeDomainData(dataArray);
+          
+          audioContext.close();
+          URL.revokeObjectURL(audioUrl);
+          resolve(dataArray);
+        } catch (error) {
+          URL.revokeObjectURL(audioUrl);
+          reject(error);
+        }
+      };
+      
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        reject(new Error('Audio element failed to load'));
+      };
+      
+      audio.load();
+    });
+  }
+
+  private async htmlAudioConversion(audioBlob: Blob): Promise<Float32Array> {
+    // Last resort: convert to different format first
+    const wavBlob = await this.convertWebMToWAV(audioBlob);
+    return await this.directWebAudioConversion(wavBlob);
+  }
+
+  private async convertWebMToWAV(webmBlob: Blob): Promise<Blob> {
+    // Simple WebM → WAV conversion using MediaRecorder
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const arrayBuffer = await webmBlob.arrayBuffer();
+    
+    try {
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      const wavBuffer = this.audioBufferToWAV(audioBuffer);
+      audioContext.close();
+      return new Blob([wavBuffer], { type: 'audio/wav' });
+    } catch (error) {
+      audioContext.close();
+      throw error;
+    }
+  }
+
+  private audioBufferToWAV(audioBuffer: AudioBuffer): ArrayBuffer {
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const format = 1; // PCM
+    const bitDepth = 16;
+
+    const bytesPerSample = bitDepth / 8;
+    const blockAlign = numChannels * bytesPerSample;
+
+    const buffer = new ArrayBuffer(44 + audioBuffer.length * blockAlign);
+    const view = new DataView(buffer);
+
+    const writeString = (offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    // WAV header
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + audioBuffer.length * blockAlign, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitDepth, true);
+    writeString(36, 'data');
+    view.setUint32(40, audioBuffer.length * blockAlign, true);
+
+    // Audio data
+    const channelData = audioBuffer.getChannelData(0);
+    let offset = 44;
+    for (let i = 0; i < channelData.length; i++) {
+      const sample = Math.max(-1, Math.min(1, channelData[i]));
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      offset += 2;
+    }
+
+    return buffer;
+  }
+}
+🚀 Solution 2: MediaRecorder Format Fix
+The root issue might be your MediaRecorder configuration. Update your recording setup:
+typescript// client/src/components/voice-recorder.tsx - Better MediaRecorder setup
+class VoiceRecorder {
+  private setupMediaRecorder(stream: MediaStream): MediaRecorder {
+    // Try different MIME types in order of preference
+    const mimeTypes = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/ogg;codecs=opus',
+      'audio/wav'
+    ];
+
+    let mimeType = '';
+    for (const type of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(type)) {
+        mimeType = type;
+        console.log(`✅ Using MIME type: ${mimeType}`);
+        break;
+      }
+    }
+
+    if (!mimeType) {
+      throw new Error('No supported audio MIME type found');
+    }
+
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType,
+      audioBitsPerSecond: 128000, // Higher quality for better processing
+    });
+
+    mediaRecorder.ondataavailable = async (event) => {
+      if (event.data.size > 5000) { // 5KB minimum threshold
+        console.log(`📦 Chunk available: ${event.data.size} bytes, type: ${event.data.type}`);
+        await this.processAudioChunk(event.data);
+      } else {
+        console.log(`🔇 Skipping small chunk: ${event.data.size} bytes`);
+      }
+    };
+
+    return mediaRecorder;
+  }
+}
+🚀 Solution 3: Server Fallback Fix
+Also fix your server fallback issue:
+typescript// server/routes/transcribe.ts - Fix server processing
+app.post('/api/transcribe-ambient-chunk', async (req, res) => {
+  try {
+    const audioFile = req.files?.audio_file as UploadedFile;
+    
+    if (!audioFile) {
+      return res.status(400).json({ error: 'No audio file provided' });
+    }
+
+    console.log(`🎵 Processing ${audioFile.size} bytes of ${audioFile.mimetype}`);
+
+    // Process with OpenAI Whisper
+    const transcription = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(audioFile.tempFilePath),
+      model: 'whisper-1',
+      language: 'fr', // Quebec French
+      temperature: 0.1, // Ambient mode
+    });
+
+    // Apply Section 8 corrections if needed
+    const enhanced = await enhanceTranscription(transcription.text, {
+      isSection8: req.body.isSection8 === 'true',
+      quebecCorrections: true
+    });
+
+    res.json({
+      transcript: enhanced,
+      source: 'server',
+      processingTime: Date.now() - startTime
+    });
+
+  } catch (error) {
+    console.error('❌ Server transcription failed:', error);
+    res.status(500).json({ 
+      error: 'Transcription failed',
+      details: error.message 
+    });
+  } finally {
+    // Zero retention cleanup
+    if (req.files?.audio_file) {
+      fs.unlinkSync((req.files.audio_file as UploadedFile).tempFilePath);
+    }
+  }
+});
+🔧 Quick Test to Isolate the Issue
+Add this diagnostic function:
+typescript// Diagnostic function to test your audio pipeline
+async function diagnoseAudioPipeline(audioBlob: Blob) {
+  console.log(`🔍 Diagnosing audio blob: ${audioBlob.size} bytes, type: ${audioBlob.type}`);
+  
+  // Test 1: Can we read the blob?
+  try {
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    console.log(`✅ Blob readable: ${arrayBuffer.byteLength} bytes`);
+  } catch (error) {
+    console.error('❌ Cannot read blob:', error);
+    return;
+  }
+
+  // Test 2: Can AudioContext handle it?
+  try {
+    const audioContext = new AudioContext();
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    console.log(`✅ AudioContext decode successful: ${audioBuffer.duration}s, ${audioBuffer.sampleRate}Hz`);
+    audioContext.close();
+  } catch (error) {
+    console.error('❌ AudioContext decode failed:', error);
+  }
+
+  // Test 3: Can HTMLAudioElement handle it?
+  try {
+    const url = URL.createObjectURL(audioBlob);
+    const audio = new Audio(url);
+    await new Promise((resolve, reject) => {
+      audio.onloadeddata = resolve;
+      audio.onerror = reject;
+      audio.load();
+    });
+    console.log(`✅ HTMLAudioElement load successful: ${audio.duration}s`);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('❌ HTMLAudioElement load failed:', error);
+  }
+}
+
+// Call this before your transcription attempt
+await diagnoseAudioPipeline(audioChunk);
+🎯 Recommended Implementation Order
+
+First: Add the enhanced audioToFloat32Array() with multiple conversion methods
+Second: Update your MediaRecorder configuration for better format compatibility
+Third: Fix the server fallback to ensure it works when browser fails
+Fourth: Add diagnostics to see exactly where the pipeline breaks
