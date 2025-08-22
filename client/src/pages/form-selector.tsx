@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User, TestTube, Database } from 'lucide-react';
+import { FormInput, FileText, Stethoscope, ArrowRight, LogOut, User, TestTube } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { VisitSelectionModal } from '@/components/visit-selection-modal';
@@ -118,19 +118,6 @@ export default function FormSelector({
                 <TestTube className="w-4 h-4" />
                 <span>{language === 'fr' ? 'Test Vocal' : 'Speech Test'}</span>
               </Button>
-
-              {/* Migration Dashboard Button (Admin Only) */}
-              {user?.role === 'admin' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLocation('/migration')}
-                  className="flex items-center space-x-1 text-blue-600 border-blue-200 hover:bg-blue-50"
-                >
-                  <Database className="w-4 h-4" />
-                  <span>{language === 'fr' ? 'Migration DB' : 'DB Migration'}</span>
-                </Button>
-              )}
 
               {/* User Info & Logout */}
               {user && (
