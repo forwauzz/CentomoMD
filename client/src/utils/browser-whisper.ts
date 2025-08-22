@@ -242,8 +242,20 @@ export class BrowserWhisperProcessor {
         sampleRate: 16000 // Whisper expects 16kHz
       });
 
-      // Convert blob to array buffer
-      const arrayBuffer = await audioBlob.arrayBuffer();
+      // Convert blob to array buffer - handle potential detachment
+      let arrayBuffer: ArrayBuffer;
+      try {
+        arrayBuffer = await audioBlob.arrayBuffer();
+      } catch (error: any) {
+        if (error.message?.includes('detached')) {
+          console.log('🔧 ArrayBuffer detached, recreating from blob...');
+          // Create a new blob from the original data
+          const newBlob = audioBlob.slice();
+          arrayBuffer = await newBlob.arrayBuffer();
+        } else {
+          throw error;
+        }
+      }
       
       if (arrayBuffer.byteLength === 0) {
         throw new Error('Audio blob contains no data');
@@ -251,16 +263,32 @@ export class BrowserWhisperProcessor {
       
       console.log(`🔄 Decoding ${arrayBuffer.byteLength} bytes of audio data`);
       
+      // Always create a copy to prevent detachment issues - check if detached first
+      let bufferCopy: ArrayBuffer;
+      try {
+        bufferCopy = arrayBuffer.slice(0);
+      } catch (sliceError: any) {
+        if (sliceError.message?.includes('detached')) {
+          console.log('🔧 ArrayBuffer detached during slice, recreating...');
+          // Recreate the buffer from blob
+          const freshBlob = audioBlob.slice();
+          const freshBuffer = await freshBlob.arrayBuffer();
+          bufferCopy = freshBuffer.slice(0);
+        } else {
+          throw sliceError;
+        }
+      }
+      
       // Decode audio data with error handling
       let audioBuffer: AudioBuffer;
       try {
-        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        audioBuffer = await audioContext.decodeAudioData(bufferCopy);
       } catch (decodeError: any) {
         console.warn('WebM decoding failed, trying with different approach:', decodeError.message);
         
-        // Try to decode with a copy of the buffer (sometimes helps with WebM issues)
-        const bufferCopy = arrayBuffer.slice(0);
-        audioBuffer = await audioContext.decodeAudioData(bufferCopy);
+        // Try again with another fresh copy
+        const secondCopy = arrayBuffer.slice(0);
+        audioBuffer = await audioContext.decodeAudioData(secondCopy);
       }
       
       if (!audioBuffer || audioBuffer.length === 0) {
