@@ -114,7 +114,14 @@ export class ContinuousAudioProcessor {
 
   async startContinuousRecording(): Promise<void> {
     if (!this.mediaRecorder || this.isRecording) {
-      throw new Error('Processor not initialized or already recording');
+      console.log('🚫 Recording already in progress or not initialized');
+      return;
+    }
+
+    // Check MediaRecorder state
+    if (this.mediaRecorder.state !== 'inactive') {
+      console.log(`🚫 MediaRecorder not ready: ${this.mediaRecorder.state}`);
+      return;
     }
 
     this.isRecording = true;
@@ -128,13 +135,18 @@ export class ContinuousAudioProcessor {
       this.vad.start();
     }
     
-    // Start recording with time slicing
-    this.mediaRecorder.start(this.config.chunkDurationMs);
-    
-    // Schedule chunk creation
-    this.scheduleNextChunk();
-    
-    console.log('🔴 Continuous recording started');
+    try {
+      // Start recording with time slicing for continuous chunks
+      this.mediaRecorder.start(this.config.chunkDurationMs);
+      console.log(`🔴 Continuous recording started (${this.config.chunkDurationMs}ms chunks)`);
+    } catch (error) {
+      console.error('❌ Failed to start MediaRecorder:', error);
+      this.isRecording = false;
+      if (this.vad) {
+        this.vad.stop();
+      }
+      throw error;
+    }
   }
 
   stopContinuousRecording(): void {
@@ -162,36 +174,30 @@ export class ContinuousAudioProcessor {
     if (!this.mediaRecorder) return;
 
     this.mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        this.recordingData.push(event.data);
+      if (event.data.size > 0 && this.isRecording) {
+        // Create chunk from each time slice
+        this.createChunkFromData([event.data]);
+        console.log(`🔄 Processing chunk: ${this.chunkCounter - 1}`);
       }
     };
 
     this.mediaRecorder.onstop = () => {
-      this.processAccumulatedData();
+      console.log('⏹️ MediaRecorder stopped');
+      // Process any remaining data
+      if (this.recordingData.length > 0) {
+        this.createFinalChunk();
+      }
     };
 
-    // Handle time slice events for continuous recording
-    this.mediaRecorder.addEventListener('dataavailable', (event) => {
-      if (this.isRecording && event.data.size > 0) {
-        this.createChunkFromData([event.data]);
-        
-        // Continue recording for next chunk
-        if (this.isRecording) {
-          this.mediaRecorder?.start(this.config.chunkDurationMs);
-        }
-      }
-    });
+    this.mediaRecorder.onerror = (event) => {
+      console.error('❌ MediaRecorder error:', event);
+      this.isRecording = false;
+    };
   }
 
   private scheduleNextChunk(): void {
-    if (!this.isRecording) return;
-
-    setTimeout(() => {
-      if (this.isRecording) {
-        this.scheduleNextChunk();
-      }
-    }, this.config.chunkDurationMs - this.config.overlapMs);
+    // MediaRecorder with time slicing handles this automatically
+    // No need for manual scheduling
   }
 
   private createChunkFromData(data: Blob[]): void {
